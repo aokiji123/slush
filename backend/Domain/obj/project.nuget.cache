@@ -1,15 +1,32 @@
 {
   "version": 2,
-  "dgSpecHash": "HGe7cCb1iPI=",
+  "dgSpecHash": "OIDWpTp5tek=",
   "success": true,
   "projectFilePath": "C:\\Users\\nikit\\Desktop\\Programming\\Diploma\\slush\\backend\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.apidescription.server\\8.0.0\\microsoft.extensions.apidescription.server.8.0.0.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.0-preview.5.25277.114\\microsoft.extensions.configuration.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.0-preview.5.25277.114\\microsoft.extensions.configuration.abstractions.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.0-preview.5.25277.114\\microsoft.extensions.configuration.binder.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.0-preview.5.25277.114\\microsoft.extensions.dependencyinjection.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.0-preview.5.25277.114\\microsoft.extensions.dependencyinjection.abstractions.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.diagnostics\\10.0.0-preview.5.25277.114\\microsoft.extensions.diagnostics.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\10.0.0-preview.5.25277.114\\microsoft.extensions.diagnostics.abstractions.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.http\\10.0.0-preview.5.25277.114\\microsoft.extensions.http.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.logging\\10.0.0-preview.5.25277.114\\microsoft.extensions.logging.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.0-preview.5.25277.114\\microsoft.extensions.logging.abstractions.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.options\\10.0.0-preview.5.25277.114\\microsoft.extensions.options.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.0-preview.5.25277.114\\microsoft.extensions.options.configurationextensions.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.0-preview.5.25277.114\\microsoft.extensions.primitives.10.0.0-preview.5.25277.114.nupkg.sha512",
     "C:\\Users\\nikit\\.nuget\\packages\\microsoft.openapi\\1.6.23\\microsoft.openapi.1.6.23.nupkg.sha512",
     "C:\\Users\\nikit\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.1\\swashbuckle.aspnetcore.9.0.1.nupkg.sha512",
     "C:\\Users\\nikit\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\9.0.1\\swashbuckle.aspnetcore.swagger.9.0.1.nupkg.sha512",
     "C:\\Users\\nikit\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\9.0.1\\swashbuckle.aspnetcore.swaggergen.9.0.1.nupkg.sha512",
-    "C:\\Users\\nikit\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.1\\swashbuckle.aspnetcore.swaggerui.9.0.1.nupkg.sha512"
+    "C:\\Users\\nikit\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.1\\swashbuckle.aspnetcore.swaggerui.9.0.1.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\system.diagnostics.diagnosticsource\\10.0.0-preview.5.25277.114\\system.diagnostics.diagnosticsource.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\system.io.pipelines\\10.0.0-preview.5.25277.114\\system.io.pipelines.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\system.text.encodings.web\\10.0.0-preview.5.25277.114\\system.text.encodings.web.10.0.0-preview.5.25277.114.nupkg.sha512",
+    "C:\\Users\\nikit\\.nuget\\packages\\system.text.json\\10.0.0-preview.5.25277.114\\system.text.json.10.0.0-preview.5.25277.114.nupkg.sha512"
   ],
   "logs": []
 }
