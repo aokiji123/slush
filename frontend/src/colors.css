@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Классическая тема */
+    --color-background: #F1FDFF;
+    --color-night-background: #00141F;
+    --color-background-1: #6FFFBA;
+    --color-background-2: #EBFF6F;
+    --color-background-3: #FFBD6F;
+    --color-background-4: #FF6F6F;
+    --color-background-5: #FF6FDF;
+    --color-background-6: #C06FFF;
+    --color-background-7: #6F97FF;
+    --color-background-8: #004252;
+    --color-background-9: #2D60E3;
+    --color-background-10: #FF6F95;
+    --color-background-11: #FF6F9540;
+    --color-background-12: #FFB1C6;
+    --color-background-14: #00141F66;
+    --color-background-15: #002F3D;
+    --color-background-16: #046075;
+    --color-background-17: #37C3FF1F;
+    --color-background-18: #37C3FF40;
+    --color-background-19: #FFA599;
+    --color-background-20: #8EFF72;
+    --color-background-21: #24E5C2;
+    --color-background-22: #24E5C233;
+    --color-background-23: #49FFDE;
+    --color-background-24: #004A5B;
+    --color-background-25: #CCF8FFA6;
+    --color-background-26: #FFFFFF;
+    --color-background-27: #9747FF;
+    --color-background-28: #005BBB;
+    --color-background-29: #BE1E2D;
+    --color-background-30: #FFD500;
+    --color-background-31: #000000;
+    --color-background-32: #2E3192;
+    --color-background-33: #E6E7E8;
+    /* Градиенты для фонов */
+    --color-gradient-1: linear-gradient(180deg, #6F97FF 0%, #FF6FDF 50%, #FFBD6F 100%);
+    --color-gradient-2: linear-gradient(180deg, #2D60E3 0%, #D903AA 50%, #E79433 100%);
+
+    /* Светлая тема */
+    /* Основные фоны */
+    --color-day-background: #F4FCFF;
+    --color-day-background-40: #F4FCFF66;
+    /* Акценты */
+    --color-day-accent: #F64070;
+    --color-day-accent-25: #F6407047;
+    --color-day-accent-hover: #F51852;
+    --color-day-primary: #007770;
+    --color-day-primary-20: #00F8E973;
+    --color-day-primary-hover: #00615B;
+    --color-day-secondary: #56DCE6;
+    --color-day-secondary-hover: #9BEDF3;
+    /* Границы */
+    --color-day-border: #D903AA;
+    --color-day-border-1: #0DBE69;
+    --color-day-border-2: #8733C9;
+    --color-day-border-3: #E6FF4B;
+    --color-day-border-4: #2251CA;
+    --color-day-border-5: #E79433;
+    --color-day-border-6: #E24747;
+    --color-day-border-gradient: linear-gradient(180deg, #2D60E3 0%, #D903AA 50%, #E79433 100%);
+    /* Карточки */
+    --color-day-card-1: #C6F2F5;
+    --color-day-card-2: #8EE4EB;
+    --color-day-card-3: #56DCE6;
+    --color-day-card-light-12: #00A0B62E;
+    --color-day-card-light-25: #00A0B64D;
+    /* Уровни */
+    --color-day-levels-1-19: #0DBE69;
+    --color-day-levels-20-39: #E6FF4B;
+    --color-day-levels-40-59: #E79433;
+    --color-day-levels-60-69: #E24747;
+    --color-day-levels-70-79: #D903AA;
+    --color-day-levels-80-89: #8733C9;
+    --color-day-levels-90-99: #2251CA;
+    --color-day-levels-100-plus: linear-gradient(180deg, #2D60E3 0%, #D903AA 50%, #E79433 100%);
+    /* Положительные/отрицательные */
+    --color-day-positive: #75E859;
+    --color-day-negative: #D43621;
+    /* Типографика */
+    --color-day-typography: #00141F;
+    --color-day-typography-secondary: #00141FA6;
+  }
+}
