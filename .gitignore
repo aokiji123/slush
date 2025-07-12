@@ -1,0 +1,51 @@
+# --- Backend (C#/.NET) ---
+# Ignore build outputs for all backend projects
+backend/API/bin/
+backend/API/obj/
+backend/Application/bin/
+backend/Application/obj/
+backend/Domain/bin/
+backend/Domain/obj/
+backend/Infrastructure/bin/
+backend/Infrastructure/obj/
+
+# Ignore user-specific and solution files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider/JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Others
+*.vspscc
+*.vssscc
+*.dbmdl
+*.bak
+*.backup
+*.swp
+*.tmp
+
+# --- Frontend (Node.js/Vite/React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env*
+frontend/*.local
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
