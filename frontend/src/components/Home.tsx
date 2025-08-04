@@ -153,6 +153,7 @@ export const Home = () => {
 
       {glowCoords.map((glow) => (
         <img
+          loading="lazy"
           src="/glow.png"
           alt="glow"
           className="absolute z-0"

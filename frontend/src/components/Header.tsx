@@ -1,5 +1,5 @@
 import { GoDotFill } from 'react-icons/go'
-import { useLocation } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { NotificationsIcon, SettingsIcon } from '@/icons'
 
 const tabs = [
@@ -29,13 +29,24 @@ const matchedUrls = [
 export const Header = () => {
   const location = useLocation()
   const url = location.pathname
+  const navigate = useNavigate()
 
   return (
     <header className="h-[90px] bg-[var(--color-background-15)] flex items-center justify-center">
       <div className="flex items-center justify-between container mx-auto h-full">
         <div>
           <h1 className="hidden">Slush</h1>
-          <img src="/logo.png" alt="logo" className="w-[100px] h-[25px]" />
+          <img
+            src="/logo.png"
+            alt="logo"
+            className="w-[100px] h-[25px]"
+            loading="lazy"
+            onClick={() => {
+              navigate({
+                to: '/',
+              })
+            }}
+          />
         </div>
         <div className="flex items-center gap-[35px] text-white">
           {tabs.map((tab) => (
@@ -71,6 +82,7 @@ export const Header = () => {
                   src="/avatar.png"
                   alt="avatar"
                   className="w-[52px] h-[52px] rounded-full"
+                  loading="lazy"
                 />
               </div>
             </div>

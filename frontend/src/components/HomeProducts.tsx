@@ -35,6 +35,7 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
               className={`max-w-[1000px] w-full h-full ${
                 grid === 3 ? 'max-h-[240px]' : 'max-h-[400px]'
               }`}

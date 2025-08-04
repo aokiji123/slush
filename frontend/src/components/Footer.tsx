@@ -22,7 +22,12 @@ export const Footer = () => {
       <div className="flex justify-between items-start container mx-auto h-full pt-[40px]">
         <div className="flex flex-col gap-[24px]">
           <div>
-            <img src="/logo.png" alt="logo" className="w-[100px] h-[25px]" />
+            <img
+              src="/logo.png"
+              alt="logo"
+              className="w-[100px] h-[25px]"
+              loading="lazy"
+            />
           </div>
           <p className="max-w-[800px] w-full text-[var(--color-background-25)] text-[16px] font-normal">
             © 2024, Zubarik inc, Inc. All rights reserved. Zubarik inc, Zubarik
