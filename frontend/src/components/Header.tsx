@@ -39,7 +39,7 @@ export const Header = () => {
           <img
             src="/logo.png"
             alt="logo"
-            className="w-[100px] h-[25px]"
+            className="w-[100px] h-[25px] cursor-pointer"
             loading="lazy"
             onClick={() => {
               navigate({

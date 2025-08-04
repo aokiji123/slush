@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { FaFacebookF, FaInstagram } from 'react-icons/fa'
 import { FaXTwitter } from 'react-icons/fa6'
 
@@ -17,6 +18,8 @@ const tabs = [
 ]
 
 export const Footer = () => {
+  const navigate = useNavigate()
+
   return (
     <footer className="h-[316px] bg-[var(--color-background-15)] flex relative z-10">
       <div className="flex justify-between items-start container mx-auto h-full pt-[40px]">
@@ -25,8 +28,13 @@ export const Footer = () => {
             <img
               src="/logo.png"
               alt="logo"
-              className="w-[100px] h-[25px]"
+              className="w-[100px] h-[25px] cursor-pointer"
               loading="lazy"
+              onClick={() => {
+                navigate({
+                  to: '/',
+                })
+              }}
             />
           </div>
           <p className="max-w-[800px] w-full text-[var(--color-background-25)] text-[16px] font-normal">
