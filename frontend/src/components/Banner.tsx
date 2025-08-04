@@ -1,12 +1,13 @@
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { CartIcon, FavoriteIcon, SearchIcon } from '@/icons'
 
 export const Banner = () => {
   return (
     <div
-      className="h-[520px] bg-[var(--color-background-15)] relative bg-cover bg-center"
+      className="h-[520px] bg-[var(--color-background-15)] relative bg-cover bg-center z-10"
       style={{ backgroundImage: 'url(/banner.png)' }}
     >
-      <div className="container mx-auto h-full flex flex-col items-center justify-center">
+      <div className="container mx-auto h-full flex flex-col items-center justify-center relative">
         <div className="flex items-center gap-[8px] absolute top-[16px] left-1/2 -translate-x-1/2">
           <div
             className="bg-[var(--color-background-16)] h-[52px] w-[1350px] rounded-[20px] flex items-center justify-between"
@@ -64,6 +65,12 @@ export const Banner = () => {
               особи, де події розгортаються на західному кордоні.{' '}
             </p>
           </div>
+        </div>
+        <div className="absolute bottom-[16px] -left-5 top-1/2 -translate-y-1/2 z-10 size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+          <FaChevronLeft className="w-[16px] h-[16px]" />
+        </div>
+        <div className="absolute bottom-[16px] -right-5 top-1/2 -translate-y-1/2 z-10 size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+          <FaChevronRight className="w-[16px] h-[16px]" />
         </div>
       </div>
     </div>

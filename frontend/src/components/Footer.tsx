@@ -18,7 +18,7 @@ const tabs = [
 
 export const Footer = () => {
   return (
-    <footer className="h-[316px] bg-[var(--color-background-15)] flex">
+    <footer className="h-[316px] bg-[var(--color-background-15)] flex relative z-10">
       <div className="flex justify-between items-start container mx-auto h-full pt-[40px]">
         <div className="flex flex-col gap-[24px]">
           <div>
@@ -42,13 +42,13 @@ export const Footer = () => {
           </div>
         </div>
         <div className="flex items-center gap-[8px]">
-          <div className="border-1 border-white text-white rounded-full p-1">
+          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
             <FaFacebookF size={22} />
           </div>
-          <div className="border-1 border-white text-white rounded-full p-1">
+          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
             <FaInstagram size={22} />
           </div>
-          <div className="border-1 border-white text-white rounded-full p-1">
+          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
             <FaXTwitter size={22} />
           </div>
         </div>
