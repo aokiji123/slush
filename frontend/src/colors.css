@@ -1,0 +1,65 @@
+@import 'tailwindcss/preflight';
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Классическая тема */
+    --color-background: #f1fdff;
+    --color-night-background: #00141f;
+    --color-background-1: #6fffba;
+    --color-background-2: #ebff6f;
+    --color-background-3: #ffbd6f;
+    --color-background-4: #ff6f6f;
+    --color-background-5: #ff6fdf;
+    --color-background-6: #c06fff;
+    --color-background-7: #6f97ff;
+    --color-background-8: #004252;
+    --color-background-9: #2d60e3;
+    --color-background-10: #ff6f95;
+    --color-background-11: #ff6f9540;
+    --color-background-12: #ffb1c6;
+    --color-background-14: #00141f66;
+    --color-background-15: #002f3d;
+    --color-background-16: #046075;
+    --color-background-17: #37c3ff1f;
+    --color-background-18: #37c3ff40;
+    --color-background-19: #ffa599;
+    --color-background-20: #8eff72;
+    --color-background-21: #24e5c2;
+    --color-background-22: #24e5c233;
+    --color-background-23: #49ffde;
+    --color-background-24: #004a5b;
+    --color-background-25: #ccf8ffa6;
+    --color-background-26: #ffffff;
+    --color-background-27: #9747ff;
+    --color-background-28: #005bbb;
+    --color-background-29: #be1e2d;
+    --color-background-30: #ffd500;
+    --color-background-31: #000000;
+    --color-background-32: #2e3192;
+    --color-background-33: #e6e7e8;
+    /* Градиенты для фонов */
+    --color-gradient-1: linear-gradient(
+      180deg,
+      #6f97ff 0%,
+      #ff6fdf 50%,
+      #ffbd6f 100%
+    );
+    --color-gradient-2: linear-gradient(
+      180deg,
+      #2d60e3 0%,
+      #d903aa 50%,
+      #e79433 100%
+    );
+
+    /* Transparent Variants */
+    --primary-10: #00777019;
+    --primary-20: #00777033;
+    --accent-25: #f6407047;
+    --sky-20: #37c3ff33;
+    --sky-25: #37c3ff40;
+    --cyan-20: #24e5c233;
+    --overlay-dark: #00141f66;
+    --overlay-light: #ffffff66;
+  }
+}

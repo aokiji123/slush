@@ -5,6 +5,7 @@ namespace Domain.Entities;
 public class User
 {
     public Guid Id { get; set; }
+<<<<<<< HEAD
     
     [Required]
     [MaxLength(50)]
@@ -23,3 +24,9 @@ public class User
     public string Bio { get; set; }
     public DateTime? FriendsFromDateTime { get; set; }
 }
+=======
+    public string Username { get; set; }
+    public string Email { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+>>>>>>> f6eb570dd3fb604ad1e6c77e95f2f8f0e4d635bd
