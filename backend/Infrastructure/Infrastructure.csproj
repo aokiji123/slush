@@ -23,10 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-<<<<<<< HEAD
-=======
       <ProjectReference Include="..\Application\Application.csproj" />
->>>>>>> f6eb570dd3fb604ad1e6c77e95f2f8f0e4d635bd
       <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
