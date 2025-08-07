@@ -1,5 +1,5 @@
 import { GoDotFill } from 'react-icons/go'
-import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { NotificationsIcon, SettingsIcon } from '@/icons'
 
 const tabs = [
@@ -17,19 +17,11 @@ const tabs = [
   },
 ]
 
-const matchedUrls = [
-  '/login',
-  '/sign-up',
-  '/reset-password',
-  '/forgot-password',
-  '/change-password',
-  '/code-access',
-]
-
 export const Header = () => {
-  const location = useLocation()
-  const url = location.pathname
   const navigate = useNavigate()
+
+  // TODO: getting real auth state
+  const isAuth = Boolean(false)
 
   return (
     <header className="h-[90px] bg-[var(--color-background-15)] flex items-center justify-center">
@@ -59,7 +51,7 @@ export const Header = () => {
             </p>
           ))}
         </div>
-        {matchedUrls.includes(url) ? (
+        {!isAuth ? (
           <div>
             <a
               href="/login"

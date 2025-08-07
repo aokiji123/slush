@@ -1,5 +1,5 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import { CartIcon, FavoriteIcon, SearchIcon } from '@/icons'
+import { Search } from './Search'
 
 export const Banner = () => {
   return (
@@ -8,37 +8,7 @@ export const Banner = () => {
       style={{ backgroundImage: 'url(/banner.png)' }}
     >
       <div className="container mx-auto h-full flex flex-col items-center justify-center relative">
-        <div className="flex items-center gap-[8px] absolute top-[16px] left-1/2 -translate-x-1/2">
-          <div
-            className="bg-[var(--color-background-16)] h-[52px] w-[1350px] rounded-[20px] flex items-center justify-between"
-            style={{
-              padding: '4px 26px 4px 4px',
-            }}
-          >
-            <div className="w-[590px] h-[44px] bg-[var(--overlay-dark)] rounded-[20px] flex items-center justify-between py-[10px] px-[16px] relative">
-              <input
-                type="text"
-                placeholder="Пошук у крамниці..."
-                className="bg-transparent text-white text-[16px] h-[44px] w-full rounded-[20px] outline-none placeholder:text-[#CCF8FFA6] placeholder:text-[16px]"
-              />
-              <SearchIcon className="absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
-            </div>
-            <div className="flex items-center gap-[26px]">
-              <p className="text-[16px] text-white font-bold cursor-pointer">
-                Каталог
-              </p>
-              <p className="text-[16px] text-white font-bold cursor-pointer">
-                Новинки
-              </p>
-            </div>
-          </div>
-          <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-16)] rounded-[20px] cursor-pointer">
-            <FavoriteIcon className="w-[24px] h-[24px]" />
-          </div>
-          <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-16)] rounded-[20px] cursor-pointer">
-            <CartIcon className="w-[24px] h-[24px]" />
-          </div>
-        </div>
+        <Search className="absolute top-[16px] left-1/2 -translate-x-1/2" />
         <div className="flex justify-between items-center gap-[8px] absolute bottom-[56px] left-1/2 -translate-x-1/2 max-w-[1460px] w-full">
           <div className="flex flex-col">
             <div className="flex  items-center gap-[16px]">

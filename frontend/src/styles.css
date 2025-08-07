@@ -13,13 +13,8 @@
     padding: 0;
   }
 
-  html {
-    overflow: auto;
-    scrollbar-gutter: stable;
-  }
-
-  html p {
-    margin-top: 4px;
+  p {
+    --color-background: #f1fdff;
   }
 }
 

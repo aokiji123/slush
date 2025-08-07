@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 type Props = {
@@ -15,8 +16,15 @@ type Product = {
 }
 
 export const HomeProducts = ({ products, grid = 3, title }: Props) => {
+  const navigate = useNavigate()
+
   return (
-    <div className="mt-[64px] flex flex-col gap-[16px] relative z-10">
+    <div
+      className="mt-[64px] flex flex-col gap-[16px] relative z-10"
+      onClick={() => {
+        navigate({ to: '/$slug', params: { slug: 'cyberpunk-2077' } })
+      }}
+    >
       <div className="flex items-center justify-between gap-[8px] text-white">
         <p className="text-[32px]">{title}</p>
         <div className="flex items-center gap-[8px] text-[20px]">
