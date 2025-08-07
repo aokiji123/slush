@@ -1,5 +1,5 @@
 import { BsThreeDots } from 'react-icons/bs'
-import { FaStar, FaRegStar } from 'react-icons/fa'
+import { FaRegStar, FaStar } from 'react-icons/fa'
 import { CommentsIcon, FavoriteIcon } from '@/icons'
 
 type GameCommentProps = {
@@ -19,6 +19,7 @@ export const GameComment = ({ text, stars }: GameCommentProps) => {
             src="/avatar.png"
             alt="user avatar"
             className="object-cover size-[56px] rounded-full"
+            loading="lazy"
           />
           <div className="flex flex-col gap-[8px]">
             <p className="text-[20px] font-bold">DenroyPro</p>

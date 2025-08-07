@@ -14,8 +14,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
-import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugIndexRouteImport } from './routes/$slug/index'
+import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -42,7 +44,7 @@ const ChangePasswordRoute = ChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SlugRoute = SlugRouteImport.update({
+const SlugRouteRoute = SlugRouteRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
@@ -52,34 +54,50 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlugIndexRoute = SlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugCharacteristicsRouteRoute =
+  SlugCharacteristicsRouteRouteImport.update({
+    id: '/characteristics',
+    path: '/characteristics',
+    getParentRoute: () => SlugRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
+  '/$slug': typeof SlugRouteRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
+  '/$slug/': typeof SlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
+  '/$slug': typeof SlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
+  '/$slug': typeof SlugRouteRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
+  '/$slug/': typeof SlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,15 +109,18 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/sign-up'
+    | '/$slug/characteristics'
+    | '/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/$slug'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
     | '/login'
     | '/sign-up'
+    | '/$slug/characteristics'
+    | '/$slug'
   id:
     | '__root__'
     | '/'
@@ -109,11 +130,13 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/sign-up'
+    | '/$slug/characteristics'
+    | '/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SlugRoute: typeof SlugRoute
+  SlugRouteRoute: typeof SlugRouteRouteWithChildren
   ChangePasswordRoute: typeof ChangePasswordRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -162,7 +185,7 @@ declare module '@tanstack/react-router' {
       id: '/$slug'
       path: '/$slug'
       fullPath: '/$slug'
-      preLoaderRoute: typeof SlugRouteImport
+      preLoaderRoute: typeof SlugRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -172,12 +195,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug/': {
+      id: '/$slug/'
+      path: '/'
+      fullPath: '/$slug/'
+      preLoaderRoute: typeof SlugIndexRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/characteristics': {
+      id: '/$slug/characteristics'
+      path: '/characteristics'
+      fullPath: '/$slug/characteristics'
+      preLoaderRoute: typeof SlugCharacteristicsRouteRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
   }
 }
 
+interface SlugRouteRouteChildren {
+  SlugCharacteristicsRouteRoute: typeof SlugCharacteristicsRouteRoute
+  SlugIndexRoute: typeof SlugIndexRoute
+}
+
+const SlugRouteRouteChildren: SlugRouteRouteChildren = {
+  SlugCharacteristicsRouteRoute: SlugCharacteristicsRouteRoute,
+  SlugIndexRoute: SlugIndexRoute,
+}
+
+const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
+  SlugRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SlugRoute: SlugRoute,
+  SlugRouteRoute: SlugRouteRouteWithChildren,
   ChangePasswordRoute: ChangePasswordRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
