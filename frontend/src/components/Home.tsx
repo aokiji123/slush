@@ -4,12 +4,14 @@ const specialOffers = [
   {
     id: 1,
     name: 'Cyberpunk 2077',
+    slug: 'cyberpunk-2077',
     image: '/cyberpunk.png',
     price: 1099,
   },
   {
     id: 2,
     name: 'Cyberpunk 2077',
+    slug: 'cyberpunk-2077',
     image: '/cyberpunk.png',
     price: 1099,
     salePrice: 699,
@@ -17,6 +19,7 @@ const specialOffers = [
   {
     id: 3,
     name: 'Cyberpunk 2077',
+    slug: 'cyberpunk-2077',
     image: '/cyberpunk.png',
     price: 1099,
   },
@@ -26,6 +29,7 @@ const recommendedGames = [
   {
     id: 1,
     name: 'Ghost of Tsushima',
+    slug: 'ghost-of-tsushima',
     image: '/ghost-of-tsushima.png',
     price: 1699,
     salePrice: 1099,
@@ -33,18 +37,21 @@ const recommendedGames = [
   {
     id: 2,
     name: 'Ghost of Tsushima',
+    slug: 'ghost-of-tsushima',
     image: '/ghost-of-tsushima.png',
     price: 1699,
   },
   {
     id: 3,
     name: 'Ghost of Tsushima',
+    slug: 'ghost-of-tsushima',
     image: '/ghost-of-tsushima.png',
     price: 1699,
   },
   {
     id: 4,
     name: 'Ghost of Tsushima',
+    slug: 'ghost-of-tsushima',
     image: '/ghost-of-tsushima.png',
     price: 1699,
     salePrice: 1099,
@@ -55,12 +62,14 @@ const under100 = [
   {
     id: 1,
     name: 'Placid Plastic Duck Simulator',
+    slug: 'placid-plastic-duck-simulator',
     image: '/duck-simulator.png',
     price: 60,
   },
   {
     id: 2,
     name: 'Placid Plastic Duck Simulator',
+    slug: 'placid-plastic-duck-simulator',
     image: '/duck-simulator.png',
     price: 60,
     salePrice: 30,
@@ -68,12 +77,14 @@ const under100 = [
   {
     id: 3,
     name: 'Placid Plastic Duck Simulator',
+    slug: 'placid-plastic-duck-simulator',
     image: '/duck-simulator.png',
     price: 60,
   },
   {
     id: 4,
     name: 'Placid Plastic Duck Simulator',
+    slug: 'placid-plastic-duck-simulator',
     image: '/duck-simulator.png',
     price: 60,
   },

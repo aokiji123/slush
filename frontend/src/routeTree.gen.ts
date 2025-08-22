@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
@@ -43,6 +44,11 @@ const CodeAccessRoute = CodeAccessRouteImport.update({
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
   id: '/change-password',
   path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRouteRoute = SlugRouteRouteImport.update({
@@ -75,6 +81,7 @@ const SlugCharacteristicsRouteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRouteRoute: typeof SlugRouteRouteWithChildren
+  CatalogRoute: typeof CatalogRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/change-password'
       fullPath: '/change-password'
       preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -250,6 +270,7 @@ const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRouteRoute: SlugRouteRouteWithChildren,
+  CatalogRoute: CatalogRoute,
   ChangePasswordRoute: ChangePasswordRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,

@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { CartIcon, FavoriteIcon, SearchIcon } from '@/icons'
 
 type SearchProps = {
@@ -5,6 +6,8 @@ type SearchProps = {
 }
 
 export const Search = ({ className }: SearchProps) => {
+  const navigate = useNavigate()
+
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
       <div
@@ -22,10 +25,17 @@ export const Search = ({ className }: SearchProps) => {
           <SearchIcon className="absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
         </div>
         <div className="flex items-center gap-[26px]">
-          <p className="text-[16px] text-white font-bold cursor-pointer">
+          <p
+            className="text-[16px] text-white font-bold cursor-pointer hover:text-[var(--color-background-23)]"
+            onClick={() => {
+              navigate({
+                to: '/catalog',
+              })
+            }}
+          >
             Каталог
           </p>
-          <p className="text-[16px] text-white font-bold cursor-pointer">
+          <p className="text-[16px] text-white font-bold cursor-pointer hover:text-[var(--color-background-23)]">
             Новинки
           </p>
         </div>

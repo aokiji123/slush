@@ -7,7 +7,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   return (
-    <div className="text-center">
+    <div className="text-center overflow-hidden">
       <Banner />
       <Home />
     </div>

@@ -10,6 +10,7 @@ type Props = {
 type Product = {
   id: number
   name: string
+  slug: string
   price: number
   image: string
   salePrice?: number
@@ -19,15 +20,15 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
   const navigate = useNavigate()
 
   return (
-    <div
-      className="mt-[64px] flex flex-col gap-[16px] relative z-10"
-      onClick={() => {
-        navigate({ to: '/$slug', params: { slug: 'cyberpunk-2077' } })
-      }}
-    >
+    <div className="mt-[64px] flex flex-col gap-[16px] relative z-10">
       <div className="flex items-center justify-between gap-[8px] text-white">
         <p className="text-[32px]">{title}</p>
-        <div className="flex items-center gap-[8px] text-[20px]">
+        <div
+          className="flex items-center gap-[8px] text-[20px] cursor-pointer"
+          onClick={() => {
+            navigate({ to: '/catalog', search: { title } })
+          }}
+        >
           <p>Дивитись більше</p>
           <FaChevronRight size={12} />
         </div>
@@ -39,6 +40,12 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
               grid === 3 ? 'w-[33%]' : 'w-[25%]'
             }`}
             key={product.id}
+            onClick={() => {
+              navigate({
+                to: '/$slug',
+                params: { slug: product.slug },
+              })
+            }}
           >
             <img
               src={product.image}

@@ -6,12 +6,20 @@ import {
 } from 'react-icons/fa'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { GameSortDropdown, MasonryLayout } from '@/components'
-import { GameComment } from '@/components/GameComment'
+import { GameComment, MasonryLayout, SortDropdown } from '@/components'
 
 export const Route = createFileRoute('/$slug/')({
   component: RouteComponent,
 })
+
+const sortOptions = [
+  'Спочатку популярні',
+  'За оцінкою',
+  'За кількістю коментарів',
+  'Спочатку нові',
+  'Спочатку позитивні',
+  'Спочатку негативні',
+]
 
 const tags = [
   'шутер',
@@ -230,7 +238,12 @@ function RouteComponent() {
             Спочатку популярні{' '}
             {isSortDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
           </button>
-          {isSortDropdownOpen && <GameSortDropdown />}
+          {isSortDropdownOpen && (
+            <SortDropdown
+              className="absolute top-8 left-[100px]"
+              options={sortOptions}
+            />
+          )}
         </div>
 
         <div className="flex flex-col gap-[32px]">

@@ -5,6 +5,13 @@ type CustomCheckboxProps = {
   checked?: boolean
   onChange?: (checked: boolean) => void
   className?: string
+  shape?: 'square' | 'circle'
+  size?: number
+  colorVar?: string
+  innerBorderOnChecked?: boolean
+  innerBorderColorVar?: string
+  innerBorderWidth?: number
+  innerInset?: number
 }
 
 export function CustomCheckbox({
@@ -12,6 +19,13 @@ export function CustomCheckbox({
   checked: controlledChecked,
   onChange,
   className = '',
+  shape = 'square',
+  size = 24,
+  colorVar = '--color-background-21',
+  innerBorderOnChecked = true,
+  innerBorderColorVar = '--color-night-background',
+  innerBorderWidth = 2,
+  innerInset = 2,
 }: CustomCheckboxProps) {
   const [isChecked, setIsChecked] = useState(controlledChecked ?? false)
 
@@ -26,6 +40,10 @@ export function CustomCheckbox({
     onChange?.(newChecked)
   }
 
+  const dimension = `${size}px`
+  const borderRadiusClass =
+    shape === 'circle' ? 'rounded-full' : 'rounded-[6px]'
+
   return (
     <div className={`relative ${className}`}>
       <input
@@ -37,14 +55,15 @@ export function CustomCheckbox({
       />
       <label
         htmlFor={id}
-        className="flex items-center justify-center w-[24px] h-[24px] rounded-[6px] border-1 border-[var(--color-background-21)] cursor-pointer transition-all duration-200 hover:border-opacity-80"
+        className={`relative flex items-center justify-center border-1 cursor-pointer transition-all duration-200 hover:border-opacity-80 ${borderRadiusClass}`}
         style={{
-          backgroundColor: checkedState
-            ? 'var(--color-background-21)'
-            : 'transparent',
+          width: dimension,
+          height: dimension,
+          borderColor: `var(${colorVar})`,
+          backgroundColor: checkedState ? `var(${colorVar})` : 'transparent',
         }}
       >
-        {checkedState && (
+        {shape === 'square' && checkedState && (
           <svg
             className="w-[14px] h-[14px] text-black"
             fill="none"
@@ -59,6 +78,17 @@ export function CustomCheckbox({
               d="M5 13l4 4L19 7"
             />
           </svg>
+        )}
+        {shape === 'circle' && checkedState && innerBorderOnChecked && (
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: innerInset,
+              borderRadius: 9999,
+              border: `${innerBorderWidth}px solid var(${innerBorderColorVar})`,
+            }}
+          />
         )}
       </label>
     </div>
