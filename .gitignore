@@ -1,15 +1,13 @@
 # --- Backend (C#/.NET) ---
-bin/
-obj/
-*.dll
-*.pdb
-*.exe
-*.cache
-project.assets.json
-*.nuget.*
-*.json  # Be cautious; only include specific JSON files like project.assets.json
-.idea/
-*.csproj.*  # Optionally ignore NuGet-related .csproj files
+# Ignore build outputs for all backend projects
+backend/API/bin/
+backend/API/obj/
+backend/Application/bin/
+backend/Application/obj/
+backend/Domain/bin/
+backend/Domain/obj/
+backend/Infrastructure/bin/
+backend/Infrastructure/obj/
 
 # Ignore user-specific and solution files
 *.user
@@ -50,8 +48,4 @@ frontend/*.local
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
-<<<<<<< HEAD
 frontend/pnpm-debug.log*
-=======
-frontend/pnpm-debug.log*
->>>>>>> f6eb570dd3fb604ad1e6c77e95f2f8f0e4d635bd
