@@ -259,7 +259,7 @@ function RouteComponent() {
       {glowCoords.map((glow) => (
         <img
           src="/glow.png"
-          className="absolute z-10"
+          className="absolute z-10 opacity-50"
           loading="lazy"
           style={{
             top: glow.top,

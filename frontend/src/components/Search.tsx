@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { CartIcon, FavoriteIcon, SearchIcon } from '@/icons'
 
 type SearchProps = {
@@ -7,6 +7,7 @@ type SearchProps = {
 
 export const Search = ({ className }: SearchProps) => {
   const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
@@ -26,25 +27,66 @@ export const Search = ({ className }: SearchProps) => {
         </div>
         <div className="flex items-center gap-[26px]">
           <p
-            className="text-[16px] text-white font-bold cursor-pointer hover:text-[var(--color-background-23)]"
+            className={`text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              location.pathname === '/catalog'
+                ? 'text-[var(--color-background-23)]'
+                : 'text-white'
+            }`}
             onClick={() => {
-              navigate({
-                to: '/catalog',
-              })
+              navigate({ to: '/catalog' })
             }}
           >
             Каталог
           </p>
-          <p className="text-[16px] text-white font-bold cursor-pointer hover:text-[var(--color-background-23)]">
+          <p
+            className={`text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              location.pathname === '/new'
+                ? 'text-[var(--color-background-23)]'
+                : 'text-white'
+            }`}
+            onClick={() => {
+              navigate({ to: '/new' })
+            }}
+          >
             Новинки
           </p>
         </div>
       </div>
-      <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-16)] rounded-[20px] cursor-pointer">
-        <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+      <div
+        className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+          location.pathname === '/wishlist'
+            ? 'bg-white'
+            : 'bg-[var(--color-background-16)]'
+        }`}
+        onClick={() => {
+          navigate({ to: '/wishlist' })
+        }}
+      >
+        <FavoriteIcon
+          className={`w-[24px] h-[24px] ${
+            location.pathname === '/wishlist'
+              ? 'text-[var(--color-background-24)]'
+              : 'text-white'
+          }`}
+        />
       </div>
-      <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-16)] rounded-[20px] cursor-pointer">
-        <CartIcon className="w-[24px] h-[24px]" />
+      <div
+        className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+          location.pathname === '/cart'
+            ? 'bg-white'
+            : 'bg-[var(--color-background-16)]'
+        }`}
+        onClick={() => {
+          navigate({ to: '/cart' })
+        }}
+      >
+        <CartIcon
+          className={`w-[24px] h-[24px] ${
+            location.pathname === '/cart'
+              ? 'text-[var(--color-background-24)]'
+              : 'text-white'
+          }`}
+        />
       </div>
     </div>
   )

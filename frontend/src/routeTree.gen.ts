@@ -9,21 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as NewRouteImport } from './routes/new'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewRoute = NewRouteImport.update({
+  id: '/new',
+  path: '/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -49,6 +62,11 @@ const ChangePasswordRoute = ChangePasswordRouteImport.update({
 const CatalogRoute = CatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRouteRoute = SlugRouteRouteImport.update({
@@ -81,24 +99,30 @@ const SlugCharacteristicsRouteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
+  '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
   '/$slug/': typeof SlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
+  '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
   '/$slug': typeof SlugIndexRoute
@@ -107,12 +131,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
+  '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
   '/$slug/': typeof SlugIndexRoute
@@ -122,24 +149,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/cart'
     | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
     | '/login'
+    | '/new'
     | '/sign-up'
+    | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cart'
     | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
     | '/login'
+    | '/new'
     | '/sign-up'
+    | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug'
@@ -147,12 +180,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/cart'
     | '/catalog'
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
     | '/login'
+    | '/new'
     | '/sign-up'
+    | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug/'
@@ -161,21 +197,38 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRouteRoute: typeof SlugRouteRouteWithChildren
+  CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  NewRoute: typeof NewRoute
   SignUpRoute: typeof SignUpRoute
+  WishlistRoute: typeof WishlistRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new': {
+      id: '/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof NewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -211,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/catalog'
       fullPath: '/catalog'
       preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -270,12 +330,15 @@ const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRouteRoute: SlugRouteRouteWithChildren,
+  CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   ChangePasswordRoute: ChangePasswordRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  NewRoute: NewRoute,
   SignUpRoute: SignUpRoute,
+  WishlistRoute: WishlistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
