@@ -15,9 +15,12 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
     
-    public async Task<UserDto> GetUserAsync(Guid id)
+    public async Task<UserDto?> GetUserAsync(Guid id)
     {
         var user = await _userRepository.GetByIdAsync(id);
+        if (user == null)
+            return null;
+            
         return new UserDto(user.Id, user.Username, user.Email);
     }
 }

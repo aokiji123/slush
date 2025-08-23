@@ -6,5 +6,5 @@ namespace Application.Interfaces;
 
 public interface IUserService
 {
-    Task<UserDto> GetUserAsync(Guid id);
+    Task<UserDto?> GetUserAsync(Guid id);
 }

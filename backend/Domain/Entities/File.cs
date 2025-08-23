@@ -3,15 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities;
 
-public class File
+public class GameFile
 {
     public Guid Id { get; set; }
     
-    [Required]
-    public Guid MessageId { get; set; }
+    public Guid? MessageId { get; set; }
     
     [Required]
-    public FileType Type { get; set; }
+    public Guid FileTypeId { get; set; }
     
     [Required]
     [MaxLength(50)]
@@ -26,4 +25,7 @@ public class File
     
     [Required]
     public DateTime CreatedAtDateTime { get; set; }
+    
+    public Message Message { get; set; }
+    public FileType FileType { get; set; }
 }
