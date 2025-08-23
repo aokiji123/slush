@@ -15,4 +15,8 @@ public class UserAchievement
     
     [Required]
     public DateTime UnlockedAtDateTime { get; set; }
+    
+    // Navigation properties
+    public Achievement Achievement { get; set; }
+    public User User { get; set; }
 }

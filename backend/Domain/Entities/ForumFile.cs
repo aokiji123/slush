@@ -20,4 +20,6 @@ public class ForumFile
     
     [Required]
     public DateTime CreatedAtDateTime { get; set; }
+
+    public Forum Forum { get; set; }
 }

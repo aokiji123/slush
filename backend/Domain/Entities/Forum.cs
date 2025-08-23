@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities;
@@ -16,4 +17,6 @@ public class Forum
     
     [Required]
     public DateTime CreatedAtDateTime { get; set; }
+    
+    public ICollection<ForumFile> ForumFiles { get; set; } = new List<ForumFile>();
 }

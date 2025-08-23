@@ -15,4 +15,7 @@ public class Friendship
     
     [Required]
     public DateTime FriendsFromDateTime { get; set; }
+    
+    public User FirstUser { get; set; }
+    public User SecondUser { get; set; }
 }

@@ -22,4 +22,7 @@ public class Review
     
     [Required]
     public DateTime CreatedAtDateTime { get; set; }
+    
+    public Game Game { get; set; }
+    public User User { get; set; }
 }

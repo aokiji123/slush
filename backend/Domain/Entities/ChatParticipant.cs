@@ -12,4 +12,7 @@ public class ChatParticipant
     
     [Required]
     public Guid UserId { get; set; }
+    
+    public Chat Chat { get; set; }
+    public User User { get; set; }
 }
