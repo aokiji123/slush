@@ -1,13 +1,17 @@
 # --- Backend (C#/.NET) ---
-# Ignore build outputs for all backend projects
-backend/API/bin/
-backend/API/obj/
-backend/Application/bin/
-backend/Application/obj/
-backend/Domain/bin/
-backend/Domain/obj/
-backend/Infrastructure/bin/
-backend/Infrastructure/obj/
+# Ignore all bin/ and obj/ folders in backend/ and its subdirectories
+backend/**/bin/
+backend/**/obj/
+
+# Ignore specific .NET build outputs
+*.dll
+*.pdb
+*.exe
+*.cache
+project.assets.json
+*.nuget.*
+*.runtimeconfig.json
+*.deps.json
 
 # Ignore user-specific and solution files
 *.user
@@ -16,7 +20,7 @@ backend/Infrastructure/obj/
 *.sln.docstates
 
 # Rider/JetBrains
-.idea/
+backend/.idea/
 *.sln.iml
 
 # Visual Studio Code
