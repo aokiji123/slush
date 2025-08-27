@@ -6,11 +6,6 @@ namespace Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
-    Task<AuthResponseDto> SignUpAsync(SignUpDto signUpDto);
-    Task<AuthResponseDto> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
-    Task<AuthResponseDto> ChangePasswordAsync(Guid userId, ChangePasswordDto changePasswordDto);
-    Task<AuthResponseDto> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
-    Task<bool> ValidateTokenAsync(string token);
-    Task<Guid?> GetUserIdFromTokenAsync(string token);
+    Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
+    Task<AuthResponseDto> LoginAsync(LoginDto dto);
 }

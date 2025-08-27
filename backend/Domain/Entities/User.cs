@@ -18,8 +18,10 @@ public class User
     public string Email { get; set; }
     
     [Required]
-    [MaxLength(255)]
-    public string Password { get; set; }
+    public byte[] PasswordHash { get; set; } = null!;
+
+    [Required]
+    public byte[] PasswordSalt { get; set; } = null!;
     
     [MaxLength(1000)]
     public string Bio { get; set; } = string.Empty;
