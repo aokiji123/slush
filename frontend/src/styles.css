@@ -21,23 +21,21 @@
 
 @font-face {
   font-family: 'Artifakt Element';
-  src: url('./frontend/src/fonts/artifakt-element-regular.otf')
-    format('opentype');
+  src: url('./fonts/artifakt-element-regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Artifakt Element';
-  src: url('./frontend/src/fonts/Artifakt-Element-Medium.ttf')
-    format('opentype');
+  src: url('./fonts/Artifakt-Element-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Artifakt Element';
-  src: url('./frontend/src/fonts/ArtifaktElement-Bold.otf') format('opentype');
+  src: url('./fonts/ArtifaktElement-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
 }

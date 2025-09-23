@@ -1,5 +1,5 @@
 import { GoDotFill } from 'react-icons/go'
-import { useNavigate } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { NotificationsIcon, SettingsIcon } from '@/icons'
 
 const tabs = [
@@ -19,9 +19,10 @@ const tabs = [
 
 export const Header = () => {
   const navigate = useNavigate()
+  const location = useLocation()
 
   // TODO: getting real auth state
-  const isAuth = Boolean(false)
+  const isAuth = Boolean(true)
 
   return (
     <header className="h-[90px] bg-[var(--color-background-15)] flex items-center justify-center">
@@ -63,10 +64,34 @@ export const Header = () => {
         ) : (
           <div>
             <div className="flex items-center gap-[8px]">
-              <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] rounded-[20px] cursor-pointer">
+              <div
+                className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer
+                  ${
+                    location.pathname === '/settings'
+                      ? 'bg-white text-[var(--color-background-16)]'
+                      : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
+                  }`}
+                onClick={() => {
+                  navigate({
+                    to: '/settings',
+                  })
+                }}
+              >
                 <SettingsIcon className="w-[24px] h-[24px]" />
               </div>
-              <div className="w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] rounded-[20px] cursor-pointer">
+              <div
+                className={`w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] text-[var(--color-background)] rounded-[20px] cursor-pointer
+                  ${
+                    location.pathname === '/notifications'
+                      ? 'bg-white text-[var(--color-background-16)]'
+                      : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
+                  }`}
+                // onClick={() => {
+                //   navigate({
+                //     to: '/notifications',
+                //   })
+                // }}
+              >
                 <NotificationsIcon className="w-[24px] h-[24px]" />
               </div>
               <div className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer">

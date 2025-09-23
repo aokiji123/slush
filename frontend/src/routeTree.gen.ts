@@ -18,9 +18,15 @@ import { Route as CodeAccessRouteImport } from './routes/code-access'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
+import { Route as SettingsWalletRouteImport } from './routes/settings/wallet'
+import { Route as SettingsPasswordRouteImport } from './routes/settings/password'
+import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
+import { Route as SettingsDeleteAccountRouteImport } from './routes/settings/delete-account'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
 
@@ -69,6 +75,11 @@ const CartRoute = CartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRouteRoute = SettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SlugRouteRoute = SlugRouteRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -79,10 +90,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
 const SlugIndexRoute = SlugIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SlugRouteRoute,
+} as any)
+const SettingsWalletRoute = SettingsWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const SettingsPasswordRoute = SettingsPasswordRouteImport.update({
+  id: '/password',
+  path: '/password',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const SettingsNotificationsRoute = SettingsNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const SettingsDeleteAccountRoute = SettingsDeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
 const SlugCommunityRouteRoute = SlugCommunityRouteRouteImport.update({
   id: '/community',
@@ -99,6 +135,7 @@ const SlugCharacteristicsRouteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
@@ -110,7 +147,12 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
+  '/settings/delete-account': typeof SettingsDeleteAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/password': typeof SettingsPasswordRoute
+  '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,12 +167,18 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
+  '/settings/delete-account': typeof SettingsDeleteAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/password': typeof SettingsPasswordRoute
+  '/settings/wallet': typeof SettingsWalletRoute
   '/$slug': typeof SlugIndexRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
@@ -142,13 +190,19 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRoute
+  '/settings/delete-account': typeof SettingsDeleteAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/password': typeof SettingsPasswordRoute
+  '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$slug'
+    | '/settings'
     | '/cart'
     | '/catalog'
     | '/change-password'
@@ -160,7 +214,12 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/settings/delete-account'
+    | '/settings/notifications'
+    | '/settings/password'
+    | '/settings/wallet'
     | '/$slug/'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,11 +234,17 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/settings/delete-account'
+    | '/settings/notifications'
+    | '/settings/password'
+    | '/settings/wallet'
     | '/$slug'
+    | '/settings'
   id:
     | '__root__'
     | '/'
     | '/$slug'
+    | '/settings'
     | '/cart'
     | '/catalog'
     | '/change-password'
@@ -191,12 +256,18 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/settings/delete-account'
+    | '/settings/notifications'
+    | '/settings/password'
+    | '/settings/wallet'
     | '/$slug/'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRouteRoute: typeof SlugRouteRouteWithChildren
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
@@ -273,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$slug': {
       id: '/$slug'
       path: '/$slug'
@@ -287,12 +365,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
     '/$slug/': {
       id: '/$slug/'
       path: '/'
       fullPath: '/$slug/'
       preLoaderRoute: typeof SlugIndexRouteImport
       parentRoute: typeof SlugRouteRoute
+    }
+    '/settings/wallet': {
+      id: '/settings/wallet'
+      path: '/wallet'
+      fullPath: '/settings/wallet'
+      preLoaderRoute: typeof SettingsWalletRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/password': {
+      id: '/settings/password'
+      path: '/password'
+      fullPath: '/settings/password'
+      preLoaderRoute: typeof SettingsPasswordRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/notifications': {
+      id: '/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof SettingsNotificationsRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/delete-account': {
+      id: '/settings/delete-account'
+      path: '/delete-account'
+      fullPath: '/settings/delete-account'
+      preLoaderRoute: typeof SettingsDeleteAccountRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
     '/$slug/community': {
       id: '/$slug/community'
@@ -327,9 +440,30 @@ const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
   SlugRouteRouteChildren,
 )
 
+interface SettingsRouteRouteChildren {
+  SettingsDeleteAccountRoute: typeof SettingsDeleteAccountRoute
+  SettingsNotificationsRoute: typeof SettingsNotificationsRoute
+  SettingsPasswordRoute: typeof SettingsPasswordRoute
+  SettingsWalletRoute: typeof SettingsWalletRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
+}
+
+const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
+  SettingsDeleteAccountRoute: SettingsDeleteAccountRoute,
+  SettingsNotificationsRoute: SettingsNotificationsRoute,
+  SettingsPasswordRoute: SettingsPasswordRoute,
+  SettingsWalletRoute: SettingsWalletRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
+}
+
+const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
+  SettingsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRouteRoute: SlugRouteRouteWithChildren,
+  SettingsRouteRoute: SettingsRouteRouteWithChildren,
   CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   ChangePasswordRoute: ChangePasswordRoute,
