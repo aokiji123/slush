@@ -1,31 +1,28 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities;
 
-public class Game
+public class DLC
 {
     [Key]
     public Guid Id { get; set; }
+
+    [Required]
+    public Guid GameId { get; set; }
+    public Game Game { get; set; }
 
     [Required]
     [MaxLength(200)]
     public string Title { get; set; }
 
     [Required]
-    public string DescriptionUA { get; set; }
-    
-    [Required]
-    public string DescriptionEN { get; set; }
+    public string Description { get; set; }
 
     [Range(0, 1000)]
     public decimal Price { get; set; }
 
     [Required]
     public DateTime ReleaseDate { get; set; }
-
-    public ICollection<GamesImages> Images { get; set; } = new List<GamesImages>();
-    public ICollection<DLC> DLCs { get; set; } = new List<DLC>();
     public Guid? DiscountId { get; set; }
     public Discount? Discount { get; set; }
 

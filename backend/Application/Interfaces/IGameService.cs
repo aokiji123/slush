@@ -5,7 +5,7 @@ using Application.DTOs;
 
 namespace Application.Interfaces;
 
-public interface IGamesService
+public interface IGameService
 {
     Task<GameDto?> GetGameByIdAsync(Guid id);
     Task<IEnumerable<BannerGameDto>> GetBannerGamesAsync();
@@ -13,4 +13,6 @@ public interface IGamesService
     Task<IEnumerable<GameDto>> GetNewAndTrendingGamesAsync(int page, int limit, string sort);
     Task<IEnumerable<GameDto>> GetBestsellerGamesAsync(int page, int limit, string sort);
     Task<IEnumerable<GameDto>> GetRecommendedGamesAsync(string userId, int page, int limit, string sort);
+    Task<IEnumerable<GameDto>> GetTopPopularGamesAsync(int top);
+    Task<IEnumerable<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request);
 }

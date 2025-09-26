@@ -1,103 +1,74 @@
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Application;
+using System.Collections.Concurrent;
 using Application.DTOs;
 using Application.Interfaces;
-using Domain.Entities;
-using Domain.Interfaces;
-using Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class AuthService(AppDbContext context, IConfiguration config) : IAuthService
+public class AuthService : IAuthService
 {
-    public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
+    private readonly ILogger<AuthService> _logger;
+    private static ConcurrentDictionary<string, string> _verificationCodes = new(); // email -> code
+    private static ConcurrentDictionary<string, string> _resetCodes = new();
+    
+    public AuthService(ILogger<AuthService> logger)
     {
-        if (await context.Users.AnyAsync(u => u.Email == dto.Email))
-            throw new Exception("User with this email already exists.");
+        _logger = logger;
+    }
+    
+    public Task SendVerificationCodeAsync(string email)
+    {
+        var code = GenerateCode();
+        _verificationCodes[email] = code;
 
-        CreatePasswordHash(dto.Password, out byte[] hash, out byte[] salt);
+        // У продакшені замість логування треба відправити email
+        _logger.LogInformation($"Verification code for {email}: {code}");
 
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Username = dto.Username,
-            Email = dto.Email,
-            PasswordHash = hash,
-            PasswordSalt = salt,
-            CreatedAtDateTime = DateTime.UtcNow
-        };
-
-        context.Users.Add(user);
-        await context.SaveChangesAsync();
-
-        return new AuthResponseDto
-        {
-            Token = GenerateJwtToken(user),
-            Username = user.Username,
-            Email = user.Email,
-            Avatar = user.Avatar
-        };
+        return Task.CompletedTask;
     }
 
-    public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
+    public Task<bool> VerifyCodeAsync(string email, string code)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (user == null || !VerifyPasswordHash(dto.Password, user.PasswordHash, user.PasswordSalt))
-            throw new Exception("Invalid credentials.");
-
-        return new AuthResponseDto
+        if (_verificationCodes.TryGetValue(email, out var storedCode) && storedCode == code)
         {
-            Token = GenerateJwtToken(user),
-            Username = user.Username,
-            Email = user.Email,
-            Avatar = user.Avatar
-        };
+            _verificationCodes.TryRemove(email, out _);
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 
-    private string GenerateJwtToken(User user)
+    // ------------------- Forgot Password -------------------
+    public Task SendResetPasswordCodeAsync(string email)
     {
-        var claims = new[]
+        var code = GenerateCode();
+        _resetCodes[email] = code;
+
+        // У продакшені – відправка email
+        _logger.LogInformation($"Password reset code for {email}: {code}");
+
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> ResetPasswordAsync(ResetPasswordDto dto)
+    {
+        if (_resetCodes.TryGetValue(dto.Email, out var storedCode) && storedCode == dto.Code)
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email)
-        };
+            _resetCodes.TryRemove(dto.Email, out _);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            // Тут логіка оновлення пароля у БД
+            // var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            // user.PasswordHash = HashPassword(dto.NewPassword);
+            // await _db.SaveChangesAsync();
 
-        var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 
-    private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
+    // ------------------- Helper -------------------
+    private string GenerateCode()
     {
-        using var hmac = new HMACSHA512();
-        salt = hmac.Key;
-        hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-    }
-
-    private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-    {
-        using var hmac = new HMACSHA512(storedSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return computedHash.SequenceEqual(storedHash);
+        var random = new Random();
+        return random.Next(100000, 999999).ToString(); // 6-значний код
     }
 }
