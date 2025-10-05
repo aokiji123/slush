@@ -67,7 +67,8 @@ export const Header = () => {
               <div
                 className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer
                   ${
-                    location.pathname === '/settings'
+                    location.pathname.startsWith('/settings') &&
+                    location.pathname !== '/settings/notifications'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
                   }`}
@@ -82,15 +83,15 @@ export const Header = () => {
               <div
                 className={`w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] text-[var(--color-background)] rounded-[20px] cursor-pointer
                   ${
-                    location.pathname === '/notifications'
+                    location.pathname === '/settings/notifications'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
                   }`}
-                // onClick={() => {
-                //   navigate({
-                //     to: '/notifications',
-                //   })
-                // }}
+                onClick={() => {
+                  navigate({
+                    to: '/settings/notifications',
+                  })
+                }}
               >
                 <NotificationsIcon className="w-[24px] h-[24px]" />
               </div>
