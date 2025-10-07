@@ -13,6 +13,7 @@ import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
@@ -50,6 +51,11 @@ const NewRoute = NewRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/change-password': typeof ChangePasswordRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
   '/sign-up': typeof SignUpRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
+    | '/library'
     | '/login'
     | '/new'
     | '/sign-up'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
+    | '/library'
     | '/login'
     | '/new'
     | '/sign-up'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/code-access'
     | '/forgot-password'
+    | '/library'
     | '/login'
     | '/new'
     | '/sign-up'
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   ChangePasswordRoute: typeof ChangePasswordRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   NewRoute: typeof NewRoute
   SignUpRoute: typeof SignUpRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -522,6 +542,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChangePasswordRoute: ChangePasswordRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   NewRoute: NewRoute,
   SignUpRoute: SignUpRoute,

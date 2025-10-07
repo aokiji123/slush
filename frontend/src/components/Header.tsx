@@ -9,7 +9,7 @@ const tabs = [
   },
   {
     name: 'Бібліотека',
-    href: '/',
+    href: '/library',
   },
   {
     name: 'Чат',
@@ -43,8 +43,10 @@ export const Header = () => {
         </div>
         <div className="flex items-center gap-[35px] text-white">
           {tabs.map((tab) => (
-            <p key={tab.name} className="hover:text-[var(--color-background-23)] relative font-bold text-[20px] group">
-              <a href={tab.href}>{tab.name}</a>
+            <p className="hover:text-[var(--color-background-23)] relative font-bold text-[20px] group">
+              <a key={tab.name} className="font-manrope" href={tab.href}>
+                {tab.name}
+              </a>
               <GoDotFill
                 className="absolute bottom-[-10px] right-1/2 translate-x-1/2 text-[var(--color-background-23)] opacity-0 group-hover:opacity-100"
                 size={12}

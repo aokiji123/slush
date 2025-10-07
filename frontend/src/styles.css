@@ -1,5 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 @import './colors.css';
 @import 'tailwindcss';
+
+@theme {
+  --font-manrope: 'Manrope', sans-serif;
+  --font-artifakt: 'Artifakt Element', sans-serif;
+}
+
+.font-manrope {
+  font-family: 'Manrope', sans-serif !important;
+}
 
 @layer base {
   *,
