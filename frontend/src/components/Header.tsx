@@ -5,7 +5,7 @@ import { NotificationsIcon, SettingsIcon } from '@/icons'
 const tabs = [
   {
     name: 'Крамниця',
-    href: '/kramnytsya',
+    href: '/',
   },
   {
     name: 'Бібліотека',
