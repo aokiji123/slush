@@ -5,7 +5,7 @@ import { NotificationsIcon, SettingsIcon } from '@/icons'
 const tabs = [
   {
     name: 'Крамниця',
-    href: '/',
+    href: '/kramnytsya',
   },
   {
     name: 'Бібліотека',
@@ -43,7 +43,7 @@ export const Header = () => {
         </div>
         <div className="flex items-center gap-[35px] text-white">
           {tabs.map((tab) => (
-            <p className="hover:text-[var(--color-background-23)] relative font-bold text-[20px] group">
+            <p key={tab.name} className="hover:text-[var(--color-background-23)] relative font-bold text-[20px] group">
               <a href={tab.href}>{tab.name}</a>
               <GoDotFill
                 className="absolute bottom-[-10px] right-1/2 translate-x-1/2 text-[var(--color-background-23)] opacity-0 group-hover:opacity-100"
@@ -67,8 +67,7 @@ export const Header = () => {
               <div
                 className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer
                   ${
-                    location.pathname.startsWith('/settings') &&
-                    location.pathname !== '/settings/notifications'
+                    location.pathname === '/settings'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
                   }`}
@@ -83,15 +82,15 @@ export const Header = () => {
               <div
                 className={`w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] text-[var(--color-background)] rounded-[20px] cursor-pointer
                   ${
-                    location.pathname === '/settings/notifications'
+                    location.pathname === '/notifications'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
                   }`}
-                onClick={() => {
-                  navigate({
-                    to: '/settings/notifications',
-                  })
-                }}
+                // onClick={() => {
+                //   navigate({
+                //     to: '/notifications',
+                //   })
+                // }}
               >
                 <NotificationsIcon className="w-[24px] h-[24px]" />
               </div>

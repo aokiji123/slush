@@ -29,6 +29,8 @@ import { Route as SettingsNotificationsRouteImport } from './routes/settings/not
 import { Route as SettingsDeleteAccountRouteImport } from './routes/settings/delete-account'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
+import { Route as SlugCommunityCreatePostRouteRouteImport } from './routes/$slug/community/createPost/route'
+import { Route as SlugCommunityCurrentPostIdRouteRouteImport } from './routes/$slug/community/currentPost/$id/route'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -131,6 +133,18 @@ const SlugCharacteristicsRouteRoute =
     path: '/characteristics',
     getParentRoute: () => SlugRouteRoute,
   } as any)
+const SlugCommunityCreatePostRouteRoute =
+  SlugCommunityCreatePostRouteRouteImport.update({
+    id: '/createPost',
+    path: '/createPost',
+    getParentRoute: () => SlugCommunityRouteRoute,
+  } as any)
+const SlugCommunityCurrentPostIdRouteRoute =
+  SlugCommunityCurrentPostIdRouteRouteImport.update({
+    id: '/currentPost/$id',
+    path: '/currentPost/$id',
+    getParentRoute: () => SlugCommunityRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -146,13 +160,15 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
-  '/$slug/community': typeof SlugCommunityRouteRoute
+  '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
+  '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,13 +182,15 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
-  '/$slug/community': typeof SlugCommunityRouteRoute
+  '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug': typeof SlugIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
+  '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,13 +207,15 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
-  '/$slug/community': typeof SlugCommunityRouteRoute
+  '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
+  '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,6 +240,8 @@ export interface FileRouteTypes {
     | '/settings/wallet'
     | '/$slug/'
     | '/settings/'
+    | '/$slug/community/createPost'
+    | '/$slug/community/currentPost/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -240,6 +262,8 @@ export interface FileRouteTypes {
     | '/settings/wallet'
     | '/$slug'
     | '/settings'
+    | '/$slug/community/createPost'
+    | '/$slug/community/currentPost/$id'
   id:
     | '__root__'
     | '/'
@@ -262,6 +286,8 @@ export interface FileRouteTypes {
     | '/settings/wallet'
     | '/$slug/'
     | '/settings/'
+    | '/$slug/community/createPost'
+    | '/$slug/community/currentPost/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -421,18 +447,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugCharacteristicsRouteRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/community/createPost': {
+      id: '/$slug/community/createPost'
+      path: '/createPost'
+      fullPath: '/$slug/community/createPost'
+      preLoaderRoute: typeof SlugCommunityCreatePostRouteRouteImport
+      parentRoute: typeof SlugCommunityRouteRoute
+    }
+    '/$slug/community/currentPost/$id': {
+      id: '/$slug/community/currentPost/$id'
+      path: '/currentPost/$id'
+      fullPath: '/$slug/community/currentPost/$id'
+      preLoaderRoute: typeof SlugCommunityCurrentPostIdRouteRouteImport
+      parentRoute: typeof SlugCommunityRouteRoute
+    }
   }
 }
 
+interface SlugCommunityRouteRouteChildren {
+  SlugCommunityCreatePostRouteRoute: typeof SlugCommunityCreatePostRouteRoute
+  SlugCommunityCurrentPostIdRouteRoute: typeof SlugCommunityCurrentPostIdRouteRoute
+}
+
+const SlugCommunityRouteRouteChildren: SlugCommunityRouteRouteChildren = {
+  SlugCommunityCreatePostRouteRoute: SlugCommunityCreatePostRouteRoute,
+  SlugCommunityCurrentPostIdRouteRoute: SlugCommunityCurrentPostIdRouteRoute,
+}
+
+const SlugCommunityRouteRouteWithChildren =
+  SlugCommunityRouteRoute._addFileChildren(SlugCommunityRouteRouteChildren)
+
 interface SlugRouteRouteChildren {
   SlugCharacteristicsRouteRoute: typeof SlugCharacteristicsRouteRoute
-  SlugCommunityRouteRoute: typeof SlugCommunityRouteRoute
+  SlugCommunityRouteRoute: typeof SlugCommunityRouteRouteWithChildren
   SlugIndexRoute: typeof SlugIndexRoute
 }
 
 const SlugRouteRouteChildren: SlugRouteRouteChildren = {
   SlugCharacteristicsRouteRoute: SlugCharacteristicsRouteRoute,
-  SlugCommunityRouteRoute: SlugCommunityRouteRoute,
+  SlugCommunityRouteRoute: SlugCommunityRouteRouteWithChildren,
   SlugIndexRoute: SlugIndexRoute,
 }
 

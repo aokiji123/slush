@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { WalletIcon } from '@/icons'
 
 export const Route = createFileRoute('/settings/wallet')({
@@ -40,73 +39,8 @@ function RouteComponent() {
         </div>
       </div>
 
-      <div className="w-full mt-[40px] flex flex-col gap-[20px]">
-        <p className="text-[24px] font-bold text-center text-white">
-          Історія транзакцій
-        </p>
-        <div className="w-full bg-[var(--color-background-8)] rounded-[20px] p-[20px] flex flex-col">
-          <div className="flex items-center px-[20px] text-[16px] text-white font-light mb-[20px]">
-            <div className="w-[15%]">
-              <p>Сума</p>
-            </div>
-            <div className="w-[75%]">
-              <p>Найменування</p>
-            </div>
-            <div className="w-[10%] text-right">
-              <p>Дата</p>
-            </div>
-          </div>
-          <div className="w-full rounded-[20px] flex flex-col gap-[8px]">
-            <div className="flex items-center px-[20px] py-[16px] rounded-[20px] text-[16px] text-white font-light bg-[var(--color-background-15)]">
-              <div className="w-[15%]">
-                <p> -999₴ </p>
-              </div>
-              <div className="w-[75%]">
-                <p>Ghost of Tsushima</p>
-              </div>
-              <div className="w-[10%] text-right">
-                <p>21.02.2023</p>
-              </div>
-            </div>
-            <div className="flex items-center px-[20px] py-[16px] rounded-[20px] text-[16px] text-white font-light bg-[var(--color-background-15)]">
-              <div className="w-[15%]">
-                <p> -599₴ </p>
-              </div>
-              <div className="w-[75%]">
-                <p>The Witcher 3</p>
-              </div>
-              <div className="w-[10%] text-right">
-                <p>21.02.2023</p>
-              </div>
-            </div>
-            <div className="flex items-center px-[20px] py-[16px] rounded-[20px] text-[16px] text-white font-light bg-[var(--color-background-15)]">
-              <div className="w-[15%]">
-                <p> +1000₴ </p>
-              </div>
-              <div className="w-[75%]">
-                <p>Поповнення балансу</p>
-              </div>
-              <div className="w-[10%] text-right">
-                <p>21.02.2023</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full flex justify-center mt-[20px]">
-            <div className="flex items-center gap-[16px] w-[300px] justify-center text-white text-[16px] font-light">
-              <p className="cursor-pointer">
-                <FaArrowLeft />
-              </p>
-              <p className="cursor-pointer hover:underline">1</p>
-              <p className="cursor-pointer hover:underline">2</p>
-              <p>...</p>
-              <p className="cursor-pointer hover:underline">10</p>
-              <p className="cursor-pointer">
-                <FaArrowRight />
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="w-full">
+        <p className="text-[24px] font-bold text-center">Історія транзакцій</p>
       </div>
     </div>
   )

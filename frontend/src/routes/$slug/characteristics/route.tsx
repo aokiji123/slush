@@ -98,7 +98,7 @@ function RouteComponent() {
           <p className="text-[24px] font-medium">Мінімальні налаштування</p>
           {minimalSettings.map((item) => {
             return (
-              <div className="flex flex-col">
+              <div key={item.name} className="flex flex-col">
                 <p className="font-bold">{item.name}</p>
                 <p className="font-light">{item.value}</p>
               </div>
@@ -107,9 +107,9 @@ function RouteComponent() {
         </div>
         <div className="w-[50%] flex flex-col gap-[16px] text-[20px]">
           <p className="text-[24px] font-medium">Рекомендовані налаштування</p>
-          {recommendedSettings.map((item) => {
+          {recommendedSettings.map((item, i) => {
             return (
-              <div className="flex flex-col">
+              <div className="flex flex-col" key={item.name + i}>
                 <p className="font-bold">{item.name}</p>
                 <p className="font-light">{item.value}</p>
               </div>

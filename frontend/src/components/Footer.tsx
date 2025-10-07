@@ -48,7 +48,7 @@ export const Footer = () => {
           </p>
           <div className="flex items-center gap-[32px] mt-[16px]">
             {tabs.map((tab) => (
-              <p className="text-white text-[16px] font-normal">
+              <p key={tab.name} className="text-white text-[16px] font-normal">
                 <a href={tab.href}>{tab.name}</a>
               </p>
             ))}
