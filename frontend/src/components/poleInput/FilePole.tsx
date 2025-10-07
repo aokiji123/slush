@@ -9,6 +9,7 @@ interface FilePoleI {
   classContainer?: string
 }
 
+
 export const FilePole = ({ classTitle = '', title, value, onChange, classContainer = '' }: FilePoleI) => {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
