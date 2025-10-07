@@ -80,7 +80,7 @@ function RouteComponent() {
       <div className="flex items-center gap-[8px] mb-[24px]">
         {tags.map((tag) => {
           return (
-            <div className="text-[14px] font-medium min-w-[66px] h-[24px] flex items-center justify-center bg-[var(--color-background-16)] py-[4px] px-[12px] rounded-[20px] text-[var(--color-background-25)]">
+            <div key={tag} className="text-[14px] font-medium min-w-[66px] h-[24px] flex items-center justify-center bg-[var(--color-background-16)] py-[4px] px-[12px] rounded-[20px] text-[var(--color-background-25)]">
               {tag}
             </div>
           )

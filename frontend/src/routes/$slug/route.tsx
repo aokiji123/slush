@@ -64,13 +64,20 @@ const nicknames = [
   'mop_riderEX',
 ]
 
+const TYPE_PAGE = {
+  community : 'community'
+}
+
 function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const isCommunity = location.pathname.split('/')[2] === TYPE_PAGE.community
+  const locationPath = location.pathname.split('/').slice(0,3).join('/')
+
   const isActiveTab = (tabHref: string) => {
     return (
-      location.pathname ===
+      locationPath ===
       tabHref.replace('$slug', location.pathname.split('/')[1])
     )
   }
@@ -103,7 +110,10 @@ function RouteComponent() {
           })}
         </ul>
 
-        <div className="w-full flex gap-[24px]">
+        {
+          isCommunity 
+          ? <Outlet />
+          : <div className="w-full flex gap-[24px]">
           <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
             <p className="text-[32px] font-bold text-[var(--color-background)]">
               Cyberpunk 2077
@@ -254,10 +264,14 @@ function RouteComponent() {
             </div>
           </div>
         </div>
+        }
+
+
       </div>
 
       {glowCoords.map((glow) => (
         <img
+          key={JSON.stringify(glow)}
           src="/glow.png"
           className="absolute z-10 opacity-50"
           loading="lazy"

@@ -192,6 +192,7 @@ function RouteComponent() {
 
       {glowCoords.map((glow) => (
         <img
+          key={glow.id}
           loading="lazy"
           src="/glow.png"
           alt="glow"
