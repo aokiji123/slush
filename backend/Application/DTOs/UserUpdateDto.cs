@@ -2,14 +2,15 @@ using System;
 
 namespace Application.DTOs;
 
-public class UserDto
+public class UserUpdateDto
 {
     public Guid Id { get; set; }
     public string Nickname { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string? Bio { get; set; }
-    public string Lang { get; set; } = "UA";
     public string? Avatar { get; set; }
     public string? Banner { get; set; }
-    public double Balance { get; set; }
+    public string Lang { get; set; } = "UA"; // UA, UK
 }
+
+

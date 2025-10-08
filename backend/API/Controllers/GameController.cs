@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/Game")]
+[Route("game")]
 public class GameController : ControllerBase
 {
     private readonly IGameService _gameService;
@@ -21,7 +21,7 @@ public class GameController : ControllerBase
         _logger = logger;
     }
 
-    // GET: api/Game/{id}
+    // GET /game/{id}
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<GameDto>> GetGame(Guid id)
     {
@@ -51,64 +51,119 @@ public class GameController : ControllerBase
         }
     }
 
-    // GET: api/Game/top-popular?top=10
-    [HttpGet("top-popular")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetTopPopular([FromQuery] int top = 10)
+    // GET /game/search?genre=...&platform=...&price=...
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> Search([FromQuery] string? genre, [FromQuery] string? platform, [FromQuery] decimal? price)
     {
-        if (top < 1 || top > 100)
-        {
-            return BadRequest("'top' must be between 1 and 100");
-        }
-
         try
         {
-            var result = await _gameService.GetTopPopularGamesAsync(top);
+            var result = await _gameService.SearchAsync(genre, platform, price);
             return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving top popular games");
+            _logger.LogError(ex, "Error occurred while searching games");
             return StatusCode(500, "Internal server error");
         }
     }
 
-    // POST: api/Game/filter
-    // Body: GamesFilterRequestDto { Genres, Platforms, WithDiscount, SortBy, Page, Limit, Query }
-    [HttpPost("filter")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetByFilter([FromBody] GamesFilterRequestDto request)
+    // GET /game/discount
+    [HttpGet("discount")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetDiscounted()
     {
-        if (request == null)
-        {
-            return BadRequest("Request body is required");
-        }
-
-        if (request.Page < 1)
-        {
-            return BadRequest("Page must be greater than 0");
-        }
-
-        if (request.Limit < 1 || request.Limit > 100)
-        {
-            return BadRequest("Limit must be between 1 and 100");
-        }
-
-        var validSorts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "relevancy", "publish_date", "rating", "price_asc", "price_desc", "alphabet", "discount"
-        };
-        if (!validSorts.Contains(request.SortBy))
-        {
-            return BadRequest("Invalid SortBy. Use one of: relevancy, publish_date, rating, price_asc, price_desc, alphabet, discount");
-        }
-
         try
         {
-            var result = await _gameService.GetGamesByFilterAsync(request);
+            var result = await _gameService.GetDiscountedAsync();
             return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while filtering games");
+            _logger.LogError(ex, "Error occurred while retrieving discounted games");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // GET /game/recommended
+    [HttpGet("recommended")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetRecommended()
+    {
+        try
+        {
+            var result = await _gameService.GetRecommendedAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving recommended games");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // GET /game/price/{price}
+    [HttpGet("price/{price:decimal}")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetCheaperThan(decimal price)
+    {
+        if (price < 0)
+        {
+            return BadRequest("Price must be non-negative");
+        }
+
+        try
+        {
+            var result = await _gameService.GetCheaperThanAsync(price);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving cheaper-than games");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // GET /game/hits
+    [HttpGet("hits")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetHits()
+    {
+        try
+        {
+            var result = await _gameService.GetHitsAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving hits");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // GET /game/new
+    [HttpGet("new")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetNew()
+    {
+        try
+        {
+            var result = await _gameService.GetNewAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving new games");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // GET /game/free
+    [HttpGet("free")]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetFree()
+    {
+        try
+        {
+            var result = await _gameService.GetFreeAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving free games");
             return StatusCode(500, "Internal server error");
         }
     }

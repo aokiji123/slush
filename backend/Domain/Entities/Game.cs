@@ -8,34 +8,46 @@ public class Game
     [Key]
     public Guid Id { get; set; }
 
-    [Required]
-    [MaxLength(200)]
-    public string Title { get; set; }
+    [Required, MaxLength(255)]
+    public string Name { get; set; } = null!;
+
+    [Required, MaxLength(255)]
+    public string Slug { get; set; } = null!;
 
     [Required]
-    public string DescriptionUA { get; set; }
-    
-    [Required]
-    public string DescriptionEN { get; set; }
+    public string MainImage { get; set; } = null!;
 
-    [Range(0, 1000)]
+    public List<string> Images { get; set; } = new();
+
+    [Range(0, 100000)]
     public decimal Price { get; set; }
+
+    [Range(0, 100)]
+    public int DiscountPercent { get; set; } = 0;
+
+    public DateTime? SaleDate { get; set; }
+
+    [Range(0, 5)]
+    public double Rating { get; set; }
+
+    public List<string> Genre { get; set; } = new();
+
+    [Required]
+    public string Description { get; set; } = null!;
 
     [Required]
     public DateTime ReleaseDate { get; set; }
 
-    public ICollection<GamesImages> Images { get; set; } = new List<GamesImages>();
-    public ICollection<DLC> DLCs { get; set; } = new List<DLC>();
-    public Guid? DiscountId { get; set; }
-    public Discount? Discount { get; set; }
+    [Required]
+    public string Developer { get; set; } = null!;
 
-    public decimal GetFinalPrice()
-    {
-        if (Discount != null && Discount.IsActive)
-        {
-            var discountAmount = Price * Discount.Percentage / 100;
-            return Math.Round(Price - discountAmount, 2);
-        }
-        return Price;
-    }
+    [Required]
+    public string Publisher { get; set; } = null!;
+
+    public List<string> Platforms { get; set; } = new();
+
+    public bool IsDlc { get; set; }
+    public Guid? BaseGameId { get; set; }
+
+    public decimal SalePrice => Math.Round(Price - Price * DiscountPercent / 100m, 2);
 }

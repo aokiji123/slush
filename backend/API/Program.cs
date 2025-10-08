@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +97,10 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
+
+// Application services
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

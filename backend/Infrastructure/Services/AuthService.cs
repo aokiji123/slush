@@ -16,6 +16,32 @@ public class AuthService : IAuthService
         _logger = logger;
     }
     
+    public Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
+    {
+        // Stub response. Replace with real user creation and token issuance.
+        var response = new AuthResponseDto
+        {
+            Token = "stub-token",
+            Username = dto.Username,
+            Email = dto.Email,
+            Avatar = string.Empty
+        };
+        return Task.FromResult(response);
+    }
+
+    public Task<AuthResponseDto> LoginAsync(LoginDto dto)
+    {
+        // Stub response. Replace with real password validation and token issuance.
+        var response = new AuthResponseDto
+        {
+            Token = "stub-token",
+            Username = dto.Email,
+            Email = dto.Email,
+            Avatar = string.Empty
+        };
+        return Task.FromResult(response);
+    }
+    
     public Task SendVerificationCodeAsync(string email)
     {
         var code = GenerateCode();
