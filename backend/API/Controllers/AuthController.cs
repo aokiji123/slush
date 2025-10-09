@@ -13,14 +13,22 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController : ControllerBase
 {
+    private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
+
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    {
+        _authService = authService;
+        _logger = logger;
+    }
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
         try
         {
-            var result = await authService.RegisterAsync(dto);
+            var result = await _authService.RegisterAsync(dto);
             return Ok(result);
         }
         catch (Exception ex)
@@ -34,7 +42,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            var result = await authService.LoginAsync(dto);
+            var result = await _authService.LoginAsync(dto);
             return Ok(result);
         }
         catch (Exception ex)
@@ -48,7 +56,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            await authService.SendVerificationCodeAsync(email);
+            await _authService.SendVerificationCodeAsync(email);
             return Ok(new { message = "Verification code sent" });
         }
         catch (Exception ex)
@@ -57,12 +65,33 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
+    [HttpPost("resend-verification")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerificationEmailDto dto)
+    {
+        if (string.IsNullOrEmpty(dto?.Email))
+        {
+            return BadRequest("Email is required");
+        }
+
+        try
+        {
+            await _authService.SendVerificationEmailAsync(dto.Email);
+            return Ok("Verification email sent. Please check your inbox.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending verification email to {Email}", dto.Email);
+            return StatusCode(500, "Failed to send verification email. Please try again later.");
+        }
+    }
+
     [HttpPost("verify-code")]
     public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto dto)
     {
         try
         {
-            var isValid = await authService.VerifyCodeAsync(dto.Email, dto.Code);
+            var isValid = await _authService.VerifyCodeAsync(dto.Email, dto.Code);
             if (!isValid) return BadRequest(new { message = "Invalid code" });
 
             return Ok(new { message = "Code verified successfully" });
@@ -78,7 +107,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            await authService.SendResetPasswordCodeAsync(dto.Email);
+            await _authService.SendResetPasswordCodeAsync(dto.Email);
             return Ok(new { message = "Password reset code sent" });
         }
         catch (Exception ex)
@@ -92,7 +121,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            var result = await authService.ResetPasswordAsync(dto);
+            var result = await _authService.ResetPasswordAsync(dto);
             if (!result) return BadRequest(new { message = "Invalid code or email" });
 
             return Ok(new { message = "Password reset successfully" });

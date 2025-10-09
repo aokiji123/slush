@@ -1,36 +1,31 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities;
 
-public class User
+public class User : IdentityUser<Guid>
 {
-    [Key]
-    public Guid Id { get; set; }
+    // IdentityUser provides:
+    // - Id (Guid)
+    // - UserName
+    // - Email
+    // - EmailConfirmed
+    // - PhoneNumber
+    // - etc.
 
-    [Required, MaxLength(100)]
-    public string Nickname { get; set; } = null!;
-
-    [Required, EmailAddress, MaxLength(255)]
-    public string Email { get; set; } = null!;
-
-    [MaxLength(1000)]
+    // Additional properties matching UserDto
+    public string Nickname { get; set; } = string.Empty;
     public string? Bio { get; set; }
-
-    [Required, MaxLength(2)]
     public string Lang { get; set; } = "UA";
-
-    [MaxLength(255)]
     public string? Avatar { get; set; }
-
-    [MaxLength(255)]
     public string? Banner { get; set; }
-
-    [Required]
-    public byte[] Hash { get; set; } = Array.Empty<byte>();
-
-    [Required]
-    public byte[] Salt { get; set; } = Array.Empty<byte>();
-
-    [Range(0, double.MaxValue)]
     public decimal Balance { get; set; }
+    public DateTime CreatedAtDateTime { get; set; } = DateTime.UtcNow;
+
+    // Navigation properties
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using Application.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -11,12 +12,31 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Domain.Entities;
+using Domain.Interfaces;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Identity
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 // JWT
 builder.Services.AddAuthentication(options =>
@@ -35,12 +55,34 @@ builder.Services.AddAuthentication(options =>
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured")))
         };
     });
 
 builder.Services.AddAuthorization();
 
+// Add Memory Cache
+builder.Services.AddMemoryCache();
+
+// Register repositories
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+// Register application services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<ILibraryService, LibraryService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+
+// Add BaseUrl configuration
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+var baseUrl = builder.Configuration["BaseUrl"] ?? "https://localhost:7020";
+builder.Services.AddHttpContextAccessor();
 // SWAGGER
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -97,10 +139,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
-
-// Application services
-builder.Services.AddScoped<IGameService, GameService>();
-builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

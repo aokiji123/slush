@@ -1,170 +1,458 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Models;
 using Application.DTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+/// <summary>
+/// Controller for managing games and game-related operations
+/// </summary>
 [ApiController]
-[Route("game")]
+[Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class GameController : ControllerBase
 {
     private readonly IGameService _gameService;
     private readonly ILogger<GameController> _logger;
+    private readonly IMemoryCache _cache;
+    
+    private const int CacheDurationSeconds = 300; // 5 minutes
+    private const string CacheKeyPrefix = "GameController_";
+    private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
-    public GameController(IGameService gameService, ILogger<GameController> logger)
+    public GameController(
+        IGameService gameService, 
+        ILogger<GameController> logger,
+        IMemoryCache cache)
     {
-        _gameService = gameService;
-        _logger = logger;
+        _gameService = gameService ?? throw new ArgumentNullException(nameof(gameService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
-    // GET /game/{id}
+    /// <summary>
+    /// Get a game by its unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the game</param>
+    /// <returns>Returns the game details if found</returns>
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<GameDto>> GetGame(Guid id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<GameDto>>> GetGame(
+        [FromRoute, Required] Guid id)
     {
         if (id == Guid.Empty)
         {
-            return BadRequest("Game ID cannot be empty");
+            return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
+        }
+
+        var cacheKey = $"{CacheKeyPrefix}Game_{id}";
+        if (_cache.TryGetValue(cacheKey, out GameDto? cachedGame))
+        {
+            _logger.LogInformation("Retrieved game {GameId} from cache", id);
+            return Ok(new ApiResponse<GameDto>(cachedGame!));
         }
 
         try
         {
-            _logger.LogInformation("Starting to retrieve game with ID: {GameId}", id);
+            _logger.LogInformation("Retrieving game with ID: {GameId}", id);
             var game = await _gameService.GetGameByIdAsync(id);
-            _logger.LogInformation("Game retrieved successfully: {GameFound}", game != null);
             
-            if (game == null)
+            if (game is null)
             {
-                return NotFound($"Game with ID {id} not found");
+                _logger.LogWarning("Game with ID {GameId} not found", id);
+                return NotFound(new ApiResponse<GameDto>($"Game with ID {id} not found"));
             }
             
-            return Ok(game);
+            // Cache the game data
+            _cache.Set(cacheKey, game, CacheExpiration);
+            
+            _logger.LogInformation("Successfully retrieved game with ID: {GameId}", id);
+            return Ok(new ApiResponse<GameDto>(game));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving game {GameId}. Exception type: {ExceptionType}, Message: {Message}", 
-            id, ex.GetType().Name, ex.Message);
-        return StatusCode(500, $"Internal server error: {ex.Message}");
+            _logger.LogError(ex, "Error occurred while retrieving game {GameId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<GameDto>("An error occurred while retrieving the game."));
         }
     }
 
-    // GET /game/search?genre=...&platform=...&price=...
+    /// <summary>
+    /// Search games by filter criteria (genre, price, platform)
+    /// </summary>
+    /// <param name="genre">Genre filter</param>
+    /// <param name="platform">Platform filter</param>
+    /// <param name="priceUpperBound">Maximum price filter</param>
+    /// <returns>List of games matching the search criteria with id, image, discount, price, sale_price, name</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> Search([FromQuery] string? genre, [FromQuery] string? platform, [FromQuery] decimal? price)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<object>>> Search(
+        [FromQuery] string? genre = null,
+        [FromQuery] string? platform = null,
+        [FromQuery] decimal? priceUpperBound = null)
     {
+        var cacheKey = $"{CacheKeyPrefix}Search_g{genre}_p{platform}_price{priceUpperBound}";
+        if (_cache.TryGetValue(cacheKey, out object? cachedGames))
+        {
+            return Ok(new ApiResponse<object>(cachedGames!));
+        }
+
         try
         {
-            var result = await _gameService.SearchAsync(genre, platform, price);
-            return Ok(result);
+            _logger.LogInformation("Searching games with criteria: Genre={Genre}, Platform={Platform}, PriceUpperBound={PriceUpperBound}", 
+                genre, platform, priceUpperBound);
+                
+            var games = await _gameService.SearchAsync(genre, platform, priceUpperBound);
+            
+            // Map to the required response format
+            var result = games.Select(g => new
+            {
+                id = g.Id,
+                image = g.MainImage,
+                discount = g.DiscountPercent,
+                price = g.Price,
+                sale_price = g.SalePrice,
+                name = g.Name
+            });
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<object>(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while searching games");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<object>("An error occurred while searching games."));
         }
     }
 
-    // GET /game/discount
+    /// <summary>
+    /// Get games with discount > 0
+    /// </summary>
+    /// <returns>List of games with discounts</returns>
     [HttpGet("discount")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetDiscounted()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetDiscount()
     {
+        var cacheKey = $"{CacheKeyPrefix}Discounted";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
         try
         {
+            _logger.LogInformation("Retrieving discounted games");
             var result = await _gameService.GetDiscountedAsync();
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while retrieving discounted games");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving discounted games."));
         }
     }
 
-    // GET /game/recommended
+    /// <summary>
+    /// Get recommended games with rating >= 4 and price < 1000
+    /// </summary>
+    /// <returns>List of recommended games</returns>
     [HttpGet("recommended")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetRecommended()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetRecommended()
     {
+        var cacheKey = $"{CacheKeyPrefix}Recommended";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
         try
         {
+            _logger.LogInformation("Retrieving recommended games");
             var result = await _gameService.GetRecommendedAsync();
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while retrieving recommended games");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving recommended games."));
         }
     }
 
-    // GET /game/price/{price}
+    /// <summary>
+    /// Get games with price less than specified amount
+    /// </summary>
+    /// <param name="price">Maximum price</param>
+    /// <returns>List of games cheaper than the specified price</returns>
     [HttpGet("price/{price:decimal}")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetCheaperThan(decimal price)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetByPrice(
+        [FromRoute, Required, Range(0, double.MaxValue)] decimal price)
     {
-        if (price < 0)
+        var cacheKey = $"{CacheKeyPrefix}Price_{price}";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
-            return BadRequest("Price must be non-negative");
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
         }
 
         try
         {
+            _logger.LogInformation("Retrieving games cheaper than {Price}", price);
             var result = await _gameService.GetCheaperThanAsync(price);
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving cheaper-than games");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error occurred while retrieving games cheaper than {Price}", price);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving games."));
         }
     }
 
-    // GET /game/hits
+    /// <summary>
+    /// Get hit games filtered by rating
+    /// </summary>
+    /// <returns>List of hit games</returns>
     [HttpGet("hits")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetHits()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetHits()
     {
+        var cacheKey = $"{CacheKeyPrefix}Hits";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
         try
         {
+            _logger.LogInformation("Retrieving hit games");
             var result = await _gameService.GetHitsAsync();
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving hits");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error occurred while retrieving hit games");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving hit games."));
         }
     }
 
-    // GET /game/new
+    /// <summary>
+    /// Get new games filtered by date
+    /// </summary>
+    /// <returns>List of new games</returns>
     [HttpGet("new")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetNew()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetNew()
     {
+        var cacheKey = $"{CacheKeyPrefix}New";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
         try
         {
+            _logger.LogInformation("Retrieving new games");
             var result = await _gameService.GetNewAsync();
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while retrieving new games");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving new games."));
         }
     }
 
-    // GET /game/free
+    /// <summary>
+    /// Get free games with price = 0 and filtered by rating
+    /// </summary>
+    /// <returns>List of free games</returns>
     [HttpGet("free")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetFree()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetFree()
     {
+        var cacheKey = $"{CacheKeyPrefix}Free";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
         try
         {
+            _logger.LogInformation("Retrieving free games");
             var result = await _gameService.GetFreeAsync();
-            return Ok(result);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while retrieving free games");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving free games."));
         }
+    }
+
+    /// <summary>
+    /// Get all DLCs of a specific game
+    /// </summary>
+    /// <param name="gameId">The unique identifier of the game</param>
+    /// <returns>List of DLCs for the specified game</returns>
+    [HttpGet("dlcs/{gameId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetDlcs(
+        [FromRoute, Required] Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("Game ID cannot be empty"));
+        }
+
+        var cacheKey = $"{CacheKeyPrefix}Dlcs_{gameId}";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedDlcs))
+        {
+            _logger.LogInformation("Retrieved DLCs for game {GameId} from cache", gameId);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedDlcs!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving DLCs for game with ID: {GameId}", gameId);
+            var result = await _gameService.GetDlcsByGameIdAsync(gameId);
+            
+            // Cache the results
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            _logger.LogInformation("Successfully retrieved {Count} DLCs for game with ID: {GameId}", result.Count(), gameId);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving DLCs for game {GameId}", gameId);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving DLCs."));
+        }
+    }
+
+    /// <summary>
+    /// Add a new DLC to a specific game.
+    /// </summary>
+    /// <remarks>
+    /// Validation: Name must be unique per game (case-insensitive). Cannot attach a DLC to another DLC. Genres and Platforms must be non-empty.
+    /// </remarks>
+    /// <param name="dto">DLC creation data.</param>
+    /// <returns>The created DLC as a GameDto, or error details.</returns>
+    /// <response code="200">Returns the new DLC</response>
+    /// <response code="400">Validation or business logic error</response>
+    /// <response code="500">Server error</response>
+    [HttpPost("dlc")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<GameDto>>> AddDlc([FromBody] AddDlcDto dto)
+    {
+        if (dto == null || dto.BaseGameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<GameDto>("Invalid DLC data. Base game ID required."));
+        }
+        try
+        {
+            var created = await _gameService.AddDlcAsync(dto);
+            return Ok(new ApiResponse<GameDto>(created));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<GameDto>(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add DLC");
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<GameDto>("An error occurred while adding the DLC."));
+        }
+    }
+
+    /// <summary>
+    /// Add a review for a game
+    /// </summary>
+    [HttpPost("review")]
+    public async Task<IActionResult> AddReview([FromBody] CreateReviewDto dto)
+    {
+        if (dto == null || dto.GameId == Guid.Empty)
+            return BadRequest("GameId is required");
+        await _gameService.AddReviewAsync(dto);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Get all reviews for a game
+    /// </summary>
+    [HttpGet("{gameId}/reviews")]
+    public async Task<ActionResult<ApiResponse<List<ReviewDto>>>> GetReviews(Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+            return BadRequest(new ApiResponse<List<ReviewDto>>("GameId required"));
+        var reviews = await _gameService.GetReviewsByGameIdAsync(gameId);
+        return Ok(new ApiResponse<List<ReviewDto>>(reviews));
     }
 }
