@@ -38,4 +38,6 @@ public class PaymentRepository : IPaymentRepository
     {
         await _context.SaveChangesAsync();
     }
+
+    public IQueryable<Payment> Payments => _context.Payments.Include(p => p.Game);
 }
