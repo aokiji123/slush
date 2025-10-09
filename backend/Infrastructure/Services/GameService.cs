@@ -1,265 +1,423 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Repositories;
 
 namespace Infrastructure.Services;
 
 public class GameService : IGameService
 {
     private readonly AppDbContext _db;
+    private readonly ReviewRepository _reviewRepo;
 
     public GameService(AppDbContext db)
     {
         _db = db;
+        _reviewRepo = new ReviewRepository(db);
     }
 
     public async Task<GameDto?> GetGameByIdAsync(Guid id)
     {
-        var game = await _db.Set<Game>()
-            .FirstOrDefaultAsync(g => g.Id == id);
-
-        if (game == null) return null;
-
-        return new GameDto
-        {
-            Id = game.Id,
-            Name = game.Name,
-            Slug = game.Slug,
-            Description = game.Description,
-            MainImage = game.MainImage,
-            Images = game.Images.ToList(),
-            Price = (double)game.Price,
-            DiscountPercent = game.DiscountPercent,
-            SalePrice = (double)game.SalePrice,
-            SaleDate = game.SaleDate,
-            Rating = game.Rating,
-            ReleaseDate = game.ReleaseDate,
-            Developer = game.Developer,
-            Publisher = game.Publisher,
-            Platforms = game.Platforms.ToList(),
-            Genre = game.Genre.ToList(),
-            IsDlc = game.IsDlc,
-            BaseGameId = game.BaseGameId
-        };
+        return await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Id == id)
+            .Select(SelectGameDto())
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<GameDto>> SearchAsync(string? genre, string? platform, decimal? priceUpperBound)
     {
-        var games = _db.Set<Game>().AsQueryable();
+        var query = _db.Set<Game>().AsNoTracking().AsQueryable();
 
         if (priceUpperBound.HasValue)
         {
-            games = games.Where(g => g.Price <= priceUpperBound.Value);
+            query = query.Where(g => g.Price <= priceUpperBound.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(genre))
-            games = games.Where(g => g.Genre.Any(x => x.ToLower() == genre.ToLower()));
+        {
+            var searchGenre = genre.ToLower();
+            query = query.Where(g => g.Genre.Any(x => x.ToLower() == searchGenre));
+        }
 
         if (!string.IsNullOrWhiteSpace(platform))
-            games = games.Where(g => g.Platforms.Any(x => x.ToLower() == platform.ToLower()));
+        {
+            var searchPlatform = platform.ToLower();
+            query = query.Where(g => g.Platforms.Any(x => x.ToLower() == searchPlatform));
+        }
 
-        return await games
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images.ToList(),
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre.ToList(),
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms.ToList(),
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
-            .ToListAsync();
+        return await query.Select(SelectGameDto()).ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetDiscountedAsync()
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .Where(g => g.DiscountPercent > 0)
             .OrderByDescending(g => g.DiscountPercent)
-            .Select(g => new GameDto
+            .Select(SelectGameDto())
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetTopPopularGamesAsync(int top)
+    {
+        var take = Math.Clamp(top, 1, 100);
+
+        return await _db.Set<Game>()
+            .AsNoTracking()
+            .OrderByDescending(g => g.Rating)
+            .ThenByDescending(g => g.DiscountPercent)
+            .Take(take)
+            .Select(SelectGameDto())
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<BannerGameDto>> GetBannerGamesAsync()
+    {
+        const int defaultBannerCount = 5;
+
+        return await _db.Set<Game>()
+            .AsNoTracking()
+            .OrderByDescending(g => g.DiscountPercent)
+            .ThenByDescending(g => g.Rating)
+            .Take(defaultBannerCount)
+            .Select(g => new BannerGameDto
             {
                 Id = g.Id,
                 Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
                 Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
+                Image = g.MainImage,
+                Price = (double)g.Price,
+                GameImages = g.Images,
+                OldPrice = g.DiscountPercent > 0 ? (double?)g.Price : null,
+                SalePercent = g.DiscountPercent,
+                SaleEndDate = g.SaleDate
             })
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetSpecialOfferGamesAsync(int page, int limit, string sort)
+    {
+        var parameters = CreateParameters(page, limit, sort);
+
+        var query = _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.DiscountPercent > 0 || (g.SalePrice > 0 && g.SalePrice < g.Price))
+            .ApplySorting(parameters)
+            .ApplyPagination(parameters)
+            .Select(SelectGameDto());
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetNewAndTrendingGamesAsync(int page, int limit, string sort)
+    {
+        var parameters = CreateParameters(page, limit, string.IsNullOrWhiteSpace(sort) ? "publish_date" : sort);
+
+        var query = _db.Set<Game>()
+            .AsNoTracking()
+            .ApplySorting(parameters)
+            .ApplyPagination(parameters)
+            .Select(SelectGameDto());
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetBestsellerGamesAsync(int page, int limit, string sort)
+    {
+        var parameters = CreateParameters(page, limit, string.IsNullOrWhiteSpace(sort) ? "discount" : sort);
+
+        var query = _db.Set<Game>()
+            .AsNoTracking()
+            .ApplySorting(parameters)
+            .ApplyPagination(parameters)
+            .Select(SelectGameDto());
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetRecommendedGamesAsync(string userId, int page, int limit, string sort)
+    {
+        var parameters = CreateParameters(page, limit, string.IsNullOrWhiteSpace(sort) ? "relevancy" : sort);
+
+        var query = _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Rating >= 4)
+            .ApplySorting(parameters)
+            .ApplyPagination(parameters)
+            .Select(SelectGameDto());
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request)
+    {
+        if (request == null) throw new ArgumentNullException(nameof(request));
+
+        var query = _db.Set<Game>().AsNoTracking().AsQueryable();
+
+        query = query.ApplySearch(request, g => g.Name, g => g.Description);
+
+        if (request.Genres?.Count > 0)
+        {
+            var genresFilter = request.Genres;
+            query = query.Where(g => g.Genre.Any(genre => genresFilter.Contains(genre)));
+        }
+
+        if (request.Platforms?.Count > 0)
+        {
+            var platformsFilter = request.Platforms;
+            query = query.Where(g => g.Platforms.Any(platform => platformsFilter.Contains(platform)));
+        }
+
+        if (request.MinPrice.HasValue)
+        {
+            query = query.Where(g => g.Price >= request.MinPrice.Value);
+        }
+
+        if (request.MaxPrice.HasValue)
+        {
+            query = query.Where(g => g.Price <= request.MaxPrice.Value);
+        }
+
+        if (request.OnSale.HasValue)
+        {
+            if (request.OnSale.Value)
+            {
+                query = query.Where(g => g.DiscountPercent > 0 || (g.SalePrice > 0 && g.SalePrice < g.Price));
+            }
+            else
+            {
+                query = query.Where(g => g.DiscountPercent == 0 && (g.SalePrice == 0 || g.SalePrice >= g.Price));
+            }
+        }
+
+        if (request.IsDlc.HasValue)
+        {
+            query = query.Where(g => g.IsDlc == request.IsDlc.Value);
+        }
+
+        query = query
+            .ApplySorting(request)
+            .ApplyPagination(request);
+
+        var dtoQuery = query.Select(SelectGameDto());
+        return await dtoQuery.ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetRecommendedAsync()
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .Where(g => g.Rating >= 4 && g.SalePrice < 1000m)
             .OrderByDescending(g => g.Rating)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
+            .Select(SelectGameDto())
             .ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetCheaperThanAsync(decimal priceUpperBound)
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .Where(g => g.Price <= priceUpperBound)
             .OrderBy(g => g.Price)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
+            .Select(SelectGameDto())
             .ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetHitsAsync()
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .OrderByDescending(g => g.Rating)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
+            .Select(SelectGameDto())
             .ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetNewAsync()
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .OrderByDescending(g => g.ReleaseDate)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
+            .Select(SelectGameDto())
             .ToListAsync();
     }
 
     public async Task<IEnumerable<GameDto>> GetFreeAsync()
     {
         return await _db.Set<Game>()
+            .AsNoTracking()
             .Where(g => g.Price == 0)
             .OrderByDescending(g => g.Rating)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.DiscountPercent,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
+            .Select(SelectGameDto())
             .ToListAsync();
     }
 
-    // inline selectors above to keep expression tree translatable
+    public async Task<IEnumerable<GameDto>> GetDlcsByGameIdAsync(Guid gameId)
+    {
+        return await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.IsDlc && g.BaseGameId == gameId)
+            .OrderBy(g => g.Name)
+            .Select(SelectGameDto())
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Creates a new DLC for the specified base game.
+    /// Checks: base game exists, base game is not itself a DLC, no duplicate name per base game.
+    /// </summary>
+    public async Task<GameDto> AddDlcAsync(AddDlcDto dto)
+    {
+        if (dto == null) throw new ArgumentNullException(nameof(dto));
+        if (dto.BaseGameId == Guid.Empty)
+            throw new ArgumentException("Base game ID required", nameof(dto.BaseGameId));
+        if (dto.ReleaseDate == default)
+            throw new ArgumentException("Release date is required", nameof(dto.ReleaseDate));
+
+        // Check base game exists and is not a DLC
+        var baseGame = await _db.Set<Game>().AsNoTracking().FirstOrDefaultAsync(g => g.Id == dto.BaseGameId);
+        if (baseGame == null)
+            throw new ArgumentException($"Base game with ID {dto.BaseGameId} not found");
+        if (baseGame.IsDlc)
+            throw new ArgumentException("Base game cannot be a DLC (nesting not allowed)");
+
+        // Prevent duplicate DLC names for the same base game (case-insensitive)
+        var nameLower = dto.Name.Trim().ToLower();
+        var dlcExists = await _db.Set<Game>()
+            .AsNoTracking()
+            .AnyAsync(g => g.IsDlc && g.BaseGameId == dto.BaseGameId && g.Name.ToLower() == nameLower);
+        if (dlcExists)
+            throw new ArgumentException($"DLC with that name already exists for this base game");
+
+        var slug = dto.Name.Trim().ToLower().Replace(' ', '-');
+        var game = new Game
+        {
+            Id = Guid.NewGuid(),
+            Name = dto.Name.Trim(),
+            Slug = slug,
+            Description = dto.Description?.Trim() ?? string.Empty,
+            Price = dto.Price,
+            MainImage = dto.MainImage?.Trim() ?? string.Empty,
+            Images = dto.Images ?? new List<string>(),
+            DiscountPercent = dto.DiscountPercent,
+            SalePrice = dto.SalePrice,
+            SaleDate = dto.SaleDate,
+            Rating = 0,
+            Genre = dto.Genre ?? new List<string>(),
+            ReleaseDate = dto.ReleaseDate,
+            Developer = dto.Developer?.Trim() ?? string.Empty,
+            Publisher = dto.Publisher?.Trim() ?? string.Empty,
+            Platforms = dto.Platforms ?? new List<string>(),
+            IsDlc = true,
+            BaseGameId = dto.BaseGameId
+        };
+        _db.Set<Game>().Add(game);
+        await _db.SaveChangesAsync();
+        // Project newly created game to GameDto
+        return new GameDto
+        {
+            Id = game.Id,
+            Name = game.Name,
+            Slug = game.Slug,
+            Description = game.Description,
+            Price = (double)game.Price,
+            MainImage = game.MainImage,
+            Images = game.Images,
+            DiscountPercent = game.DiscountPercent,
+            SalePrice = (double)game.SalePrice,
+            SaleDate = game.SaleDate,
+            Rating = game.Rating,
+            Genre = game.Genre,
+            ReleaseDate = game.ReleaseDate,
+            Developer = game.Developer,
+            Publisher = game.Publisher,
+            Platforms = game.Platforms,
+            IsDlc = game.IsDlc,
+            BaseGameId = game.BaseGameId
+        };
+    }
+
+    public async Task AddReviewAsync(CreateReviewDto dto)
+    {
+        var review = new Review
+        {
+            Id = Guid.NewGuid(),
+            GameId = dto.GameId,
+            Username = dto.Username,
+            Content = dto.Content,
+            Rating = dto.Rating,
+            CreatedAt = DateTime.UtcNow,
+        };
+        await _reviewRepo.AddReviewAsync(review);
+        // Update game's rating to new average
+        var reviews = await _reviewRepo.GetReviewsByGameIdAsync(dto.GameId);
+        if (reviews.Count > 0)
+        {
+            var game = await _db.Games.FindAsync(dto.GameId);
+            if (game != null)
+            {
+                game.Rating = reviews.Average(r => r.Rating);
+                await _db.SaveChangesAsync();
+            }
+        }
+    }
+
+    public async Task<List<ReviewDto>> GetReviewsByGameIdAsync(Guid gameId)
+    {
+        var list = await _reviewRepo.GetReviewsByGameIdAsync(gameId);
+        return list.Select(r => new ReviewDto {
+            Id = r.Id,
+            GameId = r.GameId,
+            Username = r.Username,
+            Content = r.Content,
+            Rating = r.Rating,
+            CreatedAt = r.CreatedAt,
+            Likes = r.Likes,
+            Dislikes = r.Dislikes
+        }).ToList();
+    }
+
+    private static QueryParameters CreateParameters(int page, int limit, string? sort)
+    {
+        return new QueryParameters
+        {
+            Page = page,
+            Limit = limit,
+            SortBy = sort
+        };
+    }
+
+    private static Expression<Func<Game, GameDto>> SelectGameDto()
+    {
+        return g => new GameDto
+        {
+            Id = g.Id,
+            Name = g.Name,
+            Slug = g.Slug,
+            MainImage = g.MainImage,
+            Images = g.Images,
+            Price = (double)g.Price,
+            DiscountPercent = g.DiscountPercent,
+            SalePrice = (double)g.SalePrice,
+            SaleDate = g.SaleDate,
+            Rating = g.Rating,
+            Genre = g.Genre,
+            Description = g.Description,
+            ReleaseDate = g.ReleaseDate,
+            Developer = g.Developer,
+            Publisher = g.Publisher,
+            Platforms = g.Platforms,
+            IsDlc = g.IsDlc,
+            BaseGameId = g.BaseGameId
+        };
+    }
 }

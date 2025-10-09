@@ -18,365 +18,71 @@ namespace Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Achievement", b =>
+            modelBuilder.Entity("Domain.Entities.DLC", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("DiscountId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("IconUrl")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("Achievements");
-                });
-
-            modelBuilder.Entity("Domain.Entities.BannerGame", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.PrimitiveCollection<List<string>>("GameImages")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<double?>("OldPrice")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("SaleEndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("SalePercent")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BannerGames");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Chat", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChatTypeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatTypeId");
-
-                    b.ToTable("Chats");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChatParticipant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChatId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatParticipants");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChatType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatTypes");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Comment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("FavoritesCount")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ParentCommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RepliesCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("ParentCommentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Developer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Website")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Developers");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Dlc", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("Dlcs");
-                });
-
-            modelBuilder.Entity("Domain.Entities.FileType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiscountId");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("DLCs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Discount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.HasKey("Id");
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("numeric");
 
-                    b.ToTable("FileTypes");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Forum", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Forums");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ForumFile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ForumId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ForumId");
-
-                    b.ToTable("ForumFiles");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Friendship", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FirstUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("FriendsFromDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("SecondUserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FirstUserId");
-
-                    b.HasIndex("SecondUserId");
-
-                    b.ToTable("Friendships");
+                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Game", b =>
@@ -385,26 +91,58 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("BaseGameId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<Guid>("DeveloperId")
+                    b.Property<string>("Developer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("DiscountId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("DiscountPercent")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<List<string>>("Genre")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.PrimitiveCollection<List<string>>("Images")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("IsDlc")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("MainImage")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<Guid>("PublisherId")
-                        .HasColumnType("uuid");
+                    b.PrimitiveCollection<List<string>>("Platforms")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<string>("Publisher")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<double>("Rating")
                         .HasColumnType("double precision");
@@ -412,168 +150,73 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Title")
+                    b.Property<DateTime?>("SaleDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Slug")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeveloperId");
+                    b.HasIndex("DiscountId");
 
-                    b.HasIndex("PublisherId");
+                    b.HasIndex("IsDlc", "BaseGameId");
 
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("Domain.Entities.GameFile", b =>
+            modelBuilder.Entity("Domain.Entities.Library", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAtDateTime")
+                    b.Property<DateTime>("AddedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FileTypeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("MessageId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FileTypeId");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("Files");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameGenre", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("GenreId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
 
-                    b.HasIndex("GenreId");
+                    b.HasIndex("UserId", "GameId")
+                        .IsUnique();
 
-                    b.ToTable("GameGenres");
+                    b.ToTable("Libraries");
                 });
 
-            modelBuilder.Entity("Domain.Entities.GameImage", b =>
+            modelBuilder.Entity("Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AltText")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
+                    b.Property<DateTime>("Data")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<bool>("IsMainImage")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("GameImages");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GamePlatform", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("PlatformId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("PlatformId");
-
-                    b.ToTable("GamePlatforms");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameSet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.PrimitiveCollection<List<string>>("Content")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid>("GameId")
+                    b.Property<Guid?>("GameId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<double?>("OldPrice")
-                        .HasColumnType("double precision");
+                    b.Property<int>("Page")
+                        .HasColumnType("integer");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("SaleEndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<byte?>("SalePercent")
-                        .HasColumnType("smallint");
+                    b.Property<decimal>("Sum")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -584,146 +227,48 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GameSets");
+                    b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Genre", b =>
+            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAtDateTime")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Genres");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Message", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChatId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
-
-                    b.Property<DateTime>("Timestamp")
+                    b.Property<DateTime>("Expires")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ReasonRevoked")
+                        .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("text");
 
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PasswordResetToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("Revoked")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("boolean");
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("text");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Token")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetTokens");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Platform", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Platforms");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Publisher", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Website")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Publishers");
+                    b.ToTable("RefreshToken");
                 });
 
             modelBuilder.Entity("Domain.Entities.Review", b =>
@@ -732,28 +277,34 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Comment")
+                    b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
-                    b.Property<DateTime>("CreatedAtDateTime")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Dislikes")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Likes")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
                 });
@@ -764,58 +315,90 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Avatar")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Banner")
+                        .HasColumnType("text");
 
                     b.Property<string>("Bio")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAtDateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
-                    b.Property<DateTime?>("FriendsFromDateTime")
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Lang")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<byte[]>("PasswordHash")
+                    b.Property<string>("Nickname")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("text");
 
-                    b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
-                        .HasColumnType("bytea");
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Domain.Entities.UserAchievement", b =>
+            modelBuilder.Entity("Domain.Entities.UserBalance", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AchievementId")
-                        .HasColumnType("uuid");
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
 
-                    b.Property<DateTime>("UnlockedAtDateTime")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
@@ -823,11 +406,10 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AchievementId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserAchievements");
+                    b.ToTable("UserBalances");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserOwnedGame", b =>
@@ -839,8 +421,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
 
-                    b.Property<double>("PurchasePrice")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("PurchasePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.Property<DateTime>("PurchasedAtDateTime")
                         .HasColumnType("timestamp with time zone");
@@ -852,269 +435,181 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "GameId")
+                        .IsUnique();
 
                     b.ToTable("UserOwnedGames");
                 });
 
-            modelBuilder.Entity("Domain.Entities.UserWishlist", b =>
+            modelBuilder.Entity("Domain.Entities.UserRole", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WalletTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("AddedAtDateTime")
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserWishlists");
+                    b.ToTable("WalletTransactions");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Achievement", b =>
+            modelBuilder.Entity("Domain.Entities.Wishlist", b =>
                 {
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("Achievements")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.Navigation("Game");
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AddedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("GameId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "GameId");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("GameId1");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("Wishlists");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Chat", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
-                    b.HasOne("Domain.Entities.ChatType", "ChatType")
-                        .WithMany("Chats")
-                        .HasForeignKey("ChatTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.Navigation("ChatType");
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IdentityRole<Guid>");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ChatParticipant", b =>
+            modelBuilder.Entity("Domain.Entities.DLC", b =>
                 {
-                    b.HasOne("Domain.Entities.Chat", "Chat")
-                        .WithMany("ChatParticipants")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("ChatParticipants")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Comment", b =>
-                {
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("Comments")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Comment", "ParentComment")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentCommentId");
-
-                    b.HasOne("Domain.Entities.User", "User")
+                    b.HasOne("Domain.Entities.Discount", "Discount")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Game");
-
-                    b.Navigation("ParentComment");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Dlc", b =>
-                {
                     b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("Dlcs")
+                        .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Discount");
+
                     b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ForumFile", b =>
-                {
-                    b.HasOne("Domain.Entities.Forum", "Forum")
-                        .WithMany("ForumFiles")
-                        .HasForeignKey("ForumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Forum");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Friendship", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "FirstUser")
-                        .WithMany("FirstUserFriendships")
-                        .HasForeignKey("FirstUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "SecondUser")
-                        .WithMany("SecondUserFriendships")
-                        .HasForeignKey("SecondUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FirstUser");
-
-                    b.Navigation("SecondUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.Game", b =>
                 {
-                    b.HasOne("Domain.Entities.Developer", "Developer")
-                        .WithMany("Games")
-                        .HasForeignKey("DeveloperId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Domain.Entities.Discount", "Discount")
+                        .WithMany()
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Domain.Entities.Publisher", "Publisher")
-                        .WithMany("Games")
-                        .HasForeignKey("PublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Developer");
-
-                    b.Navigation("Publisher");
+                    b.Navigation("Discount");
                 });
 
-            modelBuilder.Entity("Domain.Entities.GameFile", b =>
-                {
-                    b.HasOne("Domain.Entities.FileType", "FileType")
-                        .WithMany("Files")
-                        .HasForeignKey("FileTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Message", "Message")
-                        .WithMany("Files")
-                        .HasForeignKey("MessageId");
-
-                    b.Navigation("FileType");
-
-                    b.Navigation("Message");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameGenre", b =>
+            modelBuilder.Entity("Domain.Entities.Library", b =>
                 {
                     b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("GameGenres")
+                        .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Genre", "Genre")
-                        .WithMany("GameGenres")
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("Genre");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameImage", b =>
-                {
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("GameImages")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GamePlatform", b =>
-                {
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("GamePlatforms")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Platform", "Platform")
-                        .WithMany("GamePlatforms")
-                        .HasForeignKey("PlatformId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("Platform");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameSet", b =>
-                {
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("GameSets")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("GameSets")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Message", b =>
-                {
-                    b.HasOne("Domain.Entities.Chat", "Chat")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PasswordResetToken", b =>
-                {
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("Domain.Entities.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1130,32 +625,16 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Game");
-
-                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.UserAchievement", b =>
+            modelBuilder.Entity("Domain.Entities.UserBalance", b =>
                 {
-                    b.HasOne("Domain.Entities.Achievement", "Achievement")
-                        .WithMany("UserAchievements")
-                        .HasForeignKey("AchievementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("UserAchievements")
-                        .HasForeignKey("UserId")
+                        .WithOne()
+                        .HasForeignKey("Domain.Entities.UserBalance", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Achievement");
 
                     b.Navigation("User");
                 });
@@ -1163,13 +642,13 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.UserOwnedGame", b =>
                 {
                     b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("UserOwnedGames")
+                        .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("OwnedGames")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1179,124 +658,73 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.UserWishlist", b =>
+            modelBuilder.Entity("Domain.Entities.UserRole", b =>
                 {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WalletTransaction", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Wishlist", b =>
+                {
+                    b.HasOne("Domain.Entities.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany("UserWishlists")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("GameId1");
 
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Wishlists")
+                    b.HasOne("Domain.Entities.User", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1");
+
                     b.Navigation("Game");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Achievement", b =>
-                {
-                    b.Navigation("UserAchievements");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Chat", b =>
-                {
-                    b.Navigation("ChatParticipants");
-
-                    b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChatType", b =>
-                {
-                    b.Navigation("Chats");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Comment", b =>
-                {
-                    b.Navigation("Replies");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Developer", b =>
-                {
-                    b.Navigation("Games");
-                });
-
-            modelBuilder.Entity("Domain.Entities.FileType", b =>
-                {
-                    b.Navigation("Files");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Forum", b =>
-                {
-                    b.Navigation("ForumFiles");
                 });
 
             modelBuilder.Entity("Domain.Entities.Game", b =>
                 {
-                    b.Navigation("Achievements");
-
-                    b.Navigation("Comments");
-
-                    b.Navigation("Dlcs");
-
-                    b.Navigation("GameGenres");
-
-                    b.Navigation("GameImages");
-
-                    b.Navigation("GamePlatforms");
-
-                    b.Navigation("GameSets");
-
                     b.Navigation("Reviews");
-
-                    b.Navigation("UserOwnedGames");
-
-                    b.Navigation("UserWishlists");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Genre", b =>
-                {
-                    b.Navigation("GameGenres");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Message", b =>
-                {
-                    b.Navigation("Files");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Platform", b =>
-                {
-                    b.Navigation("GamePlatforms");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Publisher", b =>
-                {
-                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.Navigation("ChatParticipants");
+                    b.Navigation("RefreshTokens");
 
-                    b.Navigation("FirstUserFriendships");
-
-                    b.Navigation("GameSets");
-
-                    b.Navigation("Messages");
-
-                    b.Navigation("OwnedGames");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("SecondUserFriendships");
-
-                    b.Navigation("UserAchievements");
-
-                    b.Navigation("Wishlists");
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

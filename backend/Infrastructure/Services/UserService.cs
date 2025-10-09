@@ -26,8 +26,8 @@ public class UserService : IUserService
         return new UserDto
         {
             Id = user.Id,
-            Nickname = user.Nickname,
-            Email = user.Email,
+            Nickname = user.Nickname ?? string.Empty,
+            Email = user.Email ?? string.Empty,
             Bio = user.Bio,
             Lang = user.Lang,
             Avatar = user.Avatar,
