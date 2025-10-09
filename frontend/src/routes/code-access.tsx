@@ -37,7 +37,7 @@ function RouteComponent() {
           backgroundSize: 'cover',
         }}
       >
-        <div className="min-w-[470px] min-h-[400px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px]">
+        <div className="w-full max-w-[470px] min-h-[400px] bg-[var(--color-background-15)] rounded-[20px] sm:p-[40px] p-[24px] flex flex-col items-center gap-[64px] mx-[16px]">
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">
@@ -59,7 +59,7 @@ function RouteComponent() {
                   value={code[index]}
                   onChange={(e) => handleInputChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-[64px] h-[76px] bg-[var(--color-background-14)] rounded-[12px] text-center text-[36px] font-bold border-1 border-[var(--color-background-16)] focus:border-[var(--color-background-21)] focus:outline-none"
+                  className="sm:w-[64px] sm:h-[76px] w-[48px] h-[56px] bg-[var(--color-background-14)] rounded-[12px] text-center text-[36px] font-bold border-1 border-[var(--color-background-16)] focus:border-[var(--color-background-21)] focus:outline-none"
                 />
               ))}
             </div>
