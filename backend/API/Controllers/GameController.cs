@@ -396,43 +396,6 @@ public class GameController : ControllerBase
     }
 
     /// <summary>
-    /// Add a new DLC to a specific game.
-    /// </summary>
-    /// <remarks>
-    /// Validation: Name must be unique per game (case-insensitive). Cannot attach a DLC to another DLC. Genres and Platforms must be non-empty.
-    /// </remarks>
-    /// <param name="dto">DLC creation data.</param>
-    /// <returns>The created DLC as a GameDto, or error details.</returns>
-    /// <response code="200">Returns the new DLC</response>
-    /// <response code="400">Validation or business logic error</response>
-    /// <response code="500">Server error</response>
-    [HttpPost("dlc")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<GameDto>>> AddDlc([FromBody] AddDlcDto dto)
-    {
-        if (dto == null || dto.BaseGameId == Guid.Empty)
-        {
-            return BadRequest(new ApiResponse<GameDto>("Invalid DLC data. Base game ID required."));
-        }
-        try
-        {
-            var created = await _gameService.AddDlcAsync(dto);
-            return Ok(new ApiResponse<GameDto>(created));
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ApiResponse<GameDto>(ex.Message));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to add DLC");
-            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<GameDto>("An error occurred while adding the DLC."));
-        }
-    }
-
-    /// <summary>
     /// Add a review for a game
     /// </summary>
     [HttpPost("review")]

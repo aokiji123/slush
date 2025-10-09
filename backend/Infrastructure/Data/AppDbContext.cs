@@ -9,7 +9,6 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
-    public DbSet<DLC> DLCs { get; set; }
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
     public DbSet<UserBalance> UserBalances { get; set; }
@@ -27,18 +26,6 @@ public class AppDbContext : DbContext
             .HasKey(ur => new { ur.UserId, ur.RoleId });
 
         // Настройка связей между сущностями
-        modelBuilder.Entity<DLC>()
-            .HasOne(d => d.Game)
-            .WithMany()
-            .HasForeignKey(d => d.GameId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<DLC>()
-            .HasOne(d => d.Discount)
-            .WithMany()
-            .HasForeignKey(d => d.DiscountId)
-            .OnDelete(DeleteBehavior.SetNull);
-
         modelBuilder.Entity<Game>()
             .HasOne(g => g.Discount)
             .WithMany()
@@ -79,10 +66,6 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         // Настройка точности для decimal полей
-        modelBuilder.Entity<DLC>()
-            .Property(d => d.Price)
-            .HasPrecision(10, 2);
-
         modelBuilder.Entity<Game>()
             .Property(g => g.Price)
             .HasPrecision(10, 2);
