@@ -51,6 +51,30 @@ const settings = [
   },
 ]
 
+const glowCoords = [
+  {
+    id: 1,
+    top: '-150px',
+    left: '-200px',
+    width: '700px',
+    height: '700px',
+  },
+  {
+    id: 2,
+    top: '400px',
+    right: '-300px',
+    width: '900px',
+    height: '900px',
+  },
+  {
+    id: 3,
+    bottom: '-50px',
+    left: '-250px',
+    width: '900px',
+    height: '900px',
+  },
+]
+
 function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -110,6 +134,24 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+
+      {glowCoords.map((glow) => (
+        <img
+          key={glow.id}
+          loading="lazy"
+          src="/glow.png"
+          alt="glow"
+          className="absolute z-0 opacity-50"
+          style={{
+            top: glow.top,
+            left: glow.left,
+            right: glow.right,
+            bottom: glow.bottom,
+            width: glow.width,
+            height: glow.height,
+          }}
+        />
+      ))}
     </div>
   )
 }

@@ -28,6 +28,7 @@ import { Route as SettingsWalletRouteImport } from './routes/settings/wallet'
 import { Route as SettingsPasswordRouteImport } from './routes/settings/password'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsDeleteAccountRouteImport } from './routes/settings/delete-account'
+import { Route as SlugDlcRouteRouteImport } from './routes/$slug/dlc/route'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
 import { Route as SlugCommunityCreatePostRouteRouteImport } from './routes/$slug/community/createPost/route'
@@ -128,6 +129,11 @@ const SettingsDeleteAccountRoute = SettingsDeleteAccountRouteImport.update({
   path: '/delete-account',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
+const SlugDlcRouteRoute = SlugDlcRouteRouteImport.update({
+  id: '/dlc',
+  path: '/dlc',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugCommunityRouteRoute = SlugCommunityRouteRouteImport.update({
   id: '/community',
   path: '/community',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
+  '/$slug/dlc': typeof SlugDlcRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
+  '/$slug/dlc': typeof SlugDlcRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
+  '/$slug/dlc': typeof SlugDlcRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/$slug/dlc'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/$slug/dlc'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
+    | '/$slug/dlc'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -453,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsDeleteAccountRouteImport
       parentRoute: typeof SettingsRouteRoute
     }
+    '/$slug/dlc': {
+      id: '/$slug/dlc'
+      path: '/dlc'
+      fullPath: '/$slug/dlc'
+      preLoaderRoute: typeof SlugDlcRouteRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/community': {
       id: '/$slug/community'
       path: '/community'
@@ -500,12 +519,14 @@ const SlugCommunityRouteRouteWithChildren =
 interface SlugRouteRouteChildren {
   SlugCharacteristicsRouteRoute: typeof SlugCharacteristicsRouteRoute
   SlugCommunityRouteRoute: typeof SlugCommunityRouteRouteWithChildren
+  SlugDlcRouteRoute: typeof SlugDlcRouteRoute
   SlugIndexRoute: typeof SlugIndexRoute
 }
 
 const SlugRouteRouteChildren: SlugRouteRouteChildren = {
   SlugCharacteristicsRouteRoute: SlugCharacteristicsRouteRoute,
   SlugCommunityRouteRoute: SlugCommunityRouteRouteWithChildren,
+  SlugDlcRouteRoute: SlugDlcRouteRoute,
   SlugIndexRoute: SlugIndexRoute,
 }
 

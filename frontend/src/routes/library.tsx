@@ -50,10 +50,34 @@ const myGames = [
   },
 ]
 
+const glowCoords = [
+  {
+    id: 1,
+    top: '-150px',
+    left: '-200px',
+    width: '700px',
+    height: '700px',
+  },
+  {
+    id: 2,
+    top: '400px',
+    right: '-300px',
+    width: '900px',
+    height: '900px',
+  },
+  {
+    id: 3,
+    bottom: '-50px',
+    left: '-250px',
+    width: '900px',
+    height: '900px',
+  },
+]
+
 function RouteComponent() {
   return (
     <div className="bg-[var(--color-night-background)] min-h-screen flex flex-col">
-      <div className="w-[15%] min-w-[200px] absolute left-0 top-[90px] h-[calc(100vh-90px)] bg-[var(--color-background-8)] z-20 text-white">
+      <div className="w-[15%] min-w-[200px] absolute left-0 top-[90px] h-full bg-[var(--color-background-8)] z-20 text-white">
         <div className="p-[20px] flex flex-col gap-[20px]">
           <div className="flex items-center justify-between">
             <h2 className="text-[20px] font-bold">Усі ігри</h2>
@@ -75,8 +99,8 @@ function RouteComponent() {
         </div>
       </div>
 
-      <div className="w-[85%] ml-[15%]">
-        <div className="container mx-auto px-4">
+      <div className="w-[85%] ml-[15%] z-20">
+        <div className="container mx-auto px-[32px]">
           <Search className="my-[16px] w-full" />
 
           {/* TODO: community area? */}
@@ -97,7 +121,7 @@ function RouteComponent() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-[24px]">
+            <div className="flex flex-wrap gap-[24px]">
               {myGames.map((game) => (
                 <div
                   key={game.id}
@@ -114,6 +138,24 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+
+      {glowCoords.map((glow) => (
+        <img
+          key={glow.id}
+          loading="lazy"
+          src="/glow.png"
+          alt="glow"
+          className="absolute z-0 opacity-50"
+          style={{
+            top: glow.top,
+            left: glow.left,
+            right: glow.right,
+            bottom: glow.bottom,
+            width: glow.width,
+            height: glow.height,
+          }}
+        />
+      ))}
     </div>
   )
 }

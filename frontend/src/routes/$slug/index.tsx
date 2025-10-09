@@ -4,7 +4,7 @@ import {
   FaChevronRight,
   FaChevronUp,
 } from 'react-icons/fa'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import { GameComment, MasonryLayout, SortDropdown } from '@/components'
 
@@ -40,6 +40,8 @@ const commentsText = [
 
 function RouteComponent() {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
+  const navigate = useNavigate()
+  const { slug } = useParams({ from: '/$slug' })
 
   return (
     <>
@@ -80,7 +82,10 @@ function RouteComponent() {
       <div className="flex items-center gap-[8px] mb-[24px]">
         {tags.map((tag) => {
           return (
-            <div key={tag} className="text-[14px] font-medium min-w-[66px] h-[24px] flex items-center justify-center bg-[var(--color-background-16)] py-[4px] px-[12px] rounded-[20px] text-[var(--color-background-25)]">
+            <div
+              key={tag}
+              className="text-[14px] font-medium min-w-[66px] h-[24px] flex items-center justify-center bg-[var(--color-background-16)] py-[4px] px-[12px] rounded-[20px] text-[var(--color-background-25)]"
+            >
               {tag}
             </div>
           )
@@ -182,7 +187,10 @@ function RouteComponent() {
         <div className="flex flex-col gap-[20px]">
           <div className="flex items-center justify-between">
             <p className="text-[32px] font-bold">Інші DLC</p>
-            <p className="text-[16px] flex items-center gap-[8px]">
+            <p
+              className="text-[16px] flex items-center gap-[8px] cursor-pointer"
+              onClick={() => navigate({ to: `/${slug}/dlc` })}
+            >
               Усі DLC <FaChevronRight />
             </p>
           </div>
