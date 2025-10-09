@@ -18,7 +18,9 @@ function RouteComponent() {
   return (
     <div className="w-full bg-[var(--color-background-15)] rounded-[20px] overflow-hidden text-white p-[24px] pb-[40px] flex flex-col gap-[64px]">
       <div className="w-full max-w-[500px] flex flex-col gap-[16px]">
-        <p className="text-[20px] font-bold">Беззвучні сповіщення</p>
+        <p className="text-[20px] font-bold font-manrope">
+          Беззвучні сповіщення
+        </p>
 
         <ul className="w-full flex flex-col gap-[16px]">
           {notifications.map((notification) => (
@@ -34,7 +36,7 @@ function RouteComponent() {
       </div>
 
       <div className="w-full max-w-[650px]">
-        <p className="text-[20px] font-bold">Чат</p>
+        <p className="text-[20px] font-bold font-manrope">Чат</p>
 
         <div className="flex items-end justify-between">
           <p>Нове повідомлення у чаті</p>

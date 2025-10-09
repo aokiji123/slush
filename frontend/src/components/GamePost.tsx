@@ -19,7 +19,7 @@ export const GamePost = ({
 }: ICommentOne) => {
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug/community' })
-  const onHendlerPost = () => {
+  const onHandlerPost = () => {
     if (!isNext) return
     navigate({
       to: '/$slug/community/currentPost/' + _id,
@@ -27,8 +27,13 @@ export const GamePost = ({
     })
   }
   return (
-    <div className="bg-[var(--color-background-15)] rounded-[20px] comment-one-g">
-      {imageTop && <img src={imageTop} className="w-full" />}
+    <div className="bg-[var(--color-background-15)] rounded-[20px] overflow-hidden comment-one-g">
+      {imageTop && (
+        <img
+          src={imageTop}
+          className="w-full h-[220px] object-cover rounded-none"
+        />
+      )}
       <div
         className={`w-full flex flex-col pl-[24px] pr-[24px] pt-[${!isHidUser ? 16 : 1}px] pb-[16px]`}
       >
@@ -61,7 +66,7 @@ export const GamePost = ({
           <div>
             {title && (
               <h2
-                className="text-[var(--color-background)] mb-[12px] text-[20px]"
+                className="text-[var(--color-background)] mb-[12px] text-[20px] font-bold font-manrope"
                 dangerouslySetInnerHTML={{ __html: title }}
               />
             )}
@@ -102,7 +107,7 @@ export const GamePost = ({
             </p>
           </div>
           <div
-            onClick={onHendlerPost}
+            onClick={onHandlerPost}
             className="flex bg-[var(--color-background-8)] rounded-[20px] items-center gap-[10px] pr-[8px]  pl-[8px] pb-[4px] pt-[4px]"
           >
             <svg

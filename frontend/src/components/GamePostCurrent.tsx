@@ -18,7 +18,7 @@ export const GamePostCurrent = ({
 }: ICommentOne) => {
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug/community' })
-  const onHendlerPost = () => {
+  const onHandlerPost = () => {
     if (!isNext) return
     navigate({
       to: '/$slug/community/currentPost/' + _id,
@@ -130,7 +130,7 @@ export const GamePostCurrent = ({
               </p>
             </div>
             <div
-              onClick={onHendlerPost}
+              onClick={onHandlerPost}
               className="flex bg-[var(--color-background-8)] rounded-[20px] items-center gap-[10px] pr-[8px]  pl-[8px] pb-[4px] pt-[4px]"
             >
               <svg

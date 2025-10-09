@@ -106,9 +106,9 @@ function RouteComponent() {
       </div>
 
       <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
-        <p className="text-[32px] font-bold">Комплекти</p>
+        <p className="text-[32px] font-bold font-manrope">Комплекти</p>
         <div className="w-full bg-[var(--color-background-15)] min-h-[475px] rounded-[20px] p-[20px] flex flex-col gap-[20px]">
-          <p className="text-[24px] font-bold">Cyberpunk 2077</p>
+          <p className="text-[24px] font-bold font-manrope">Cyberpunk 2077</p>
           <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
             <p className="text-[20px] font-normal">
               Cyberpunk 2077 — пригодницький рольовий екшн у відкритому світі
@@ -145,7 +145,9 @@ function RouteComponent() {
         </div>
 
         <div className="w-full bg-[var(--color-background-15)] min-h-[265px] rounded-[20px] p-[20px] flex flex-col gap-[20px]">
-          <p className="text-[24px] font-bold">Cyberpunk: Повне видання</p>
+          <p className="text-[24px] font-bold font-manrope">
+            Cyberpunk: Повне видання
+          </p>
           <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
             <div className="text-[20px] font-normal">
               <p className="text-[var(--color-background-25)]">Вміст:</p>
@@ -186,7 +188,7 @@ function RouteComponent() {
         </div>
         <div className="flex flex-col gap-[20px]">
           <div className="flex items-center justify-between">
-            <p className="text-[32px] font-bold">Інші DLC</p>
+            <p className="text-[32px] font-bold font-manrope">Інші DLC</p>
             <p
               className="text-[16px] flex items-center gap-[8px] cursor-pointer"
               onClick={() => navigate({ to: `/${slug}/dlc` })}
@@ -197,24 +199,24 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[8px]">
             <div className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold">
-              <p>Cyberpunk 2077 Bonus Content</p>
+              <p className="font-manrope">Cyberpunk 2077 Bonus Content</p>
               <p>Безкоштовно</p>
             </div>
 
             <div className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold">
-              <p>Cyberpunk 2077 REDmod</p>
+              <p className="font-manrope">Cyberpunk 2077 REDmod</p>
               <p>Безкоштовно</p>
             </div>
 
             <div className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold">
-              <p>Cyberpunk 2077: Ілюзія свободи</p>
+              <p className="font-manrope">Cyberpunk 2077: Ілюзія свободи</p>
               <p>549₴</p>
             </div>
           </div>
 
           <div className="flex items-center justify-end">
             <div className="flex items-center gap-[16px]">
-              <p className="text-[20px] font-normal text-[var(--color-background)]">
+              <p className="text-[20px] font-normal text-[var(--color-background)] font-manrope">
                 549₴
               </p>
               <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
@@ -227,7 +229,7 @@ function RouteComponent() {
 
       <div className="w-full flex flex-col gap-[24px]">
         <div className="flex items-center justify-between">
-          <p className="text-[32px] font-bold text-[var(--color-background)]">
+          <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
             Рецензії
           </p>
           <div className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">

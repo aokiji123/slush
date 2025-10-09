@@ -17,7 +17,7 @@ function RouteComponent() {
       >
         <div className="w-[720px] min-h-[680px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col gap-[64px]">
           <div className="flex flex-col gap-[32px] h-[460px] w-full">
-            <p className="text-[24px] font-bold text-center">
+            <p className="text-[24px] font-bold text-center font-manrope">
               Створіть новий акаунт
             </p>
             <div className="flex flex-col gap-[16px]">

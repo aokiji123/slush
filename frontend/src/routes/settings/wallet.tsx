@@ -16,7 +16,7 @@ function RouteComponent() {
             <p className="text-[20px] text-[var(--color-background-25)]">
               Мій баланс
             </p>
-            <p className="text-[36px] font-bold">1000.50₴</p>
+            <p className="text-[36px] font-bold font-manrope">1000.50₴</p>
           </div>
         </div>
         <div className="flex flex-col gap-[8px]">

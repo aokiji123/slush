@@ -132,7 +132,7 @@ function RouteComponent() {
         <div className="mt-[24px] flex flex-wrap gap-[24px] mb-[256px]">
           {dlcItems.map((item) => {
             return (
-              <div className="w-[49%] min-h-[435px] rounded-[20px] bg-[var(--color-background-15)] overflow-hidden">
+              <div className="w-[49%] min-h-[440px] rounded-[20px] bg-[var(--color-background-15)] overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.name}
@@ -146,10 +146,12 @@ function RouteComponent() {
                       size={22}
                     />
                   </div>
-                  <p className="text-[20px] font-bold">{item.name}</p>
+                  <p className="text-[20px] font-bold font-manrope">
+                    {item.name}
+                  </p>
                   <div className="font-light">
                     <p>До цифрового набору включено:</p>
-                    <p>{item.description}</p>
+                    <p className="line-clamp-2">{item.description}</p>
                   </div>
                   <div className="w-full flex items-center justify-end gap-[16px] mt-[16px]">
                     <button className="h-[48px] flex items-center justify-center text-[20px] font-normal rounded-[20px] text-white cursor-pointer">

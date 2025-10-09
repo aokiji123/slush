@@ -11,10 +11,10 @@ const tabs = [
     name: 'Бібліотека',
     href: '/library',
   },
-  {
-    name: 'Чат',
-    href: '/',
-  },
+  // {
+  //   name: 'Чат',
+  //   href: '/',
+  // },
 ]
 
 export const Header = () => {
@@ -24,8 +24,13 @@ export const Header = () => {
   // TODO: getting real auth state
   const isAuth = Boolean(true)
 
+  const isShopActive =
+    location.pathname === '/' ||
+    (location.pathname !== '/library' && location.pathname !== '/chat')
+  const isLibraryActive = location.pathname === '/library'
+
   return (
-    <header className="h-[90px] bg-[var(--color-background-15)] flex items-center justify-center">
+    <header className="h-[90px] bg-[var(--color-background-15)] flex items-center justify-center relative z-50">
       <div className="flex items-center justify-between container mx-auto h-full">
         <div>
           <h1 className="hidden">Slush</h1>
@@ -42,17 +47,32 @@ export const Header = () => {
           />
         </div>
         <div className="flex items-center gap-[35px] text-white">
-          {tabs.map((tab) => (
-            <p className="hover:text-[var(--color-background-23)] relative font-bold text-[20px] group">
-              <a key={tab.name} className="font-manrope" href={tab.href}>
-                {tab.name}
-              </a>
-              <GoDotFill
-                className="absolute bottom-[-10px] right-1/2 translate-x-1/2 text-[var(--color-background-23)] opacity-0 group-hover:opacity-100"
-                size={12}
-              />
-            </p>
-          ))}
+          {tabs.map((tab) => {
+            const isActive =
+              (tab.href === '/' && isShopActive) ||
+              (tab.href === '/library' && isLibraryActive)
+
+            return (
+              <p
+                key={tab.name}
+                className={`hover:text-[var(--color-background-23)] relative font-bold text-[20px] group ${
+                  isActive ? 'text-[var(--color-background-23)]' : ''
+                }`}
+              >
+                <a className="font-manrope" href={tab.href}>
+                  {tab.name}
+                </a>
+                <GoDotFill
+                  className={`absolute bottom-[-10px] right-1/2 translate-x-1/2 text-[var(--color-background-23)] ${
+                    isActive
+                      ? 'opacity-100'
+                      : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                  size={12}
+                />
+              </p>
+            )
+          })}
         </div>
         {!isAuth ? (
           <div>
@@ -84,15 +104,15 @@ export const Header = () => {
               <div
                 className={`w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] text-[var(--color-background)] rounded-[20px] cursor-pointer
                   ${
-                    location.pathname === '/notifications'
+                    location.pathname === '/settings/notifications'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
                   }`}
-                // onClick={() => {
-                //   navigate({
-                //     to: '/notifications',
-                //   })
-                // }}
+                onClick={() => {
+                  navigate({
+                    to: '/settings/notifications',
+                  })
+                }}
               >
                 <NotificationsIcon className="w-[24px] h-[24px]" />
               </div>

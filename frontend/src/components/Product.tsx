@@ -25,7 +25,7 @@ export const Product = ({ linear }: { linear: boolean }) => {
           className={`w-[306px] h-[88px]`}
         />
         <div className="pl-[20px] p-[32px] w-full text-[var(--color-background)] flex items-center justify-between h-[88px]">
-          <p className="text-[20px] font-bold">{product.name}</p>
+          <p className="text-[20px] font-bold font-manrope">{product.name}</p>
           <div className="flex items-center gap-[8px]">
             {product.salePrice && (
               <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">

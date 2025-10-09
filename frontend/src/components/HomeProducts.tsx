@@ -22,7 +22,7 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
   return (
     <div className="mt-[64px] flex flex-col gap-[16px] relative z-10">
       <div className="flex items-center justify-between gap-[8px] text-white">
-        <p className="text-[32px]">{title}</p>
+        <p className="text-[32px] font-manrope">{title}</p>
         <div
           className="flex items-center gap-[8px] text-[20px] cursor-pointer"
           onClick={() => {
@@ -57,7 +57,9 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
             />
 
             <div className="p-[20px] pt-[16px] text-white text-left">
-              <p className="text-[20px] font-bold">{product.name}</p>
+              <p className="text-[20px] font-bold font-manrope">
+                {product.name}
+              </p>
               <div className="flex items-center gap-[8px]">
                 {product.salePrice && (
                   <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">

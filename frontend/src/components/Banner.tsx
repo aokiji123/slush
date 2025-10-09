@@ -1,7 +1,7 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { Search } from './Search'
 
-export const Banner = ({ isDlc }: { isDlc: boolean }) => {
+export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
   return (
     <div
       className="h-[520px] bg-[var(--color-background-15)] relative bg-cover bg-center z-10"
@@ -22,7 +22,9 @@ export const Banner = ({ isDlc }: { isDlc: boolean }) => {
                     -40%
                   </p>
                   <div className="flex items-center gap-[8px]">
-                    <p className="text-[32px] text-white font-bold">911₴</p>
+                    <p className="text-[32px] text-white font-bold font-manrope">
+                      911₴
+                    </p>
                     <p className="text-[32px] text-[var(--color-background-25)] font-extralight line-through">
                       1519₴
                     </p>
@@ -33,7 +35,7 @@ export const Banner = ({ isDlc }: { isDlc: boolean }) => {
                 </p>
               </div>
               <div className="flex flex-col gap-[8px] text-right w-full max-w-[470px]">
-                <p className="text-[24px] text-white font-bold">
+                <p className="text-[24px] text-white font-bold font-manrope">
                   Avatar: Frontiers of Pandora
                 </p>
                 <p className="text-[16px] text-white font-normal">
@@ -55,7 +57,7 @@ export const Banner = ({ isDlc }: { isDlc: boolean }) => {
             <p className="text-[20px] font-light opacity-60">
               Завантажуваний контент для
             </p>
-            <p className="text-[32px] font-bold">Cyberpunk 2077</p>
+            <p className="text-[32px] font-bold font-manrope">Cyberpunk 2077</p>
           </div>
         )}
       </div>

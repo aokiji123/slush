@@ -67,7 +67,7 @@ function RouteComponent() {
           <Search className="my-[16px] w-full" />
         </div>
 
-        <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px]">
+        <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px] font-manrope">
           Мій список бажаного
         </h2>
 
@@ -122,7 +122,7 @@ function RouteComponent() {
                     <div className="flex flex-col gap-[20px] w-full">
                       <div className="flex flex-col gap-[12px]">
                         <div className="flex items-center justify-between">
-                          <p className="text-[24px] font-bold text-[var(--color-background)]">
+                          <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
                             Baldur's Gate 3
                           </p>
                           <MdClose

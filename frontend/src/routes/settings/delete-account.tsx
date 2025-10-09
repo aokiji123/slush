@@ -8,7 +8,9 @@ function RouteComponent() {
   return (
     <div className="flex items-center justify-center">
       <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
-        <p className="text-[24px] font-bold text-center">Видалення акаунта</p>
+        <p className="text-[24px] font-bold text-center font-manrope">
+          Видалення акаунта
+        </p>
 
         <div className="p-[12px] bg-[#FF6F952E] rounded-[16px]">
           <p>

@@ -50,7 +50,7 @@ function RouteComponent() {
     currentComment?.comments.push({
       name: 'NikaNii',
       text: valueSearch,
-      avatar: '/community/avatar.png',
+      avatar: '/avatar.png',
       _id: Math.random().toString(36).substring(2, 9),
     })
     setValueSearch('')
@@ -177,7 +177,7 @@ function RouteComponent() {
 
         {/* coments list */}
 
-        {commentsList.map((el, i) => (
+        {commentsList.map((el) => (
           <GameComments key={el._id} {...el} onSelected={setCurrentComment} />
         ))}
       </div>
@@ -218,7 +218,7 @@ function RouteComponent() {
                 fillRule="nonzero"
               />
             </svg>
-            <p className="text-[var(--color-night-background)] text-[20px]">
+            <p className="text-[var(--color-night-background)] text-[20px] cursor-pointer">
               Створити пост
             </p>
           </div>
@@ -266,7 +266,7 @@ function RouteComponent() {
           {posts
             .filter((elem) => elem.isComment && elem._id !== id)
             .slice(4)
-            .map((el, i) => (
+            .map((el) => (
               <GamePost key={el._id} {...el} isNext={true} isHidUser={true} />
             ))}
         </div>

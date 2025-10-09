@@ -20,7 +20,7 @@ function RouteComponent() {
         <div className="w-[720px] min-h-[460px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px]">
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
-              <p className="text-[24px] font-bold text-center">
+              <p className="text-[24px] font-bold text-center font-manrope">
                 Забули пароль?
               </p>
               <p className="text-[16px] font-normal text-center">

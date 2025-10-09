@@ -113,7 +113,7 @@ const GamesColumn = ({
           navigate({ to: '/catalog', search: { title } })
         }}
       >
-        <p>{title}</p>
+        <p className="font-manrope">{title}</p>
         <FaChevronRight size={16} />
       </div>
       {products.map((product) => (

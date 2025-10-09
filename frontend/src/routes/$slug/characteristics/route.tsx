@@ -89,13 +89,15 @@ function RouteComponent() {
       <div className="w-[50%] flex items-center justify-between h-[48px] py-[12px] px-[20px] rounded-[20px] bg-[var(--color-background-15)] text-[var(--color-background)] border-1 border-[var(--color-background-16)] mt-[8px]">
         <div className="flex items-center gap-[10px]">
           <FaWindows size={24} />
-          <p className="text-[20px] font-medium">Windows</p>
+          <p className="text-[20px] font-medium font-manrope">Windows</p>
         </div>
         <FaChevronDown />
       </div>
       <div className="w-full flex gap-[64px] mt-[16px] text-[var(--color-background)]">
         <div className="w-[50%] flex flex-col gap-[16px] text-[20px]">
-          <p className="text-[24px] font-medium">Мінімальні налаштування</p>
+          <p className="text-[24px] font-medium font-manrope">
+            Мінімальні налаштування
+          </p>
           {minimalSettings.map((item) => {
             return (
               <div key={item.name} className="flex flex-col">
@@ -106,7 +108,9 @@ function RouteComponent() {
           })}
         </div>
         <div className="w-[50%] flex flex-col gap-[16px] text-[20px]">
-          <p className="text-[24px] font-medium">Рекомендовані налаштування</p>
+          <p className="text-[24px] font-medium font-manrope">
+            Рекомендовані налаштування
+          </p>
           {recommendedSettings.map((item, i) => {
             return (
               <div className="flex flex-col" key={item.name + i}>

@@ -121,7 +121,9 @@ export const SidebarFilter = ({ noSort }: { noSort?: boolean }) => {
       )}
       <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
         <div className="flex items-center justify-between">
-          <p className="text-[20px] text-[var(--color-background)]">Фільтри</p>
+          <p className="text-[20px] text-[var(--color-background)] font-manrope">
+            Фільтри
+          </p>
           <button className="text-[16px] text-[var(--color-background-21)] cursor-pointer">
             Скинути
           </button>

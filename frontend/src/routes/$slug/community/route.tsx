@@ -56,7 +56,7 @@ function RouteComponent() {
   const [postType, setPostType] = useState(rosdils[0])
   const [postTypeSort, setPostTypeSort] = useState(searchSelect[0])
 
-  const onHendlerPost = (post: string) => {
+  const onHandlerPost = (post: string) => {
     setPostType(post)
     setValueSearch('')
   }
@@ -67,7 +67,7 @@ function RouteComponent() {
   return (
     <div className="w-full flex flex-row gap-[24px]">
       <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px] justify-start">
-        <p className="text-[32px] font-bold text-[var(--color-background)]">
+        <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
           Cyberpunk 2077
         </p>
         <div className="w-full flex items-center justify-start mb-[14px]">
@@ -84,7 +84,7 @@ function RouteComponent() {
         <div className="w-full flex flex-col gap-[24px]">
           {posts
             .filter((elem) => elem.type === postType)
-            .map((el, i) => (
+            .map((el) => (
               <GamePost key={el._id} {...el} isNext={true} />
             ))}
         </div>
@@ -113,7 +113,7 @@ function RouteComponent() {
                 fillRule="nonzero"
               />
             </svg>
-            <p className="text-[var(--color-night-background)] text-[20px]">
+            <p className="text-[var(--color-night-background)] text-[20px] cursor-pointer">
               Створити пост
             </p>
           </div>
@@ -179,7 +179,7 @@ function RouteComponent() {
                     onClick={() => setPostTypeSort(el)}
                     key={el.text}
                     className={
-                      'p-[6px] pl-[12px] pr-[12px] rounded-[20px] text-[var(--color-background)] cursor-pointer ' +
+                      'p-[6px] pl-[12px] pr-[12px] rounded-[20px] text-[var(--color-background)] cursor-pointer' +
                       (el.text === postTypeSort.text
                         ? 'bg-[var(--color-background-18)]'
                         : '')
@@ -201,7 +201,7 @@ function RouteComponent() {
             {rosdils.map((text) => (
               <p
                 key={text}
-                onClick={() => onHendlerPost(text)}
+                onClick={() => onHandlerPost(text)}
                 className={
                   'rounded-[12px] p-[9px] pl-[12px] pr-[12px] text-[var(--color-background)] text-search-community ' +
                   (text === postType ? 'bg-[var(--color-background-18)]' : '')
@@ -213,10 +213,6 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      {/* <p className="text-[32px] font-bold text-[var(--color-background)]">
-        Спільнота
-      </p> */}
-      {/* <div className='community'></div> */}
     </div>
   )
 }

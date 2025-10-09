@@ -8,7 +8,9 @@ function RouteComponent() {
   return (
     <div className="flex items-center justify-center">
       <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
-        <p className="text-[24px] font-bold text-center">Зміна паролю</p>
+        <p className="text-[24px] font-bold text-center font-manrope">
+          Зміна паролю
+        </p>
         <div className="bg-[var(--color-background-17)] rounded-[16px] py-[12px] px-[24px]">
           <ul className="flex flex-col gap-[4px] list-disc list-inside">
             <li>Не використовуйте жодного з останніх 5 паролів</li>

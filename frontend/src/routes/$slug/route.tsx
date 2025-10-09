@@ -99,7 +99,7 @@ function RouteComponent() {
               const isActive = isActiveTab(tab.href)
               return (
                 <li
-                  className={`text-[25px] font-bold relative border-b-2 transition-colors ${
+                  className={`text-[25px] font-bold relative border-b-2 transition-colors font-manrope ${
                     isActive
                       ? 'text-[var(--color-background-21)] border-[var(--color-background-21)]'
                       : 'border-transparent hover:text-[var(--color-background-21)] hover:border-[var(--color-background-21)]'
@@ -120,7 +120,7 @@ function RouteComponent() {
           ) : (
             <div className="w-full flex gap-[24px]">
               <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
-                <p className="text-[32px] font-bold text-[var(--color-background)]">
+                <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
                   Cyberpunk 2077
                 </p>
                 <Outlet />
@@ -128,7 +128,7 @@ function RouteComponent() {
 
               <div className="w-[25%] flex flex-col gap-[8px] flex-shrink-0">
                 <div className="flex items-center gap-[15px] justify-end h-[48px]">
-                  <p className="text-[24px] font-bold text-[var(--color-background)]">
+                  <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
                     5.0
                   </p>
                   <div className="flex items-center gap-[8px]">
@@ -151,7 +151,7 @@ function RouteComponent() {
                     className="w-full h-[145px] rounded-[20px] object-cover"
                     loading="lazy"
                   />
-                  <p className="text-[32px] font-bold text-[var(--color-background)]">
+                  <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
                     1 099₴
                   </p>
                   <div className="flex flex-col gap-[12px]">

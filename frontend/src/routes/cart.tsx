@@ -49,7 +49,7 @@ function RouteComponent() {
           <Search className="my-[16px] w-full" />
         </div>
 
-        <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px]">
+        <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px] font-manrope">
           Мій кошик
         </h2>
 
@@ -73,7 +73,9 @@ function RouteComponent() {
                     />
                     <div className="pt-[16px] p-[20px] w-full text-[var(--color-background)] flex flex-col justify-between h-[128px]">
                       <div className="flex flex-row items-center justify-between h-full">
-                        <p className="text-[20px] font-bold">{product.name}</p>
+                        <p className="text-[20px] font-bold font-manrope">
+                          {product.name}
+                        </p>
                         <MdClose className="text-[24px] text-[var(--color-background-25)] cursor-pointer" />
                       </div>
                       <div className="flex flex-row items-center justify-between h-full">
@@ -87,7 +89,7 @@ function RouteComponent() {
                             </p>
                           )}
                           {product.salePrice && (
-                            <p className="text-[24px] font-normal">
+                            <p className="text-[24px] font-normal font-manrope">
                               {product.salePrice}₴
                             </p>
                           )}
@@ -95,7 +97,7 @@ function RouteComponent() {
                             className={`text-[20px] font-normal ${
                               product.salePrice
                                 ? 'line-through text-[var(--color-background-25)] font-extralight'
-                                : ''
+                                : 'font-manrope'
                             }`}
                           >
                             {product.price}₴
@@ -118,7 +120,7 @@ function RouteComponent() {
                   </div>
                   <div className="flex items-center justify-between w-full">
                     <p className="text-[20px] font-normal">Усього</p>
-                    <p className="text-[24px] font-bold">1000₴</p>
+                    <p className="text-[24px] font-bold font-manrope">1000₴</p>
                   </div>
                 </div>
                 <p className="text-[16px] font-normal text-[var(--color-background-25)]">

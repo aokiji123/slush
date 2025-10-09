@@ -10,9 +10,15 @@ import {
 
 type SearchProps = {
   className?: string
+  viewMode?: 'grid' | 'row'
+  onViewModeChange?: (mode: 'grid' | 'row') => void
 }
 
-export const Search = ({ className }: SearchProps) => {
+export const Search = ({
+  className,
+  viewMode = 'grid',
+  onViewModeChange,
+}: SearchProps) => {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -67,8 +73,24 @@ export const Search = ({ className }: SearchProps) => {
             </div>
             <div className="flex items-center gap-[12px]">
               <p className="text-[16px] mr-1">Вид:</p>
-              <GridIcon />
-              <GridRowIcon />
+              <div onClick={() => onViewModeChange?.('grid')}>
+                <GridIcon
+                  className={`cursor-pointer hover:text-[var(--color-background-23)] ${
+                    viewMode === 'grid'
+                      ? 'text-[var(--color-background-23)]'
+                      : ''
+                  }`}
+                />
+              </div>
+              <div onClick={() => onViewModeChange?.('row')}>
+                <GridRowIcon
+                  className={`cursor-pointer hover:text-[var(--color-background-23)] ${
+                    viewMode === 'row'
+                      ? 'text-[var(--color-background-23)]'
+                      : ''
+                  }`}
+                />
+              </div>
             </div>
           </div>
         )}
