@@ -10,7 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameCharacteristic> GameCharacteristics { get; set; }
-    public DbSet<Discount> Discounts { get; set; }
+    // Removed: public DbSet<Discount> Discounts { get; set; }
     // Removed: public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
@@ -24,12 +24,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserRole>()
             .HasKey(ur => new { ur.UserId, ur.RoleId });
 
-        // Настройка связей между сущностями
-        modelBuilder.Entity<Game>()
-            .HasOne(g => g.Discount)
-            .WithMany()
-            .HasForeignKey(g => g.DiscountId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // Removed discount relation; SalePrice drives promotions
 
         modelBuilder.Entity<Game>()
             .HasOne(g => g.GameCharacteristic)

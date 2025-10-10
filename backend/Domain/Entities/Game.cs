@@ -64,10 +64,7 @@ public class Game
 
     public Guid? BaseGameId { get; set; }
 
-    public Guid? DiscountId { get; set; }
-
-    [ForeignKey(nameof(DiscountId))]
-    public Discount? Discount { get; set; }
+    // Removed discount relation; SalePrice is now the source of truth
 
     public List<Review> Reviews { get; set; } = new();
 

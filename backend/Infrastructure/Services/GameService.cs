@@ -61,8 +61,8 @@ public class GameService : IGameService
     {
         return await _db.Set<Game>()
             .AsNoTracking()
-            .Where(g => g.DiscountPercent > 0)
-            .OrderByDescending(g => g.DiscountPercent)
+            .Where(g => g.SalePrice > 0 && g.SalePrice < g.Price)
+            .OrderByDescending(g => (g.Price - g.SalePrice) / g.Price)
             .Select(SelectGameDto())
             .ToListAsync();
     }
@@ -74,7 +74,7 @@ public class GameService : IGameService
         return await _db.Set<Game>()
             .AsNoTracking()
             .OrderByDescending(g => g.Rating)
-            .ThenByDescending(g => g.DiscountPercent)
+            .ThenByDescending(g => g.SalePrice > 0 && g.SalePrice < g.Price ? (g.Price - g.SalePrice) / g.Price : 0)
             .Take(take)
             .Select(SelectGameDto())
             .ToListAsync();
@@ -86,7 +86,7 @@ public class GameService : IGameService
 
         return await _db.Set<Game>()
             .AsNoTracking()
-            .OrderByDescending(g => g.DiscountPercent)
+            .OrderByDescending(g => g.SalePrice > 0 && g.SalePrice < g.Price ? (g.Price - g.SalePrice) / g.Price : 0)
             .ThenByDescending(g => g.Rating)
             .Take(defaultBannerCount)
             .Select(g => new BannerGameDto
@@ -97,8 +97,10 @@ public class GameService : IGameService
                 Image = g.MainImage,
                 Price = (double)g.Price,
                 GameImages = g.Images,
-                OldPrice = g.DiscountPercent > 0 ? (double?)g.Price : null,
-                SalePercent = g.DiscountPercent,
+                OldPrice = g.SalePrice > 0 && g.SalePrice < g.Price ? (double?)g.Price : null,
+                SalePercent = g.SalePrice > 0 && g.SalePrice < g.Price
+                    ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
+                    : 0,
                 SaleEndDate = g.SaleDate
             })
             .ToListAsync();
@@ -110,7 +112,7 @@ public class GameService : IGameService
 
         var query = _db.Set<Game>()
             .AsNoTracking()
-            .Where(g => g.DiscountPercent > 0 || (g.SalePrice > 0 && g.SalePrice < g.Price))
+            .Where(g => g.SalePrice > 0 && g.SalePrice < g.Price)
             .ApplySorting(parameters)
             .ApplyPagination(parameters)
             .Select(SelectGameDto());
@@ -362,7 +364,10 @@ public class GameService : IGameService
             MainImage = g.MainImage,
             Images = g.Images,
             Price = (double)g.Price,
-            DiscountPercent = g.DiscountPercent,
+            // Compute discount percent dynamically from SalePrice if valid
+            DiscountPercent = g.SalePrice > 0 && g.SalePrice < g.Price
+                ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
+                : 0,
             SalePrice = (double)g.SalePrice,
             SaleDate = g.SaleDate,
             Rating = g.Rating,
