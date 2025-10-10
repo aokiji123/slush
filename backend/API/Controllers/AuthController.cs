@@ -107,6 +107,7 @@ public class AuthController : ControllerBase
     {
         try
         {
+            // Remove Captcha check
             await _authService.SendResetPasswordCodeAsync(dto.Email);
             return Ok(new { message = "Password reset code sent" });
         }
@@ -121,8 +122,12 @@ public class AuthController : ControllerBase
     {
         try
         {
+            if (dto.NewPassword != dto.NewPasswordConfirmed)
+            {
+                return BadRequest(new { message = "Passwords do not match" });
+            }
             var result = await _authService.ResetPasswordAsync(dto);
-            if (!result) return BadRequest(new { message = "Invalid code or email" });
+            if (!result) return BadRequest(new { message = "Invalid email or verification issue" });
 
             return Ok(new { message = "Password reset successfully" });
         }
