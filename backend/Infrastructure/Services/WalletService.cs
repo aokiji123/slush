@@ -20,15 +20,15 @@ public class WalletService : IWalletService
 
     public async Task<BalanceDto> GetBalanceAsync(Guid userId)
     {
-        var balance = await _walletRepository.GetOrCreateBalanceAsync(userId);
-        return new BalanceDto { Amount = balance.Amount };
+        var user = await _walletRepository.GetOrCreateUserAsync(userId);
+        return new BalanceDto { Amount = user.Balance };
     }
 
     public async Task<BalanceDto> AddAsync(Guid userId, WalletChangeDto dto)
     {
         if (dto.Amount <= 0) throw new ArgumentException("Amount must be positive");
-        var balance = await _walletRepository.GetOrCreateBalanceAsync(userId);
-        balance.Amount += dto.Amount;
+        var user = await _walletRepository.GetOrCreateUserAsync(userId);
+        user.Balance += dto.Amount;
         await _walletRepository.AddTransactionAsync(new WalletTransaction
         {
             Id = Guid.NewGuid(),
@@ -38,15 +38,15 @@ public class WalletService : IWalletService
             CreatedAt = DateTime.UtcNow
         });
         await _walletRepository.SaveAsync();
-        return new BalanceDto { Amount = balance.Amount };
+        return new BalanceDto { Amount = user.Balance };
     }
 
     public async Task<BalanceDto> SubtractAsync(Guid userId, WalletChangeDto dto)
     {
         if (dto.Amount <= 0) throw new ArgumentException("Amount must be positive");
-        var balance = await _walletRepository.GetOrCreateBalanceAsync(userId);
-        if (balance.Amount < dto.Amount) throw new InvalidOperationException("Insufficient funds");
-        balance.Amount -= dto.Amount;
+        var user = await _walletRepository.GetOrCreateUserAsync(userId);
+        if (user.Balance < dto.Amount) throw new InvalidOperationException("Insufficient funds");
+        user.Balance -= dto.Amount;
         await _walletRepository.AddTransactionAsync(new WalletTransaction
         {
             Id = Guid.NewGuid(),
@@ -56,7 +56,7 @@ public class WalletService : IWalletService
             CreatedAt = DateTime.UtcNow
         });
         await _walletRepository.SaveAsync();
-        return new BalanceDto { Amount = balance.Amount };
+        return new BalanceDto { Amount = user.Balance };
     }
 
     public async Task<PagedResult<TransactionDto>> GetHistoryAsync(Guid userId, WalletQueryParameters parameters)

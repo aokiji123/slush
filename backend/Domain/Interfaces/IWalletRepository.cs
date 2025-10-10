@@ -7,7 +7,7 @@ namespace Domain.Interfaces;
 
 public interface IWalletRepository
 {
-    Task<UserBalance> GetOrCreateBalanceAsync(Guid userId);
+    Task<User> GetOrCreateUserAsync(Guid userId);
     Task AddTransactionAsync(WalletTransaction transaction);
     Task SaveAsync();
     Task<(IReadOnlyList<WalletTransaction> Items, int TotalCount)> GetTransactionsAsync(

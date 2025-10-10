@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251010092340_RemoveUserBalances")]
+    partial class RemoveUserBalances
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -437,9 +440,19 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("AddedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("GameId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
                     b.HasKey("UserId", "GameId");
 
                     b.HasIndex("GameId");
+
+                    b.HasIndex("GameId1");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Wishlists");
                 });
@@ -584,17 +597,25 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>
                 {
-                    b.HasOne("Domain.Entities.Game", "Game")
+                    b.HasOne("Domain.Entities.Game", null)
                         .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "User")
+                    b.HasOne("Domain.Entities.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId1");
+
+                    b.HasOne("Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Game");
 

@@ -19,16 +19,16 @@ public class WalletRepository : IWalletRepository
         _context = context;
     }
 
-    public async Task<UserBalance> GetOrCreateBalanceAsync(Guid userId)
+    public async Task<User> GetOrCreateUserAsync(Guid userId)
     {
-        var balance = await _context.UserBalances.FirstOrDefaultAsync(b => b.UserId == userId);
-        if (balance == null)
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
         {
-            balance = new UserBalance { Id = Guid.NewGuid(), UserId = userId, Amount = 0m };
-            _context.UserBalances.Add(balance);
+            user = new User { Id = userId, Balance = 0m };
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
-        return balance;
+        return user;
     }
 
     public async Task AddTransactionAsync(WalletTransaction transaction)

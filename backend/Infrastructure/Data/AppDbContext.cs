@@ -11,7 +11,6 @@ public class AppDbContext : DbContext
     public DbSet<Game> Games { get; set; }
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
-    public DbSet<UserBalance> UserBalances { get; set; }
     public DbSet<WalletTransaction> WalletTransactions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
@@ -53,11 +52,7 @@ public class AppDbContext : DbContext
             .HasIndex(uog => new { uog.UserId, uog.GameId })
             .IsUnique();
 
-        modelBuilder.Entity<UserBalance>()
-            .HasOne(ub => ub.User)
-            .WithOne()
-            .HasForeignKey<UserBalance>(ub => ub.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Removed UserBalance; using User.Balance as source of truth
 
         modelBuilder.Entity<WalletTransaction>()
             .HasOne(wt => wt.User)
@@ -74,10 +69,6 @@ public class AppDbContext : DbContext
             .Property(uog => uog.PurchasePrice)
             .HasPrecision(10, 2);
 
-        modelBuilder.Entity<UserBalance>()
-            .Property(ub => ub.Amount)
-            .HasPrecision(12, 2);
-
         modelBuilder.Entity<WalletTransaction>()
             .Property(wt => wt.Amount)
             .HasPrecision(12, 2);
@@ -87,13 +78,13 @@ public class AppDbContext : DbContext
             .HasKey(w => new { w.UserId, w.GameId });
 
         modelBuilder.Entity<Wishlist>()
-            .HasOne<User>()
+            .HasOne(w => w.User)
             .WithMany()
             .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Wishlist>()
-            .HasOne<Game>()
+            .HasOne(w => w.Game)
             .WithMany()
             .HasForeignKey(w => w.GameId)
             .OnDelete(DeleteBehavior.Cascade);
