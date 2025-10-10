@@ -10,7 +10,6 @@ public class PaymentDto
     public decimal Sum { get; set; }
     public string Name { get; set; } = string.Empty;
     public DateTime Data { get; set; }
-    public int Page { get; set; }
 }
 
 public class CreatePaymentDto
@@ -19,5 +18,4 @@ public class CreatePaymentDto
     public Guid? GameId { get; set; }
     public decimal Sum { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int Page { get; set; } = 0;
 }

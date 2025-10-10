@@ -31,7 +31,7 @@ public class GameController : ControllerBase
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
     public GameController(
-        IGameService gameService, 
+        IGameService gameService,
         ILogger<GameController> logger,
         IMemoryCache cache)
     {
@@ -40,11 +40,6 @@ public class GameController : ControllerBase
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
-    /// <summary>
-    /// Get a game by its unique identifier
-    /// </summary>
-    /// <param name="id">The unique identifier of the game</param>
-    /// <returns>Returns the game details if found</returns>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,7 +53,6 @@ public class GameController : ControllerBase
         {
             return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
         }
-
         var cacheKey = $"{CacheKeyPrefix}Game_{id}";
         if (_cache.TryGetValue(cacheKey, out GameDto? cachedGame))
         {
@@ -396,43 +390,6 @@ public class GameController : ControllerBase
     }
 
     /// <summary>
-    /// Add a new DLC to a specific game.
-    /// </summary>
-    /// <remarks>
-    /// Validation: Name must be unique per game (case-insensitive). Cannot attach a DLC to another DLC. Genres and Platforms must be non-empty.
-    /// </remarks>
-    /// <param name="dto">DLC creation data.</param>
-    /// <returns>The created DLC as a GameDto, or error details.</returns>
-    /// <response code="200">Returns the new DLC</response>
-    /// <response code="400">Validation or business logic error</response>
-    /// <response code="500">Server error</response>
-    [HttpPost("dlc")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<GameDto>>> AddDlc([FromBody] AddDlcDto dto)
-    {
-        if (dto == null || dto.BaseGameId == Guid.Empty)
-        {
-            return BadRequest(new ApiResponse<GameDto>("Invalid DLC data. Base game ID required."));
-        }
-        try
-        {
-            var created = await _gameService.AddDlcAsync(dto);
-            return Ok(new ApiResponse<GameDto>(created));
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ApiResponse<GameDto>(ex.Message));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to add DLC");
-            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<GameDto>("An error occurred while adding the DLC."));
-        }
-    }
-
-    /// <summary>
     /// Add a review for a game
     /// </summary>
     [HttpPost("review")]
@@ -454,5 +411,83 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<List<ReviewDto>>("GameId required"));
         var reviews = await _gameService.GetReviewsByGameIdAsync(gameId);
         return Ok(new ApiResponse<List<ReviewDto>>(reviews));
+    }
+
+    /// <summary>
+    /// Get game characteristics by game id
+    /// </summary>
+    /// <param name="gameId">The unique identifier of the game</param>
+    /// <returns>Returns the technical characteristics for the specified game</returns>
+    [HttpGet("{gameId:guid}/characteristics")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<GameCharacteristicDto>>> GetCharacteristics([FromRoute] Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<GameCharacteristicDto>("Game ID cannot be empty"));
+        }
+
+        var cacheKey = $"{CacheKeyPrefix}Characteristics_{gameId}";
+        if (_cache.TryGetValue(cacheKey, out GameCharacteristicDto? cachedCharacteristics))
+        {
+            return Ok(new ApiResponse<GameCharacteristicDto>(cachedCharacteristics!));
+        }
+
+        try
+        {
+            var characteristics = await _gameService.GetGameCharacteristicsAsync(gameId);
+
+            if (characteristics is null)
+            {
+                return NotFound(new ApiResponse<GameCharacteristicDto>($"Characteristics for game {gameId} not found"));
+            }
+
+            _cache.Set(cacheKey, characteristics, CacheExpiration);
+
+            return Ok(new ApiResponse<GameCharacteristicDto>(characteristics));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving characteristics for game {GameId}", gameId);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<GameCharacteristicDto>("An error occurred while retrieving game characteristics."));
+        }
+    }
+
+    /// <summary>
+    /// Get all games from the database
+    /// </summary>
+    /// <returns>List of all games</returns>
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetAllGames()
+    {
+        var cacheKey = $"{CacheKeyPrefix}All";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving all games");
+            var result = await _gameService.SearchAsync(null, null, null); // Return all games, unfiltered
+
+            _cache.Set(cacheKey, result, CacheExpiration);
+
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving all games");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving all games."));
+        }
     }
 }

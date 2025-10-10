@@ -95,7 +95,8 @@ public static class QueryableExtensions
                 return query.OrderByDescending(g => g.ReleaseDate);
             case "discount":
             case "discountpercent":
-                return query.OrderByDescending(g => g.DiscountPercent).ThenBy(g => g.Price);
+                return query.OrderByDescending(g => (g.SalePrice > 0 && g.SalePrice < g.Price) ? (g.Price - g.SalePrice) / g.Price : 0)
+                    .ThenBy(g => g.Price);
             case "price_asc":
                 return query.OrderBy(g => g.Price);
             case "price_desc":

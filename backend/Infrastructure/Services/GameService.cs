@@ -61,8 +61,8 @@ public class GameService : IGameService
     {
         return await _db.Set<Game>()
             .AsNoTracking()
-            .Where(g => g.DiscountPercent > 0)
-            .OrderByDescending(g => g.DiscountPercent)
+            .Where(g => g.SalePrice > 0 && g.SalePrice < g.Price)
+            .OrderByDescending(g => (g.Price - g.SalePrice) / g.Price)
             .Select(SelectGameDto())
             .ToListAsync();
     }
@@ -74,7 +74,7 @@ public class GameService : IGameService
         return await _db.Set<Game>()
             .AsNoTracking()
             .OrderByDescending(g => g.Rating)
-            .ThenByDescending(g => g.DiscountPercent)
+            .ThenByDescending(g => g.SalePrice > 0 && g.SalePrice < g.Price ? (g.Price - g.SalePrice) / g.Price : 0)
             .Take(take)
             .Select(SelectGameDto())
             .ToListAsync();
@@ -86,7 +86,7 @@ public class GameService : IGameService
 
         return await _db.Set<Game>()
             .AsNoTracking()
-            .OrderByDescending(g => g.DiscountPercent)
+            .OrderByDescending(g => g.SalePrice > 0 && g.SalePrice < g.Price ? (g.Price - g.SalePrice) / g.Price : 0)
             .ThenByDescending(g => g.Rating)
             .Take(defaultBannerCount)
             .Select(g => new BannerGameDto
@@ -97,8 +97,10 @@ public class GameService : IGameService
                 Image = g.MainImage,
                 Price = (double)g.Price,
                 GameImages = g.Images,
-                OldPrice = g.DiscountPercent > 0 ? (double?)g.Price : null,
-                SalePercent = g.DiscountPercent,
+                OldPrice = g.SalePrice > 0 && g.SalePrice < g.Price ? (double?)g.Price : null,
+                SalePercent = g.SalePrice > 0 && g.SalePrice < g.Price
+                    ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
+                    : 0,
                 SaleEndDate = g.SaleDate
             })
             .ToListAsync();
@@ -110,7 +112,7 @@ public class GameService : IGameService
 
         var query = _db.Set<Game>()
             .AsNoTracking()
-            .Where(g => g.DiscountPercent > 0 || (g.SalePrice > 0 && g.SalePrice < g.Price))
+            .Where(g => g.SalePrice > 0 && g.SalePrice < g.Price)
             .ApplySorting(parameters)
             .ApplyPagination(parameters)
             .Select(SelectGameDto());
@@ -271,79 +273,35 @@ public class GameService : IGameService
             .ToListAsync();
     }
 
-    /// <summary>
-    /// Creates a new DLC for the specified base game.
-    /// Checks: base game exists, base game is not itself a DLC, no duplicate name per base game.
-    /// </summary>
-    public async Task<GameDto> AddDlcAsync(AddDlcDto dto)
+    public async Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId)
     {
-        if (dto == null) throw new ArgumentNullException(nameof(dto));
-        if (dto.BaseGameId == Guid.Empty)
-            throw new ArgumentException("Base game ID required", nameof(dto.BaseGameId));
-        if (dto.ReleaseDate == default)
-            throw new ArgumentException("Release date is required", nameof(dto.ReleaseDate));
-
-        // Check base game exists and is not a DLC
-        var baseGame = await _db.Set<Game>().AsNoTracking().FirstOrDefaultAsync(g => g.Id == dto.BaseGameId);
-        if (baseGame == null)
-            throw new ArgumentException($"Base game with ID {dto.BaseGameId} not found");
-        if (baseGame.IsDlc)
-            throw new ArgumentException("Base game cannot be a DLC (nesting not allowed)");
-
-        // Prevent duplicate DLC names for the same base game (case-insensitive)
-        var nameLower = dto.Name.Trim().ToLower();
-        var dlcExists = await _db.Set<Game>()
+        return await _db.Set<GameCharacteristic>()
             .AsNoTracking()
-            .AnyAsync(g => g.IsDlc && g.BaseGameId == dto.BaseGameId && g.Name.ToLower() == nameLower);
-        if (dlcExists)
-            throw new ArgumentException($"DLC with that name already exists for this base game");
-
-        var slug = dto.Name.Trim().ToLower().Replace(' ', '-');
-        var game = new Game
-        {
-            Id = Guid.NewGuid(),
-            Name = dto.Name.Trim(),
-            Slug = slug,
-            Description = dto.Description?.Trim() ?? string.Empty,
-            Price = dto.Price,
-            MainImage = dto.MainImage?.Trim() ?? string.Empty,
-            Images = dto.Images ?? new List<string>(),
-            DiscountPercent = dto.DiscountPercent,
-            SalePrice = dto.SalePrice,
-            SaleDate = dto.SaleDate,
-            Rating = 0,
-            Genre = dto.Genre ?? new List<string>(),
-            ReleaseDate = dto.ReleaseDate,
-            Developer = dto.Developer?.Trim() ?? string.Empty,
-            Publisher = dto.Publisher?.Trim() ?? string.Empty,
-            Platforms = dto.Platforms ?? new List<string>(),
-            IsDlc = true,
-            BaseGameId = dto.BaseGameId
-        };
-        _db.Set<Game>().Add(game);
-        await _db.SaveChangesAsync();
-        // Project newly created game to GameDto
-        return new GameDto
-        {
-            Id = game.Id,
-            Name = game.Name,
-            Slug = game.Slug,
-            Description = game.Description,
-            Price = (double)game.Price,
-            MainImage = game.MainImage,
-            Images = game.Images,
-            DiscountPercent = game.DiscountPercent,
-            SalePrice = (double)game.SalePrice,
-            SaleDate = game.SaleDate,
-            Rating = game.Rating,
-            Genre = game.Genre,
-            ReleaseDate = game.ReleaseDate,
-            Developer = game.Developer,
-            Publisher = game.Publisher,
-            Platforms = game.Platforms,
-            IsDlc = game.IsDlc,
-            BaseGameId = game.BaseGameId
-        };
+            .Where(gc => gc.GameId == gameId)
+            .Select(gc => new GameCharacteristicDto
+            {
+                GameId = gc.GameId,
+                Platform = gc.Platform,
+                MinVersion = gc.MinVersion,
+                MinCpu = gc.MinCpu,
+                MinRam = gc.MinRam,
+                MinGpu = gc.MinGpu,
+                MinDirectX = gc.MinDirectX,
+                MinMemory = gc.MinMemory,
+                MinAudioCard = gc.MinAudioCard,
+                RecommendedVersion = gc.RecommendedVersion,
+                RecommendedCpu = gc.RecommendedCpu,
+                RecommendedRam = gc.RecommendedRam,
+                RecommendedGpu = gc.RecommendedGpu,
+                RecommendedDirectX = gc.RecommendedDirectX,
+                RecommendedMemory = gc.RecommendedMemory,
+                RecommendedAudioCard = gc.RecommendedAudioCard,
+                Controller = gc.Controller,
+                Additional = gc.Additional,
+                LangAudio = gc.LangAudio,
+                LangText = gc.LangText
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task AddReviewAsync(CreateReviewDto dto)
@@ -406,7 +364,10 @@ public class GameService : IGameService
             MainImage = g.MainImage,
             Images = g.Images,
             Price = (double)g.Price,
-            DiscountPercent = g.DiscountPercent,
+            // Compute discount percent dynamically from SalePrice if valid
+            DiscountPercent = g.SalePrice > 0 && g.SalePrice < g.Price
+                ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
+                : 0,
             SalePrice = (double)g.SalePrice,
             SaleDate = g.SaleDate,
             Rating = g.Rating,

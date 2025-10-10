@@ -25,9 +25,6 @@ public class Payment
     [Required]
     public DateTime Data { get; set; } = DateTime.UtcNow;
 
-    [Required]
-    [Range(0, int.MaxValue)]
-    public int Page { get; set; } = 0;
 
     // Navigation properties
     [ForeignKey(nameof(UserId))]

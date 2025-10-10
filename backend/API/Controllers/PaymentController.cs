@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Models;
 using Application.DTOs;
 using Application.Interfaces;
+using Application.Common.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -103,6 +104,39 @@ public class PaymentController : ControllerBase
         {
             _logger.LogError(ex, "Error retrieving payments for user {UserId}", userId);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IReadOnlyList<PaymentDto>>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Gets payments for a specific user, with pagination and sorting.
+    /// </summary>
+    /// <param name="userId">User identifier</param>
+    /// <param name="query">Paging and sorting query</param>
+    /// <returns>Paged list of user's payments</returns>
+    [HttpGet("{userId:guid}/paged")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<PagedResult<PaymentDto>>>> GetUserPaymentsPagedAsync(Guid userId, [FromQuery] PaymentQueryParameters query)
+    {
+        if (userId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<PagedResult<PaymentDto>>("User ID cannot be empty."));
+        }
+
+        try
+        {
+            var pagedPayments = await _paymentService.GetUserPaymentsPagedAsync(userId, query);
+            var response = new ApiResponse<PagedResult<PaymentDto>>(pagedPayments)
+            {
+                Message = $"Found {pagedPayments.TotalCount} payments for user {userId}."
+            };
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving paged payments for user {UserId}", userId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<PagedResult<PaymentDto>>(UnexpectedErrorMessage));
         }
     }
 }

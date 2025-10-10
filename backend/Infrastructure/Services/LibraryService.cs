@@ -27,33 +27,33 @@ public class LibraryService : ILibraryService
     {
         parameters ??= new LibraryQueryParameters();
 
-        var baseQuery = _context.UserOwnedGames
+        IQueryable<Library> baseQuery = _context.Libraries
             .AsNoTracking()
-            .Where(o => o.UserId == userId);
+            .Where(l => l.UserId == userId);
 
         if (parameters.IsDlc.HasValue)
         {
-            baseQuery = baseQuery.Where(o => o.Game.IsDlc == parameters.IsDlc.Value);
+            baseQuery = baseQuery.Where(l => l.Game.IsDlc == parameters.IsDlc.Value);
         }
 
         baseQuery = baseQuery.ApplySearch(parameters,
-            o => o.Game.Name,
-            o => o.Game.Developer,
-            o => o.Game.Publisher);
+            l => l.Game.Name,
+            l => l.Game.Developer,
+            l => l.Game.Publisher);
 
         var total = await baseQuery.CountAsync();
 
         var items = await baseQuery
-            .Include(o => o.Game)
+            .Include(l => l.Game)
             .ApplySorting(parameters)
             .ApplyPagination(parameters)
-            .Select(o => new OwnedGameDto
+            .Select(l => new OwnedGameDto
             {
-                GameId = o.GameId,
-                Title = o.Game.Title ?? string.Empty,
-                MainImage = o.Game.MainImage ?? string.Empty,
-                PurchasedAt = o.PurchasedAtDateTime,
-                PurchasePrice = (double)o.PurchasePrice
+                GameId = l.GameId,
+                Title = l.Game.Title ?? string.Empty,
+                MainImage = l.Game.MainImage ?? string.Empty,
+                PurchasedAt = l.AddedAt,
+                PurchasePrice = (double)l.Game.Price
             })
             .ToListAsync();
 
@@ -62,7 +62,7 @@ public class LibraryService : ILibraryService
 
     public async Task<bool> IsOwnedAsync(Guid userId, Guid gameId)
     {
-        return await _context.UserOwnedGames.AnyAsync(o => o.UserId == userId && o.GameId == gameId);
+        return await _context.Libraries.AnyAsync(l => l.UserId == userId && l.GameId == gameId);
     }
 
     public async Task<IEnumerable<LibraryGameDto>> GetUserLibraryAsync(Guid userId)

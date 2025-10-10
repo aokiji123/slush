@@ -6,6 +6,8 @@ using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Application.Common.Query;
 
 namespace Infrastructure.Services;
 
@@ -29,8 +31,7 @@ public class PaymentService : IPaymentService
             GameId = dto.GameId,
             Sum = dto.Sum,
             Name = dto.Name,
-            Data = DateTime.UtcNow,
-            Page = dto.Page
+            Data = DateTime.UtcNow
         };
 
         // If no name provided and GameId exists, get game name
@@ -55,8 +56,7 @@ public class PaymentService : IPaymentService
             GameId = createdPayment.GameId,
             Sum = createdPayment.Sum,
             Name = createdPayment.Name,
-            Data = createdPayment.Data,
-            Page = createdPayment.Page
+            Data = createdPayment.Data
         };
     }
 
@@ -71,8 +71,32 @@ public class PaymentService : IPaymentService
             GameId = p.GameId,
             Sum = p.Sum,
             Name = p.Name,
-            Data = p.Data,
-            Page = p.Page
+            Data = p.Data
         }).ToList();
+    }
+
+    public async Task<PagedResult<PaymentDto>> GetUserPaymentsPagedAsync(Guid userId, PaymentQueryParameters query)
+    {
+        var userPaymentsQuery = _paymentRepository.Payments // Expose IQueryable<Payment> from repository
+            .Where(p => p.UserId == userId);
+        
+        // Apply sorting and pagination from Common/Query
+        userPaymentsQuery = userPaymentsQuery.ApplySorting(query);
+
+        var totalCount = await userPaymentsQuery.CountAsync();
+        var (skip, take) = query.Normalize();
+        var pagedPayments = await userPaymentsQuery.Skip(skip).Take(take)
+            .ToListAsync();
+
+        var dtos = pagedPayments.Select(p => new PaymentDto
+        {
+            Id = p.Id,
+            UserId = p.UserId,
+            GameId = p.GameId,
+            Sum = p.Sum,
+            Name = p.Name,
+            Data = p.Data
+        }).ToList();
+        return new PagedResult<PaymentDto>(dtos, query.Page, query.Limit, totalCount);
     }
 }
