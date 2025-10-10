@@ -13,6 +13,7 @@ export default [
         "@typescript-eslint/consistent-type-imports": "off",
         "sort-imports": "off",
         "import/consistent-type-specifier-style": "off",
+        "@typescript-eslint/array-type": "off",
       },
     },
 ];

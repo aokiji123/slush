@@ -9,6 +9,7 @@ import {
 import { useState } from 'react'
 import { HiMenuAlt3 } from 'react-icons/hi'
 import { IoClose } from 'react-icons/io5'
+import { useAuthState } from '@/api/queries/useAuth'
 
 const tabs = [
   {
@@ -29,9 +30,7 @@ export const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
-  // TODO: getting real auth state
-  const isAuth = Boolean(true)
+  const { user, isAuth } = useAuthState()
 
   const isShopActive =
     location.pathname === '/' ||
@@ -137,9 +136,9 @@ export const Header = () => {
                 </div>
                 <div className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer">
                   <img
-                    src="/avatar.png"
+                    src={user?.avatar || '/avatar.png'}
                     alt="avatar"
-                    className="w-[52px] h-[52px] rounded-full"
+                    className="w-[52px] h-[52px] rounded-full object-cover"
                     loading="lazy"
                   />
                 </div>
@@ -228,17 +227,19 @@ export const Header = () => {
             ) : (
               <div className="mt-4 flex flex-col gap-3">
                 {/* User Profile */}
-                <div className="flex items-center gap-3 p-3 bg-[var(--color-background-17)] rounded-[12px]">
+                <div className="flex items-center gap-3 p-3 bg-[var(--color-background-17)] rounded-[12px] overflow-hidden">
                   <img
-                    src="/avatar.png"
+                    src={user?.avatar || '/avatar.png'}
                     alt="avatar"
-                    className="w-[48px] h-[48px] rounded-full"
+                    className="w-[48px] h-[48px] rounded-full object-cover flex-shrink-0"
                     loading="lazy"
                   />
-                  <div className="flex flex-col">
-                    <p className="text-white text-[16px] font-bold">Юзернейм</p>
-                    <p className="text-[var(--color-background-25)] text-[14px]">
-                      user@example.com
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <p className="text-white text-[16px] font-bold truncate">
+                      {user?.username || 'Юзернейм'}
+                    </p>
+                    <p className="text-[var(--color-background-25)] text-[14px] truncate">
+                      {user?.email || 'user@example.com'}
                     </p>
                   </div>
                 </div>

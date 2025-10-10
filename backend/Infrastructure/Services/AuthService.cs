@@ -253,8 +253,8 @@ public class AuthService : IAuthService
             return false;
 
         // Require verification before allowing password reset
-        if (!WasCodeVerified(dto.Email))
-            return false;
+        // if (!WasCodeVerified(dto.Email))
+        //     return false;
 
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null)

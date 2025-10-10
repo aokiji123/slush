@@ -1,94 +1,12 @@
+import {
+  useDiscountedGames,
+  useFreeGames,
+  useGamesWithPriceLessThan,
+  useHitsGames,
+  useNewGames,
+  useRecommendedGames,
+} from '@/api/queries/useGame'
 import { GamesByCategory, HomeProducts } from '@/components'
-
-const specialOffers = [
-  {
-    id: 1,
-    name: 'Cyberpunk 2077',
-    slug: 'cyberpunk-2077',
-    image: '/cyberpunk.png',
-    price: 1099,
-  },
-  {
-    id: 2,
-    name: 'Cyberpunk 2077',
-    slug: 'cyberpunk-2077',
-    image: '/cyberpunk.png',
-    price: 1099,
-    salePrice: 699,
-  },
-  {
-    id: 3,
-    name: 'Cyberpunk 2077',
-    slug: 'cyberpunk-2077',
-    image: '/cyberpunk.png',
-    price: 1099,
-  },
-]
-
-const recommendedGames = [
-  {
-    id: 1,
-    name: 'Ghost of Tsushima',
-    slug: 'ghost-of-tsushima',
-    image: '/ghost-of-tsushima.png',
-    price: 1699,
-    salePrice: 1099,
-  },
-  {
-    id: 2,
-    name: 'Ghost of Tsushima',
-    slug: 'ghost-of-tsushima',
-    image: '/ghost-of-tsushima.png',
-    price: 1699,
-  },
-  {
-    id: 3,
-    name: 'Ghost of Tsushima',
-    slug: 'ghost-of-tsushima',
-    image: '/ghost-of-tsushima.png',
-    price: 1699,
-  },
-  {
-    id: 4,
-    name: 'Ghost of Tsushima',
-    slug: 'ghost-of-tsushima',
-    image: '/ghost-of-tsushima.png',
-    price: 1699,
-    salePrice: 1099,
-  },
-]
-
-const under100 = [
-  {
-    id: 1,
-    name: 'Placid Plastic Duck Simulator',
-    slug: 'placid-plastic-duck-simulator',
-    image: '/duck-simulator.png',
-    price: 60,
-  },
-  {
-    id: 2,
-    name: 'Placid Plastic Duck Simulator',
-    slug: 'placid-plastic-duck-simulator',
-    image: '/duck-simulator.png',
-    price: 60,
-    salePrice: 30,
-  },
-  {
-    id: 3,
-    name: 'Placid Plastic Duck Simulator',
-    slug: 'placid-plastic-duck-simulator',
-    image: '/duck-simulator.png',
-    price: 60,
-  },
-  {
-    id: 4,
-    name: 'Placid Plastic Duck Simulator',
-    slug: 'placid-plastic-duck-simulator',
-    image: '/duck-simulator.png',
-    price: 60,
-  },
-]
 
 const glowCoords = [
   {
@@ -129,10 +47,17 @@ const glowCoords = [
 ]
 
 export const Home = () => {
+  const { data: recommendedGames } = useRecommendedGames() // recommended
+  const { data: under100 } = useGamesWithPriceLessThan(100) // cheaper than 100
+  const { data: freeGames } = useFreeGames() // free
+  const { data: hitsGames } = useHitsGames()
+  const { data: newGames } = useNewGames() // new
+  const { data: discountedGames } = useDiscountedGames() // special offers
+
   return (
     <div className="bg-[var(--color-night-background)] relative px-2 sm:px-0">
       <div className="container mx-auto py-[24px] z-10">
-        <div className="flex items-center gap-[16px] overflow-x-auto scrollbar-hide">
+        {/* <div className="flex items-center gap-[16px] overflow-x-auto scrollbar-hide">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index) => (
             <div
               key={index}
@@ -143,23 +68,27 @@ export const Home = () => {
               }}
             />
           ))}
-        </div>
+        </div> */}
 
         <HomeProducts
-          products={specialOffers}
+          products={discountedGames?.data}
           grid={3}
           title="Особливі пропозиції"
         />
 
         <HomeProducts
-          products={recommendedGames}
+          products={recommendedGames?.data}
           grid={4}
           title="Рекомендовані вам"
         />
 
-        <HomeProducts products={under100} grid={4} title="До 100₴" />
+        <HomeProducts products={under100?.data} grid={4} title="До 100₴" />
 
-        <GamesByCategory />
+        <GamesByCategory
+          hits={hitsGames?.data}
+          newReleases={newGames?.data}
+          freeGames={freeGames?.data}
+        />
       </div>
 
       {glowCoords.map((glow) => (

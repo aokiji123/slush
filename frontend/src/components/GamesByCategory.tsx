@@ -1,8 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { FaChevronRight } from 'react-icons/fa'
+import type { GameData } from '@/api/types/game'
 
 type Product = {
-  id: number
+  id: string
   name: string
   slug: string
   price: number
@@ -10,87 +11,38 @@ type Product = {
   salePrice?: number
 }
 
-const bestSellers = [
-  {
-    id: 1,
-    name: "Baldur's Gate 3",
-    slug: 'baldurs-gate-3',
-    image: '/baldurs-gate-3.png',
-    price: 899,
-  },
-  {
-    id: 2,
-    name: "Baldur's Gate 3",
-    slug: 'baldurs-gate-3',
-    image: '/baldurs-gate-3.png',
-    price: 899,
-    salePrice: 699,
-  },
-  {
-    id: 3,
-    name: "Baldur's Gate 3",
-    slug: 'baldurs-gate-3',
-    image: '/baldurs-gate-3.png',
-    price: 899,
-  },
-]
+type GamesByCategoryProps = {
+  hits?: GameData[]
+  newReleases?: GameData[]
+  freeGames?: GameData[]
+}
 
-const newReleases = [
-  {
-    id: 1,
-    name: 'Destiny 2: The Final Shape',
-    slug: 'destiny-2',
-    image: '/destiny-2.png',
-    price: 1299,
-  },
-  {
-    id: 2,
-    name: 'Destiny 2: The Final Shape',
-    slug: 'destiny-2',
-    image: '/destiny-2.png',
-    price: 1299,
-  },
-  {
-    id: 3,
-    name: 'Destiny 2: The Final Shape',
-    slug: 'destiny-2',
-    image: '/destiny-2.png',
-    price: 1299,
-    salePrice: 999,
-  },
-]
+export const GamesByCategory = ({
+  hits,
+  newReleases,
+  freeGames,
+}: GamesByCategoryProps) => {
+  const transformGames = (games?: GameData[]): Product[] => {
+    if (!games) return []
+    return games.slice(0, 3).map((game) => ({
+      id: game.id,
+      name: game.name,
+      slug: game.slug,
+      price: game.price,
+      image: game.mainImage,
+      salePrice: game.salePrice > 0 ? game.salePrice : undefined,
+    }))
+  }
 
-const freeToPlay = [
-  {
-    id: 1,
-    name: 'Counter-Strike 2',
-    slug: 'cs-2',
-    image: '/cs.png',
-    price: 0,
-  },
-  {
-    id: 2,
-    name: 'Counter-Strike 2',
-    slug: 'cs-2',
-    image: '/cs.png',
-    price: 0,
-  },
-  {
-    id: 3,
-    name: 'Counter-Strike 2',
-    slug: 'cs-2',
-    image: '/cs.png',
-    price: 0,
-  },
-]
-
-export const GamesByCategory = () => {
   return (
     <div className="mt-[64px] mb-[192px] flex flex-col gap-[16px] relative text-white z-10">
       <div className="flex flex-col lg:flex-row items-center justify-center gap-[16px] md:gap-[24px] w-full">
-        <GamesColumn products={bestSellers} title="Хіти продажу" />
-        <GamesColumn products={newReleases} title="Нові релізи" />
-        <GamesColumn products={freeToPlay} title="Безкоштовні" />
+        <GamesColumn products={transformGames(hits)} title="Хіти продажу" />
+        <GamesColumn
+          products={transformGames(newReleases)}
+          title="Нові релізи"
+        />
+        <GamesColumn products={transformGames(freeGames)} title="Безкоштовні" />
       </div>
     </div>
   )
@@ -121,7 +73,7 @@ const GamesColumn = ({
           className="bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer"
           key={product.id}
           onClick={() => {
-            navigate({ to: '/$slug', params: { slug: product.slug } })
+            navigate({ to: '/$slug', params: { slug: product.id } })
           }}
         >
           <img

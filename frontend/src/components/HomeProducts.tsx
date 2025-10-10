@@ -1,23 +1,19 @@
 import { useNavigate } from '@tanstack/react-router'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import type { GameData } from '@/api/types/game'
 
 type Props = {
-  products: Array<Product>
+  products?: GameData[]
   grid?: number
   title: string
 }
 
-type Product = {
-  id: number
-  name: string
-  slug: string
-  price: number
-  image: string
-  salePrice?: number
-}
-
 export const HomeProducts = ({ products, grid = 3, title }: Props) => {
   const navigate = useNavigate()
+
+  if (!products || products.length === 0) {
+    return null
+  }
 
   return (
     <div className="mt-[64px] flex flex-col gap-[16px] relative z-10">
@@ -34,53 +30,53 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
         </div>
       </div>
       <div className="flex items-center gap-[8px] md:gap-[24px] overflow-x-auto scrollbar-hide">
-        {products.map((product) => (
+        {products.map((game) => (
           <div
             className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer flex-shrink-0 ${
               grid === 3
                 ? 'w-[250px] sm:w-[300px] lg:w-[33%]'
                 : 'w-[280px] sm:w-[320px] lg:w-[25%]'
             }`}
-            key={product.id}
+            key={game.id}
             onClick={() => {
               navigate({
                 to: '/$slug',
-                params: { slug: product.slug },
+                params: { slug: game.id },
               })
             }}
           >
             <img
-              src={product.image}
-              alt={product.name}
+              src={game.mainImage}
+              alt={game.name}
               loading="lazy"
               className={`w-full object-cover ${
-                grid === 3 ? 'h-[200px] sm:h-[240px]' : 'h-[300px] sm:h-[400px]'
+                grid === 3
+                  ? 'h-[200px] sm:h-[240px] w-full'
+                  : 'h-[300px] sm:h-[400px] w-full'
               }`}
             />
 
             <div className="p-[20px] pt-[16px] text-white text-left">
               <p className="text-[20px] font-bold font-manrope line-clamp-1">
-                {product.name}
+                {game.name}
               </p>
               <div className="flex items-center gap-[8px]">
-                {product.salePrice && (
+                {game.salePrice > 0 && (
                   <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">
-                    -25%
+                    -{game.discountPercent}%
                   </p>
                 )}
-                {product.salePrice && (
-                  <p className="text-[16px] font-normal">
-                    {product.salePrice}₴
-                  </p>
+                {game.salePrice > 0 && (
+                  <p className="text-[16px] font-normal">{game.salePrice}₴</p>
                 )}
                 <p
                   className={`text-[16px] font-normal ${
-                    product.salePrice
+                    game.salePrice > 0
                       ? 'line-through text-[var(--color-background-25)] font-extralight'
                       : ''
                   }`}
                 >
-                  {product.price}₴
+                  {game.price ? `${game.price}₴` : 'Безкоштовно'}
                 </p>
               </div>
             </div>

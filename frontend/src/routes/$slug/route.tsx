@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa'
 import { Search } from '@/components'
 import { ComplaintIcon, FavoriteIcon, RepostIcon } from '@/icons'
+import { useGameById } from '@/api/queries/useGame'
 
 export const Route = createFileRoute('/$slug')({
   component: RouteComponent,
@@ -39,20 +40,22 @@ const glowCoords = [
   },
 ]
 
-const tabs = [
-  {
-    name: 'Про гру',
-    href: '/cyberpunk-2077',
-  },
-  {
-    name: 'Характеристики',
-    href: '/cyberpunk-2077/characteristics',
-  },
-  {
-    name: 'Спільнота',
-    href: '/cyberpunk-2077/community',
-  },
-]
+function getTabs(slug: string) {
+  return [
+    {
+      name: 'Про гру',
+      href: `/${slug}`,
+    },
+    {
+      name: 'Характеристики',
+      href: `/${slug}/characteristics`,
+    },
+    {
+      name: 'Спільнота',
+      href: `/${slug}/community`,
+    },
+  ]
+}
 
 const nicknames = [
   'karl_vava',
@@ -72,13 +75,31 @@ const TYPE_PAGE = {
 function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { slug } = Route.useParams()
+
+  const { data: game, isLoading, isError } = useGameById(slug)
 
   const currentPage = location.pathname.split('/')[2]
   const locationPath = location.pathname.split('/').slice(0, 3).join('/')
+  const tabs = getTabs(slug)
 
   const isActiveTab = (tabHref: string) => {
+    return locationPath === tabHref
+  }
+
+  if (isLoading) {
     return (
-      locationPath === tabHref.replace('$slug', location.pathname.split('/')[1])
+      <div className="bg-[var(--color-night-background)] relative overflow-hidden min-h-screen flex items-center justify-center">
+        <p className="text-white text-2xl">Завантаження...</p>
+      </div>
+    )
+  }
+
+  if (isError || !game) {
+    return (
+      <div className="bg-[var(--color-night-background)] relative overflow-hidden min-h-screen flex items-center justify-center">
+        <p className="text-white text-2xl">Гру не знайдено</p>
+      </div>
     )
   }
 
@@ -121,7 +142,7 @@ function RouteComponent() {
             <div className="w-full flex gap-[24px]">
               <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
                 <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
-                  Cyberpunk 2077
+                  {game.data.name}
                 </p>
                 <Outlet />
               </div>
@@ -129,15 +150,20 @@ function RouteComponent() {
               <div className="w-[25%] flex flex-col gap-[8px] flex-shrink-0">
                 <div className="flex items-center gap-[15px] justify-end h-[48px]">
                   <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
-                    5.0
+                    {game.data.rating.toFixed(1) || '0.0'}
                   </p>
                   <div className="flex items-center gap-[8px]">
                     {Array.from({ length: 5 }).map((_, index) => {
+                      const isFilled = index < Math.floor(game.data.rating)
                       return (
                         <FaStar
                           key={index}
                           size={24}
-                          className="text-[var(--color-background-10)]"
+                          className={
+                            isFilled
+                              ? 'text-[var(--color-background-10)]'
+                              : 'text-[var(--color-background-25)]'
+                          }
                         />
                       )
                     })}
@@ -146,14 +172,29 @@ function RouteComponent() {
 
                 <div className="flex flex-col gap-[20px]">
                   <img
-                    src="/cyberpunk.png"
-                    alt="cyberpunk"
+                    src={game.data.mainImage}
+                    alt={game.data.name}
                     className="w-full h-[145px] rounded-[20px] object-cover"
                     loading="lazy"
                   />
-                  <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
-                    1 099₴
-                  </p>
+                  <div className="flex items-center gap-[8px]">
+                    {game.data.salePrice && game.data.salePrice > 0 ? (
+                      <>
+                        <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                          {game.data.salePrice}₴
+                        </p>
+                        <p className="text-[24px] font-normal text-[var(--color-background-25)] line-through font-manrope">
+                          {game.data.price}₴
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                        {game.data.price
+                          ? `${game.data.price}₴`
+                          : 'Безкоштовно'}
+                      </p>
+                    )}
+                  </div>
                   <div className="flex flex-col gap-[12px]">
                     <button className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
                       <p>Купити</p>
@@ -184,26 +225,47 @@ function RouteComponent() {
                   <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">Дата виходу</p>
-                      <p className="text-[16px] font-normal">10.12.2020</p>
+                      <p className="text-[16px] font-normal">
+                        {game.data.releaseDate
+                          ? new Date(game.data.releaseDate).toLocaleDateString(
+                              'uk-UA',
+                              {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              },
+                            )
+                          : 'N/A'}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">Розробник</p>
-                      <p className="text-[16px] font-normal">CD PROJECT RED</p>
+                      <p className="text-[16px] font-normal">
+                        {game.data.developer}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">Видавець</p>
-                      <p className="text-[16px] font-normal">Zubaric Inc</p>
+                      <p className="text-[16px] font-normal">
+                        {game.data.publisher}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">Платформи</p>
                       <div className="flex items-center gap-[12px]">
-                        <FaWindows size={24} />
+                        {game.data.platforms.includes('windows') && (
+                          <FaWindows size={24} />
+                        )}
                         <FaApple size={24} />
-                        <FaPlaystation size={24} />
-                        <FaXbox size={24} />
+                        {game.data.platforms.includes('playstation') && (
+                          <FaPlaystation size={24} />
+                        )}
+                        {game.data.platforms.includes('xbox') && (
+                          <FaXbox size={24} />
+                        )}
                       </div>
                     </div>
                   </div>
