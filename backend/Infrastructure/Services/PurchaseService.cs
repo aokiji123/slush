@@ -26,7 +26,7 @@ public class PurchaseService : IPurchaseService
         if (game == null)
             return new PurchaseResultDto { Success = false, Message = "Game not found" };
 
-        var owned = await _context.UserOwnedGames.AnyAsync(o => o.UserId == userId && o.GameId == game.Id);
+        var owned = await _context.Libraries.AnyAsync(l => l.UserId == userId && l.GameId == game.Id);
         if (owned)
             return new PurchaseResultDto { Success = false, Message = "Game already owned" };
 
@@ -45,15 +45,14 @@ public class PurchaseService : IPurchaseService
             return new PurchaseResultDto { Success = false, Message = ex.Message };
         }
 
-        var ownedGame = new UserOwnedGame
+        var libraryEntry = new Library
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             GameId = game.Id,
-            PurchasedAtDateTime = DateTime.UtcNow,
-            PurchasePrice = game.Price
+            AddedAt = DateTime.UtcNow
         };
-        _context.UserOwnedGames.Add(ownedGame);
+        _context.Libraries.Add(libraryEntry);
         await _context.SaveChangesAsync();
 
         var balance = await _walletService.GetBalanceAsync(userId);
@@ -61,7 +60,7 @@ public class PurchaseService : IPurchaseService
         {
             Success = true,
             Message = "Purchase successful",
-            OwnedGameId = ownedGame.Id,
+            OwnedGameId = libraryEntry.Id,
             Balance = balance
         };
     }

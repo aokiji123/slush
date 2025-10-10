@@ -11,7 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Game> Games { get; set; }
     public DbSet<GameCharacteristic> GameCharacteristics { get; set; }
     public DbSet<Discount> Discounts { get; set; }
-    public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
+    // Removed: public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<Library> Libraries { get; set; }
@@ -40,23 +40,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Game>()
             .HasIndex(g => new { g.IsDlc, g.BaseGameId });
 
-        // Убираем составной ключ, так как теперь у UserOwnedGame есть Id
-        modelBuilder.Entity<UserOwnedGame>()
-            .HasOne(uog => uog.User)
-            .WithMany()
-            .HasForeignKey(uog => uog.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<UserOwnedGame>()
-            .HasOne(uog => uog.Game)
-            .WithMany()
-            .HasForeignKey(uog => uog.GameId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Добавляем индекс для уникальности пары UserId-GameId
-        modelBuilder.Entity<UserOwnedGame>()
-            .HasIndex(uog => new { uog.UserId, uog.GameId })
-            .IsUnique();
+        // Removed UserOwnedGame configuration in favor of Library
 
         // Removed UserBalance; using User.Balance as source of truth
 
@@ -65,9 +49,7 @@ public class AppDbContext : DbContext
             .Property(g => g.Price)
             .HasPrecision(10, 2);
 
-        modelBuilder.Entity<UserOwnedGame>()
-            .Property(uog => uog.PurchasePrice)
-            .HasPrecision(10, 2);
+        // Removed UserOwnedGame precision config
 
         
 
