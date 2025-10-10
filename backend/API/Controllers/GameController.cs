@@ -457,4 +457,37 @@ public class GameController : ControllerBase
                 new ApiResponse<GameCharacteristicDto>("An error occurred while retrieving game characteristics."));
         }
     }
+
+    /// <summary>
+    /// Get all games from the database
+    /// </summary>
+    /// <returns>List of all games</returns>
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetAllGames()
+    {
+        var cacheKey = $"{CacheKeyPrefix}All";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
+        {
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving all games");
+            var result = await _gameService.SearchAsync(null, null, null); // Return all games, unfiltered
+
+            _cache.Set(cacheKey, result, CacheExpiration);
+
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving all games");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving all games."));
+        }
+    }
 }
