@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using System.Text;
+using System.Collections.Generic; // Added for List
 
 namespace Infrastructure.Services
 {
@@ -76,15 +77,17 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task SendVerificationEmailAsync(string email, string verificationLink)
+        public async Task SendVerificationEmailAsync(string email, string code)
         {
             var subject = "🔐 Verify Your Email Address";
             var message = BuildEmailTemplate(
                 "Verify Your Email",
                 $"<p>Welcome to Slush! We're excited to have you on board.</p>" +
-                $"<p>To complete your registration, please verify your email address by clicking the button below:</p>",
-                verificationLink,
-                "Verify Email",
+                $"<p>Your verification code is:</p>" +
+                $"<h2 style='text-align:center; font-size: 32px; letter-spacing: 5px; margin: 20px 0;'>{code}</h2>" +
+                $"<p>Enter this code in the app to verify your email address.</p>",
+                null,
+                null,
                 "If you didn't create an account, you can safely ignore this email."
             );
 

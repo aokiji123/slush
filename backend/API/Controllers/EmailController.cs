@@ -41,25 +41,13 @@ public class EmailController : ControllerBase
         try
         {
             var testEmail = "slavik.art.off@gmail.com";
-            
-            // Create a test user or use an existing one
-            var user = await _userManager.FindByEmailAsync(testEmail) ?? new User
-            {
-                UserName = "testuser",
-                Email = testEmail,
-                EmailConfirmed = false
-            };
-            
-            // Generate verification token
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var baseUrl = _configuration["BaseUrl"] ?? "https://localhost:5088";
-            var userIdString = user.Id.ToString();
-            var verificationLink = $"{baseUrl}/api/Email/verify-email?userId={Uri.EscapeDataString(userIdString)}&token={Uri.EscapeDataString(token)}";
-            
-            // Send verification email
-            await _emailService.SendVerificationEmailAsync(testEmail, verificationLink);
-            
-            return Ok("Verification email sent successfully. Please check your inbox at slavik.art.off@gmail.com");
+
+            // Generate a sample code
+            var code = "123456"; // For the test endpoint, or regenerate a more realistic one if needed
+            // Send test verification email
+            await _emailService.SendVerificationEmailAsync(testEmail, code);
+
+            return Ok("Verification test email sent successfully. Please check your inbox at slavik.art.off@gmail.com");
         }
         catch (Exception ex)
         {
