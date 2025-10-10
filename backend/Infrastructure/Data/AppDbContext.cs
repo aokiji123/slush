@@ -17,6 +17,11 @@ public class AppDbContext : DbContext
     public DbSet<Library> Libraries { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<Media> Media { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<PostLike> PostLikes { get; set; }
+    public DbSet<CommentLike> CommentLikes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,5 +112,48 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Review>()
             .HasIndex(r => r.GameId);
+
+        // Community: Posts
+        modelBuilder.Entity<Post>()
+            .HasKey(p => p.Id);
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => p.GameId);
+        modelBuilder.Entity<Post>()
+            .Property(p => p.Title)
+            .HasMaxLength(200);
+        modelBuilder.Entity<Post>()
+            .HasMany(p => p.Media)
+            .WithOne(m => m.Post!)
+            .HasForeignKey(m => m.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Post>()
+            .HasMany(p => p.Comments)
+            .WithOne(c => c.Post!)
+            .HasForeignKey(c => c.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Post>()
+            .HasMany(p => p.Likes)
+            .WithOne(l => l.Post!)
+            .HasForeignKey(l => l.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Community: Media
+        modelBuilder.Entity<Media>()
+            .HasKey(m => m.Id);
+
+        // Community: Comments
+        modelBuilder.Entity<Comment>()
+            .HasKey(c => c.Id);
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.ParentComment)
+            .WithMany(c => c.Replies)
+            .HasForeignKey(c => c.ParentCommentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Community: Likes composite keys
+        modelBuilder.Entity<PostLike>()
+            .HasKey(l => new { l.UserId, l.PostId });
+        modelBuilder.Entity<CommentLike>()
+            .HasKey(l => new { l.UserId, l.CommentId });
     }
 }
