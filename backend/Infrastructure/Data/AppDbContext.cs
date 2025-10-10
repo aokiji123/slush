@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<Library> Libraries { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<FriendRequest> FriendRequests { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Media> Media { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -105,14 +107,60 @@ public class AppDbContext : DbContext
             .Property(p => p.Sum)
             .HasPrecision(12, 2);
 
-        modelBuilder.Entity<Review>()
-            .HasOne(r => r.Game)
-            .WithMany(g => g.Reviews)
+        // Correct Review-Game relationship config
+        modelBuilder.Entity<Game>()
+            .HasMany(g => g.Reviews)
+            .WithOne(r => r.Game)
             .HasForeignKey(r => r.GameId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Review>()
             .HasIndex(r => r.GameId);
 
+        modelBuilder.Entity<FriendRequest>()
+            .HasKey(fr => new { fr.SenderId, fr.ReceiverId });
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(fr => fr.SenderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(fr => fr.ReceiverId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FriendRequest>()
+            .Property(fr => fr.Status)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasIndex(fr => fr.SenderId);
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasIndex(fr => fr.ReceiverId);
+
+        modelBuilder.Entity<Friendship>()
+            .HasKey(f => new { f.User1Id, f.User2Id });
+
+        modelBuilder.Entity<Friendship>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(f => f.User1Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Friendship>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(f => f.User2Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Friendship>()
+            .HasIndex(f => f.User1Id);
+
+        modelBuilder.Entity<Friendship>()
+            .HasIndex(f => f.User2Id);
         // Community: Posts
         modelBuilder.Entity<Post>()
             .HasKey(p => p.Id);

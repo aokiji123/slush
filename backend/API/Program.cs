@@ -68,6 +68,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -78,6 +80,7 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 
 // Add BaseUrl configuration

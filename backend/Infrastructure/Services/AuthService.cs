@@ -171,7 +171,12 @@ public class AuthService : IAuthService
         if (user == null) return false;
 
         var result = await _userManager.ConfirmEmailAsync(user, token);
-        return result.Succeeded;
+        if (result.Succeeded)
+        {
+            SetVerifiedFlag(email);
+            return true;
+        }
+        return false;
     }
 
     public async Task SendVerificationEmailAsync(string email)
@@ -241,61 +246,43 @@ public class AuthService : IAuthService
         if (dto == null) 
             throw new ArgumentNullException(nameof(dto));
 
-        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Code) || string.IsNullOrWhiteSpace(dto.NewPassword))
+        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.NewPassword) || string.IsNullOrWhiteSpace(dto.NewPasswordConfirmed))
             return false;
 
-        // Find the user first to avoid leaking information about account existence
+        if (dto.NewPassword != dto.NewPasswordConfirmed)
+            return false;
+
+        // Require verification before allowing password reset
+        if (!WasCodeVerified(dto.Email))
+            return false;
+
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null)
         {
-            // Don't reveal that the user doesn't exist
             _logger.LogWarning("Password reset attempt for non-existent email: {Email}", dto.Email);
             return false;
         }
 
-        if (!_resetCodes.TryGetValue(dto.Email, out var entry))
-            return false;
-
-        if (DateTime.UtcNow > entry.Expiry)
-        {
-            _resetCodes.TryRemove(dto.Email, out _);
-            _logger.LogWarning("Expired password reset code for {Email}", dto.Email);
-            return false;
-        }
-
-        // Split the stored value to get code and token
-        var parts = entry.Code.Split(':');
-        if (parts.Length != 2 || parts[0] != dto.Code)
-        {
-            _logger.LogWarning("Invalid password reset code for {Email}", dto.Email);
-            return false;
-        }
-
-        var token = parts[1];
-        _resetCodes.TryRemove(dto.Email, out _);
-
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var result = await _userManager.ResetPasswordAsync(user, token, dto.NewPassword);
         if (result.Succeeded)
         {
             _logger.LogInformation("Password reset successful for {Email}", dto.Email);
-            
-            // Optionally sign the user out of all devices
             await _userManager.UpdateSecurityStampAsync(user);
-            
+            RemoveVerifiedFlag(dto.Email);
             return true;
         }
 
         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
         _logger.LogWarning("Failed to reset password for {Email}: {Errors}", dto.Email, errors);
-        
-        // Log specific error details for debugging (but don't expose to client)
-        if (result.Errors.Any(e => e.Code == "PasswordMismatch"))
-        {
-            _logger.LogWarning("Password does not meet complexity requirements for {Email}", dto.Email);
-        }
-        
         return false;
     }
+
+    // In-memory verification flag store for one-time use per email
+    private static readonly ConcurrentDictionary<string, bool> _verifiedEmails = new();
+    public bool WasCodeVerified(string email) => _verifiedEmails.TryGetValue(email, out var ok) && ok;
+    public void SetVerifiedFlag(string email) => _verifiedEmails[email] = true;
+    public void RemoveVerifiedFlag(string email) => _verifiedEmails.TryRemove(email, out _);
 
     private Task<string> GenerateJwtToken(User user)
     {
@@ -333,7 +320,7 @@ public class AuthService : IAuthService
         using var rng = RandomNumberGenerator.Create();
         var randomNumber = new byte[4];
         rng.GetBytes(randomNumber);
-        var code = Math.Abs(BitConverter.ToInt32(randomNumber, 0)) % 900000 + 100000;
-        return code.ToString("D6");
+        var code = Math.Abs(BitConverter.ToInt32(randomNumber, 0)) % 90000 + 10000;
+        return code.ToString("D5");
     }
 }
