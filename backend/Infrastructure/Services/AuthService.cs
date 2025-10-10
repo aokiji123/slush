@@ -136,10 +136,8 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Verification code generated for {Email}", email);
 
-        var baseUrl = _configuration["BaseUrl"] ?? "https://localhost:7020";
-        var verificationLink = $"{baseUrl}/api/auth/verify-email?email={Uri.EscapeDataString(email)}&code={code}";
-        
-        await _emailService.SendVerificationEmailAsync(email, verificationLink);
+        // Send code directly in email, no link
+        await _emailService.SendVerificationEmailAsync(email, code);
     }
 
     public async Task<bool> VerifyCodeAsync(string email, string code)
@@ -185,14 +183,16 @@ public class AuthService : IAuthService
         if (user == null) 
             throw new InvalidOperationException("User not found.");
 
+        // Generate code and new confirmation token, update/reset _resetCodes
+        var code = GenerateSecureCode();
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var baseUrl = _configuration["BaseUrl"] ?? "https://localhost:7020";
-        var verificationLink = $"{baseUrl}/api/auth/verify-email?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
-        
+        var expiry = DateTime.UtcNow.AddMinutes(ResetTokenExpirationMinutes);
+        _resetCodes[email] = ($"{code}:{token}", expiry);
+
         if (string.IsNullOrEmpty(user.Email))
             throw new InvalidOperationException("User email is not set.");
-            
-        await _emailService.SendVerificationEmailAsync(user.Email, verificationLink);
+
+        await _emailService.SendVerificationEmailAsync(user.Email, code);
     }
 
     public async Task<bool> VerifyEmailAsync(string userId, string token)
@@ -276,6 +276,20 @@ public class AuthService : IAuthService
         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
         _logger.LogWarning("Failed to reset password for {Email}: {Errors}", dto.Email, errors);
         return false;
+    }
+
+    public async Task<bool> VerifyResetPasswordCodeAsync(string email, string code)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
+            return false;
+        if (!_resetCodes.TryGetValue(email, out var entry))
+            return false;
+        if (DateTime.UtcNow > entry.Expiry)
+            return false;
+        var parts = entry.Code.Split(':');
+        if (parts.Length != 2 || parts[0] != code)
+            return false;
+        return true; // Only verifies code, doesn't confirm email!
     }
 
     // In-memory verification flag store for one-time use per email

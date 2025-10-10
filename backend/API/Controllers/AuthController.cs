@@ -102,6 +102,22 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("verify-reset-code")]
+    public async Task<IActionResult> VerifyResetCode([FromBody] VerifyCodeDto dto)
+    {
+        try
+        {
+            var isValid = await _authService.VerifyResetPasswordCodeAsync(dto.Email, dto.Code);
+            if (!isValid)
+                return BadRequest(new { message = "Invalid or expired reset code" });
+            return Ok(new { message = "Code is valid for password reset" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
     {
