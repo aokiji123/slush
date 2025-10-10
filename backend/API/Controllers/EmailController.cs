@@ -34,28 +34,6 @@ public class EmailController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpGet("test-verification-email")]
-    [AllowAnonymous]
-    public async Task<IActionResult> TestVerificationEmail()
-    {
-        try
-        {
-            var testEmail = "slavik.art.off@gmail.com";
-
-            // Generate a sample code
-            var code = "123456"; // For the test endpoint, or regenerate a more realistic one if needed
-            // Send test verification email
-            await _emailService.SendVerificationEmailAsync(testEmail, code);
-
-            return Ok("Verification test email sent successfully. Please check your inbox at slavik.art.off@gmail.com");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error sending test email");
-            return StatusCode(500, $"Failed to send test email: {ex.Message}");
-        }
-    }
-
     [HttpGet("verify-email")]
     [AllowAnonymous]
     public async Task<IActionResult> VerifyEmail([FromQuery] string userId, [FromQuery] string token)
