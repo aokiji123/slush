@@ -1,7 +1,6 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -45,12 +44,5 @@ public class WalletController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("history")]
-    public async Task<IActionResult> History([FromQuery] int page = 1, [FromQuery] int limit = 20)
-    {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var parameters = new WalletQueryParameters { Page = page, Limit = limit };
-        var items = await _walletService.GetHistoryAsync(userId, parameters);
-        return Ok(items);
-    }
+// history endpoint removed; payments act as ledger
 }

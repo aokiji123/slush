@@ -11,7 +11,6 @@ public class AppDbContext : DbContext
     public DbSet<Game> Games { get; set; }
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
-    public DbSet<WalletTransaction> WalletTransactions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<Library> Libraries { get; set; }
@@ -54,12 +53,6 @@ public class AppDbContext : DbContext
 
         // Removed UserBalance; using User.Balance as source of truth
 
-        modelBuilder.Entity<WalletTransaction>()
-            .HasOne(wt => wt.User)
-            .WithMany()
-            .HasForeignKey(wt => wt.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // Настройка точности для decimal полей
         modelBuilder.Entity<Game>()
             .Property(g => g.Price)
@@ -69,9 +62,7 @@ public class AppDbContext : DbContext
             .Property(uog => uog.PurchasePrice)
             .HasPrecision(10, 2);
 
-        modelBuilder.Entity<WalletTransaction>()
-            .Property(wt => wt.Amount)
-            .HasPrecision(12, 2);
+        
 
         // Configure Wishlist composite primary key
         modelBuilder.Entity<Wishlist>()
