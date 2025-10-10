@@ -70,4 +70,6 @@ public class Game
     public Discount? Discount { get; set; }
 
     public List<Review> Reviews { get; set; } = new();
+
+    public GameCharacteristic? GameCharacteristic { get; set; }
 }

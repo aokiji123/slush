@@ -271,6 +271,37 @@ public class GameService : IGameService
             .ToListAsync();
     }
 
+    public async Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId)
+    {
+        return await _db.Set<GameCharacteristic>()
+            .AsNoTracking()
+            .Where(gc => gc.GameId == gameId)
+            .Select(gc => new GameCharacteristicDto
+            {
+                GameId = gc.GameId,
+                Platform = gc.Platform,
+                MinVersion = gc.MinVersion,
+                MinCpu = gc.MinCpu,
+                MinRam = gc.MinRam,
+                MinGpu = gc.MinGpu,
+                MinDirectX = gc.MinDirectX,
+                MinMemory = gc.MinMemory,
+                MinAudioCard = gc.MinAudioCard,
+                RecommendedVersion = gc.RecommendedVersion,
+                RecommendedCpu = gc.RecommendedCpu,
+                RecommendedRam = gc.RecommendedRam,
+                RecommendedGpu = gc.RecommendedGpu,
+                RecommendedDirectX = gc.RecommendedDirectX,
+                RecommendedMemory = gc.RecommendedMemory,
+                RecommendedAudioCard = gc.RecommendedAudioCard,
+                Controller = gc.Controller,
+                Additional = gc.Additional,
+                LangAudio = gc.LangAudio,
+                LangText = gc.LangText
+            })
+            .FirstOrDefaultAsync();
+    }
+
     public async Task AddReviewAsync(CreateReviewDto dto)
     {
         var review = new Review

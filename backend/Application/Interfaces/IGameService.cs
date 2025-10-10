@@ -23,6 +23,7 @@ public interface IGameService
     Task<IEnumerable<GameDto>> GetNewAsync();
     Task<IEnumerable<GameDto>> GetFreeAsync();
     Task<IEnumerable<GameDto>> GetDlcsByGameIdAsync(Guid gameId);
+    Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId);
     Task AddReviewAsync(CreateReviewDto dto);
     Task<List<ReviewDto>> GetReviewsByGameIdAsync(Guid gameId);
 }

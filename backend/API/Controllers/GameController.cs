@@ -31,7 +31,7 @@ public class GameController : ControllerBase
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
     public GameController(
-        IGameService gameService, 
+        IGameService gameService,
         ILogger<GameController> logger,
         IMemoryCache cache)
     {
@@ -40,11 +40,6 @@ public class GameController : ControllerBase
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
-    /// <summary>
-    /// Get a game by its unique identifier
-    /// </summary>
-    /// <param name="id">The unique identifier of the game</param>
-    /// <returns>Returns the game details if found</returns>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,7 +53,6 @@ public class GameController : ControllerBase
         {
             return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
         }
-
         var cacheKey = $"{CacheKeyPrefix}Game_{id}";
         if (_cache.TryGetValue(cacheKey, out GameDto? cachedGame))
         {
@@ -417,5 +411,50 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<List<ReviewDto>>("GameId required"));
         var reviews = await _gameService.GetReviewsByGameIdAsync(gameId);
         return Ok(new ApiResponse<List<ReviewDto>>(reviews));
+    }
+
+    /// <summary>
+    /// Get game characteristics by game id
+    /// </summary>
+    /// <param name="gameId">The unique identifier of the game</param>
+    /// <returns>Returns the technical characteristics for the specified game</returns>
+    [HttpGet("{gameId:guid}/characteristics")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<GameCharacteristicDto>>> GetCharacteristics([FromRoute] Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<GameCharacteristicDto>("Game ID cannot be empty"));
+        }
+
+        var cacheKey = $"{CacheKeyPrefix}Characteristics_{gameId}";
+        if (_cache.TryGetValue(cacheKey, out GameCharacteristicDto? cachedCharacteristics))
+        {
+            return Ok(new ApiResponse<GameCharacteristicDto>(cachedCharacteristics!));
+        }
+
+        try
+        {
+            var characteristics = await _gameService.GetGameCharacteristicsAsync(gameId);
+
+            if (characteristics is null)
+            {
+                return NotFound(new ApiResponse<GameCharacteristicDto>($"Characteristics for game {gameId} not found"));
+            }
+
+            _cache.Set(cacheKey, characteristics, CacheExpiration);
+
+            return Ok(new ApiResponse<GameCharacteristicDto>(characteristics));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving characteristics for game {GameId}", gameId);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<GameCharacteristicDto>("An error occurred while retrieving game characteristics."));
+        }
     }
 }

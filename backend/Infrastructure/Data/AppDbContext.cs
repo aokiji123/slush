@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
+    public DbSet<GameCharacteristic> GameCharacteristics { get; set; }
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
@@ -29,6 +30,12 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(g => g.DiscountId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Game>()
+            .HasOne(g => g.GameCharacteristic)
+            .WithOne(gc => gc.Game)
+            .HasForeignKey<GameCharacteristic>(gc => gc.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Game>()
             .HasIndex(g => new { g.IsDlc, g.BaseGameId });
