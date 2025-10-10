@@ -12,12 +12,15 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
     >
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-[1]" />
       <div className="container mx-auto h-full flex flex-col items-center justify-center relative z-[2]">
-        <Search className="absolute top-[16px] left-1/2 -translate-x-1/2 z-[3]" />
+        <Search className="md:px-0 px-[4px] absolute top-[16px] left-1/2 -translate-x-1/2 z-[3]" />
         {!isDlc ? (
           <>
             <div className="flex justify-between items-center gap-[8px] absolute bottom-[56px] left-1/2 -translate-x-1/2 max-w-[1460px] w-full z-[3]">
-              <div className="flex flex-col">
-                <div className="flex  items-center gap-[16px]">
+              <div className="flex flex-col sm:pl-0 pl-[16px]">
+                <p className="md:hidden block text-[24px] text-left text-white font-bold font-manrope">
+                  Avatar: Frontiers of Pandora
+                </p>
+                <div className="flex items-center gap-[16px]">
                   <p className="rounded-[20px] px-[12px] py-[4px] bg-[var(--color-background-10)]">
                     -40%
                   </p>
@@ -35,20 +38,20 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
                 </p>
               </div>
               <div className="flex flex-col gap-[8px] text-right w-full max-w-[470px]">
-                <p className="text-[24px] text-white font-bold font-manrope">
+                <p className="md:block hidden text-[24px] text-white font-bold font-manrope">
                   Avatar: Frontiers of Pandora
                 </p>
-                <p className="text-[16px] text-white font-normal">
+                <p className="md:block hidden text-[16px] text-white font-normal">
                   Avatar: Frontiers of Pandora™ — це пригодницька гра від
                   першої особи, де події розгортаються на західному
                   кордоні.{' '}
                 </p>
               </div>
             </div>
-            <div className="absolute bottom-[16px] -left-5 top-1/2 -translate-y-1/2 z-[3] size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+            <div className="absolute bottom-[16px] left-1 md:-left-0 top-1/2 -translate-y-1/2 z-[3] size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
               <FaChevronLeft className="w-[16px] h-[16px]" />
             </div>
-            <div className="absolute bottom-[16px] -right-5 top-1/2 -translate-y-1/2 z-[3] size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+            <div className="absolute bottom-[16px] right-1 md:-right-0 top-1/2 -translate-y-1/2 z-[3] size-[36px] rounded-full bg-white flex items-center justify-center cursor-pointer">
               <FaChevronRight className="w-[16px] h-[16px]" />
             </div>
           </>

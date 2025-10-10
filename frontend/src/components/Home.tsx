@@ -130,13 +130,13 @@ const glowCoords = [
 
 export const Home = () => {
   return (
-    <div className="bg-[var(--color-night-background)] relative">
+    <div className="bg-[var(--color-night-background)] relative px-2 sm:px-0">
       <div className="container mx-auto py-[24px] z-10">
-        <div className="flex items-center justify-center gap-[16px]">
+        <div className="flex items-center gap-[16px] overflow-x-auto scrollbar-hide">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index) => (
             <div
               key={index}
-              className="w-[140px] h-[70px] rounded-lg cursor-pointer"
+              className="w-[100px] sm:w-[140px] h-[50px] sm:h-[70px] rounded-lg cursor-pointer flex-shrink-0"
               style={{
                 background: `url(/game-image.png) no-repeat center center`,
                 backgroundSize: 'cover',

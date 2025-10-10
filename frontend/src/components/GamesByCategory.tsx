@@ -87,7 +87,7 @@ const freeToPlay = [
 export const GamesByCategory = () => {
   return (
     <div className="mt-[64px] mb-[192px] flex flex-col gap-[16px] relative text-white z-10">
-      <div className="flex items-center justify-center gap-[24px] w-full">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-[16px] md:gap-[24px] w-full">
         <GamesColumn products={bestSellers} title="Хіти продажу" />
         <GamesColumn products={newReleases} title="Нові релізи" />
         <GamesColumn products={freeToPlay} title="Безкоштовні" />
@@ -106,9 +106,9 @@ const GamesColumn = ({
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col gap-[24px] w-[33%]">
+    <div className="flex flex-col gap-[16px] md:gap-[24px] w-full lg:w-[33%]">
       <div
-        className="flex items-center justify-between gap-[8px] text-[24px] cursor-pointer"
+        className="flex items-center justify-between gap-[8px] text-[20px] md:text-[24px] cursor-pointer"
         onClick={() => {
           navigate({ to: '/catalog', search: { title } })
         }}
@@ -127,11 +127,14 @@ const GamesColumn = ({
           <img
             src={product.image}
             alt={product.name}
-            className="max-w-[1000px] w-full h-full max-h-[240px]"
+            loading="lazy"
+            className="w-full h-[180px] sm:h-[200px] md:h-[240px] object-cover"
           />
 
-          <div className="p-[20px] pt-[16px] text-white text-left">
-            <p className="text-[20px] font-bold">{product.name}</p>
+          <div className="p-[16px] md:p-[20px] md:pt-[16px] text-white text-left">
+            <p className="text-[18px] md:text-[20px] font-bold font-manrope line-clamp-1">
+              {product.name}
+            </p>
             <div className="flex items-center gap-[8px]">
               {product.salePrice && (
                 <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">

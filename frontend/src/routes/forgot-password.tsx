@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import ReCAPTCHA from 'react-google-recaptcha'
 
 export const Route = createFileRoute('/forgot-password')({
   component: RouteComponent,
@@ -17,7 +16,7 @@ function RouteComponent() {
           backgroundSize: 'cover',
         }}
       >
-        <div className="w-[720px] min-h-[460px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px]">
+        <div className="w-[720px] min-h-[300px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px] mx-[16px]">
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">
@@ -37,12 +36,6 @@ function RouteComponent() {
                   id="email"
                   placeholder="Введіть ваш email..."
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
-                />
-              </div>
-              <div className="flex justify-center mt-[16px]">
-                <ReCAPTCHA
-                  sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-                  theme="light"
                 />
               </div>
             </div>

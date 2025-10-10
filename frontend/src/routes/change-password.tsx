@@ -16,7 +16,7 @@ function RouteComponent() {
           backgroundSize: 'cover',
         }}
       >
-        <div className="w-[720px] min-h-[410px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px]">
+        <div className="w-full max-w-[720px] min-h-[410px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col items-center gap-[64px] mx-[16px]">
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">

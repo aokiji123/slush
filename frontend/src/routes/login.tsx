@@ -15,7 +15,7 @@ function RouteComponent() {
           backgroundSize: 'cover',
         }}
       >
-        <div className="w-[720px] min-h-[460px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col gap-[64px]">
+        <div className="w-[720px] min-h-[460px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col gap-[24px] sm:gap-[64px] mx-[16px]">
           <div className="flex flex-col gap-[32px] w-full">
             <p className="text-[24px] font-bold text-center font-manrope">
               Авторизуйтесь, щоб продовжити
@@ -43,7 +43,7 @@ function RouteComponent() {
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex sm:flex-row flex-col items-center sm:justify-between justify-center sm:gap-0 gap-[16px] sm:mt-0 mt-[16px]">
                 <div className="flex items-center gap-[12px]">
                   <CustomCheckbox id="checkbox" />
                   <label htmlFor="checkbox" className="text-[16px] font-light">

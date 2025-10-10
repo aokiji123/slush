@@ -25,23 +25,23 @@ export const Search = ({
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
       <div
-        className="bg-[var(--color-background-16)] h-[52px] flex-1 rounded-[20px] flex items-center justify-between"
+        className="bg-[var(--color-background-16)] h-[52px] flex-1 rounded-[20px] flex sm:gap-[8px] gap-[0px] items-center justify-between"
         style={{
           padding: '4px 26px 4px 4px',
         }}
       >
-        <div className="w-[590px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative">
+        <div className="w-[190px] sm:w-[320px] lg:w-[590px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative">
           <input
             type="text"
             placeholder="Пошук у крамниці..."
             className="bg-transparent text-white text-[16px] h-[44px] w-full rounded-[20px] outline-none placeholder:text-[#CCF8FFA6] placeholder:text-[16px]"
           />
-          <SearchIcon className="absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
+          <SearchIcon className="sm:block hidden absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
         </div>
         {location.pathname !== '/library' ? (
-          <div className="flex items-center gap-[26px]">
+          <div className="flex items-center sm:gap-[26px] gap-[16px]">
             <p
-              className={`text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              className={`text-[]14px sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
                 location.pathname === '/catalog'
                   ? 'text-[var(--color-background-23)]'
                   : 'text-white'
@@ -53,7 +53,7 @@ export const Search = ({
               Каталог
             </p>
             <p
-              className={`text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              className={`text-[14px] sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
                 location.pathname === '/new'
                   ? 'text-[var(--color-background-23)]'
                   : 'text-white'
@@ -96,7 +96,7 @@ export const Search = ({
         )}
       </div>
       {location.pathname !== '/library' && (
-        <>
+        <div className="sm:flex hidden items-center gap-[8px]">
           <div
             className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
               location.pathname === '/wishlist'
@@ -133,7 +133,7 @@ export const Search = ({
               }`}
             />
           </div>
-        </>
+        </div>
       )}
     </div>
   )
