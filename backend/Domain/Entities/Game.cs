@@ -64,8 +64,6 @@ public class Game
 
     public Guid? BaseGameId { get; set; }
 
-    // Removed discount relation; SalePrice is now the source of truth
-
     public List<Review> Reviews { get; set; } = new();
 
     public GameCharacteristic? GameCharacteristic { get; set; }
