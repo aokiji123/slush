@@ -1,1 +1,0 @@
-// Removed in favor of using User.Balance as the single source of truth

@@ -10,8 +10,6 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameCharacteristic> GameCharacteristics { get; set; }
-    // Removed: public DbSet<Discount> Discounts { get; set; }
-    // Removed: public DbSet<UserOwnedGame> UserOwnedGames { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<Library> Libraries { get; set; }
@@ -31,8 +29,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserRole>()
             .HasKey(ur => new { ur.UserId, ur.RoleId });
 
-        // Removed discount relation; SalePrice drives promotions
-
         modelBuilder.Entity<Game>()
             .HasOne(g => g.GameCharacteristic)
             .WithOne(gc => gc.Game)
@@ -42,16 +38,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Game>()
             .HasIndex(g => new { g.IsDlc, g.BaseGameId });
 
-        // Removed UserOwnedGame configuration in favor of Library
-
-        // Removed UserBalance; using User.Balance as source of truth
-
         // Настройка точности для decimal полей
         modelBuilder.Entity<Game>()
             .Property(g => g.Price)
             .HasPrecision(10, 2);
-
-        // Removed UserOwnedGame precision config
 
         
 
