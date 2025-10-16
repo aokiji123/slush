@@ -42,9 +42,9 @@ export const GameComment = ({ text, stars }: GameCommentProps) => {
             </div>
           </div>
         </div>
-        <button className="text-[var(--color-background)]">
+        {/* <button className="text-[var(--color-background)]">
           <BsThreeDots size={24} className="cursor-pointer" />
-        </button>
+        </button> */}
       </div>
       <p className="text-[20px] font-normal">{text}</p>
       <div className="flex items-center justify-between">
@@ -53,10 +53,10 @@ export const GameComment = ({ text, stars }: GameCommentProps) => {
             <FavoriteIcon className="text-[var(--color-background-10)]" />
             <p>2.5k</p>
           </div>
-          <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
+          {/* <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
             <CommentsIcon />
             <p>2.5k</p>
-          </div>
+          </div> */}
         </div>
         <p className="text-[16px] font-normal text-[var(--color-background-25)]">
           21.02.2023

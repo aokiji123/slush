@@ -30,3 +30,37 @@ export type GamesListResponse = {
   message: string
   data: GameData[]
 }
+
+export type CreateReviewRequest = {
+  gameId: string
+  username: string
+  content: string
+  rating: number
+}
+
+export type GameCharacteristics = {
+  success: boolean
+  message: string
+  data: {
+    gameId: string
+    platform: string
+    minVersion: string
+    minCpu: string
+    minRam: string
+    minGpu: string
+    minDirectX: string
+    minMemory: string
+    minAudioCard: string
+    recommendedVersion: string
+    recommendedCpu: string
+    recommendedRam: string
+    recommendedGpu: string
+    recommendedDirectX: string
+    recommendedMemory: string
+    recommendedAudioCard: string
+    controller: string
+    additional: string
+    langAudio: string[]
+    langText: string[]
+  }
+}

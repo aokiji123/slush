@@ -134,7 +134,14 @@ export const Header = () => {
                 >
                   <NotificationsIcon className="w-[24px] h-[24px]" />
                 </div>
-                <div className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer">
+                <div
+                  className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer"
+                  onClick={() => {
+                    navigate({
+                      to: '/settings',
+                    })
+                  }}
+                >
                   <img
                     src={user?.avatar || '/avatar.png'}
                     alt="avatar"
@@ -148,7 +155,7 @@ export const Header = () => {
 
           {/* Mobile Burger Menu */}
           <button
-            className="md:hidden w-[40px] h-[40px] flex items-center justify-center text-white"
+            className="md:hidden w-[40px] h-[40px] flex items-center justify-center text-white cursor-pointer"
             onClick={() => setIsMobileMenuOpen(true)}
             aria-label="Open menu"
           >
@@ -180,7 +187,7 @@ export const Header = () => {
             />
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-[40px] h-[40px] flex items-center justify-center text-white"
+              className="w-[40px] h-[40px] flex items-center justify-center text-white cursor-pointer"
               aria-label="Close menu"
             >
               <IoClose size={28} />
@@ -227,7 +234,14 @@ export const Header = () => {
             ) : (
               <div className="mt-4 flex flex-col gap-3">
                 {/* User Profile */}
-                <div className="flex items-center gap-3 p-3 bg-[var(--color-background-17)] rounded-[12px] overflow-hidden">
+                <div
+                  className="flex items-center gap-3 p-3 bg-[var(--color-background-17)] rounded-[12px] overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    navigate({
+                      to: '/settings',
+                    })
+                  }}
+                >
                   <img
                     src={user?.avatar || '/avatar.png'}
                     alt="avatar"
@@ -246,7 +260,7 @@ export const Header = () => {
 
                 {/* Settings & Notifications */}
                 <button
-                  className={`flex items-center gap-3 p-3 rounded-[12px] transition-colors ${
+                  className={`flex items-center gap-3 p-3 rounded-[12px] transition-colors cursor-pointer ${
                     location.pathname === '/settings'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-white hover:bg-[var(--color-background-16)]'
@@ -258,7 +272,7 @@ export const Header = () => {
                 </button>
 
                 <button
-                  className={`flex items-center gap-3 p-3 rounded-[12px] transition-colors ${
+                  className={`flex items-center gap-3 p-3 rounded-[12px] transition-colors cursor-pointer ${
                     location.pathname === '/settings/notifications'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-white hover:bg-[var(--color-background-16)]'

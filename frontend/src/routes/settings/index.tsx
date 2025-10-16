@@ -50,7 +50,7 @@ function RouteComponent() {
                 alt="Avatar"
                 className="w-full h-full object-cover rounded-full"
               />
-              <div className="bg-[var(--color-background-16)] rounded-full p-[8px] absolute bottom-0 right-[30px] cursor-pointer">
+              <div className="bg-[var(--color-background-16)] rounded-full p-[8px] absolute bottom-0 right-[10px] cursor-pointer">
                 <ChangeImageIcon className="text-white" />
               </div>
             </div>

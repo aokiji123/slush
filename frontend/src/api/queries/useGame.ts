@@ -1,6 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '..'
-import type { Game, GamesListResponse } from '../types/game'
+import type {
+  CreateReviewRequest,
+  Game,
+  GameCharacteristics,
+  GamesListResponse,
+} from '../types/game'
 
 async function getGameById(id: string): Promise<Game> {
   const { data } = await axiosInstance.get(`/game/${id}`)
@@ -44,14 +49,21 @@ async function getFreeGames(): Promise<GamesListResponse> {
   return data
 }
 
-export function useGameById(id: string) {
-  return useQuery({
-    queryKey: ['game', id],
-    queryFn: () => getGameById(id),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 3,
-    refetchOnWindowFocus: false,
-  })
+async function getGameReviews(id: string): Promise<Game> {
+  const { data } = await axiosInstance.get(`/game/${id}/reviews`)
+  return data
+}
+
+async function createGameReview(review: CreateReviewRequest): Promise<void> {
+  const { data } = await axiosInstance.post('/game/review', review)
+  return data
+}
+
+async function getGameCharacteristics(
+  id: string,
+): Promise<GameCharacteristics> {
+  const { data } = await axiosInstance.get(`/game/${id}/characteristics`)
+  return data
 }
 
 export function useNewGames() {
@@ -78,6 +90,16 @@ export function useRecommendedGames() {
   return useQuery({
     queryKey: ['recommendedGames'],
     queryFn: () => getRecommendedGames(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useGameById(id: string) {
+  return useQuery({
+    queryKey: ['game', id],
+    queryFn: () => getGameById(id),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,
@@ -121,5 +143,31 @@ export function useGameDlcs(id: string) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,
+  })
+}
+
+export function useGameReviews(id: string) {
+  return useQuery({
+    queryKey: ['gameReviews', id],
+    queryFn: () => getGameReviews(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useGameCharacteristics(id: string) {
+  return useQuery({
+    queryKey: ['gameCharacteristics', id],
+    queryFn: () => getGameCharacteristics(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useCreateGameReview() {
+  return useMutation({
+    mutationFn: (review: CreateReviewRequest) => createGameReview(review),
   })
 }
