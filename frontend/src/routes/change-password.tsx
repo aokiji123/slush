@@ -3,7 +3,7 @@ import {
   useNavigate,
   useLocation,
 } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useResetPassword } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/change-password')({
