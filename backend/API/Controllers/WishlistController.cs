@@ -26,25 +26,25 @@ public class WishlistController : ControllerBase
     }
 
     [HttpGet("{userId:guid}")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<Guid>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<Guid>>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<Guid>>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<Guid>>>> GetWishlist([FromRoute, Required] Guid userId)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetWishlist([FromRoute, Required] Guid userId)
     {
         if (userId == Guid.Empty)
         {
-            return BadRequest(new ApiResponse<IEnumerable<Guid>>("User ID cannot be empty."));
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("User ID cannot be empty."));
         }
 
         try
         {
-            var gameIds = await _wishlistService.GetWishlistGameIdsAsync(userId);
-            return Ok(new ApiResponse<IEnumerable<Guid>>(gameIds));
+            var games = await _wishlistService.GetWishlistGamesAsync(userId);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(games));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to retrieve wishlist for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<Guid>>("Unable to retrieve wishlist."));
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<GameDto>>("Unable to retrieve wishlist."));
         }
     }
 
