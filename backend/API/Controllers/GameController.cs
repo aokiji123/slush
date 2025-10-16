@@ -389,29 +389,6 @@ public class GameController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Add a review for a game
-    /// </summary>
-    [HttpPost("review")]
-    public async Task<IActionResult> AddReview([FromBody] CreateReviewDto dto)
-    {
-        if (dto == null || dto.GameId == Guid.Empty)
-            return BadRequest("GameId is required");
-        await _gameService.AddReviewAsync(dto);
-        return Ok();
-    }
-
-    /// <summary>
-    /// Get all reviews for a game
-    /// </summary>
-    [HttpGet("{gameId}/reviews")]
-    public async Task<ActionResult<ApiResponse<List<ReviewDto>>>> GetReviews(Guid gameId)
-    {
-        if (gameId == Guid.Empty)
-            return BadRequest(new ApiResponse<List<ReviewDto>>("GameId required"));
-        var reviews = await _gameService.GetReviewsByGameIdAsync(gameId);
-        return Ok(new ApiResponse<List<ReviewDto>>(reviews));
-    }
 
     /// <summary>
     /// Get game characteristics by game id

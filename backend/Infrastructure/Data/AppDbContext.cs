@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<Library> Libraries { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<ReviewLike> ReviewLikes { get; set; }
     public DbSet<FriendRequest> FriendRequests { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
     public DbSet<Post> Posts { get; set; }
@@ -97,14 +98,43 @@ public class AppDbContext : DbContext
             .Property(p => p.Sum)
             .HasPrecision(12, 2);
 
-        // Correct Review-Game relationship config
-        modelBuilder.Entity<Game>()
-            .HasMany(g => g.Reviews)
-            .WithOne(r => r.Game)
+        // Review-User relationship config
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Review-Game relationship config
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Game)
+            .WithMany(g => g.Reviews)
             .HasForeignKey(r => r.GameId)
             .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Review>()
             .HasIndex(r => r.GameId);
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => r.UserId);
+
+        // ReviewLike configuration
+        modelBuilder.Entity<ReviewLike>()
+            .HasKey(rl => new { rl.UserId, rl.ReviewId });
+
+        modelBuilder.Entity<ReviewLike>()
+            .HasOne(rl => rl.User)
+            .WithMany()
+            .HasForeignKey(rl => rl.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ReviewLike>()
+            .HasOne(rl => rl.Review)
+            .WithMany()
+            .HasForeignKey(rl => rl.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ReviewLike>()
+            .HasIndex(rl => rl.ReviewId);
 
         modelBuilder.Entity<FriendRequest>()
             .HasKey(fr => new { fr.SenderId, fr.ReceiverId });

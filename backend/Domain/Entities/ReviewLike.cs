@@ -3,29 +3,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities;
 
-public class Review
+public class ReviewLike
 {
     public Guid Id { get; set; }
 
     [Required]
-    public Guid GameId { get; set; }
+    public Guid ReviewId { get; set; }
 
     [Required]
     public Guid UserId { get; set; }
 
-    [Required, MaxLength(2000)]
-    public string Content { get; set; } = null!;
-
-    [Range(1, 5)]
-    public int Rating { get; set; }
-
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Range(0, int.MaxValue)]
-    public int Likes { get; set; } = 0;
-
     // Navigation properties
-    public Game Game { get; set; } = null!;
+    public Review Review { get; set; } = null!;
     public User User { get; set; } = null!;
 }
