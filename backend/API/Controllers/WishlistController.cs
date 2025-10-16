@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -45,6 +47,85 @@ public class WishlistController : ControllerBase
         {
             _logger.LogError(ex, "Failed to retrieve wishlist for user {UserId}", userId);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<GameDto>>("Unable to retrieve wishlist."));
+        }
+    }
+
+    /// <summary>
+    /// Get wishlist games with query parameters for filtering, sorting, and pagination
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="page">Page number (1-based)</param>
+    /// <param name="limit">Items per page</param>
+    /// <param name="sortBy">Sort field and direction (e.g., "Price:desc", "Name:asc")</param>
+    /// <param name="sortDirection">Sort direction (asc/desc) - used when sortBy has no inline direction</param>
+    /// <param name="search">Search term for game name, developer, publisher, or description</param>
+    /// <param name="genres">Filter by genres (comma-separated)</param>
+    /// <param name="platforms">Filter by platforms (comma-separated)</param>
+    /// <param name="minPrice">Minimum price filter</param>
+    /// <param name="maxPrice">Maximum price filter</param>
+    /// <param name="onSale">Filter by games on sale</param>
+    /// <param name="isDlc">Filter by DLC games</param>
+    /// <returns>Paginated list of wishlist games</returns>
+    [HttpGet("{userId:guid}/query")]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<PagedResult<GameDto>>>> GetWishlistWithQuery(
+        [FromRoute, Required] Guid userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int limit = 20,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = null,
+        [FromQuery] string? search = null,
+        [FromQuery] string? genres = null,
+        [FromQuery] string? platforms = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] bool? onSale = null,
+        [FromQuery] bool? isDlc = null)
+    {
+        if (userId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<PagedResult<GameDto>>("User ID cannot be empty."));
+        }
+
+        try
+        {
+            var parameters = new WishlistQueryParameters
+            {
+                Page = page,
+                Limit = limit,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Search = search,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                OnSale = onSale,
+                IsDlc = isDlc
+            };
+
+            // Parse comma-separated values
+            if (!string.IsNullOrWhiteSpace(genres))
+            {
+                parameters.Genres = genres.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(g => g.Trim())
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(platforms))
+            {
+                parameters.Platforms = platforms.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .ToList();
+            }
+
+            var result = await _wishlistService.GetWishlistGamesAsync(userId, parameters);
+            return Ok(new ApiResponse<PagedResult<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve paginated wishlist for user {UserId}", userId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<PagedResult<GameDto>>("Unable to retrieve wishlist."));
         }
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
@@ -38,6 +39,76 @@ public class WishlistService : IWishlistService
             .Select(w => w.Game)
             .Select(SelectGameDto())
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<GameDto>> GetWishlistGamesAsync(Guid userId, WishlistQueryParameters parameters)
+    {
+        parameters ??= new WishlistQueryParameters();
+
+        IQueryable<Wishlist> baseQuery = _db.Wishlists
+            .AsNoTracking()
+            .Where(w => w.UserId == userId)
+            .Include(w => w.Game);
+
+        // Apply filters
+        if (parameters.Genres?.Count > 0)
+        {
+            var genresFilter = parameters.Genres;
+            baseQuery = baseQuery.Where(w => w.Game.Genre.Any(genre => genresFilter.Contains(genre)));
+        }
+
+        if (parameters.Platforms?.Count > 0)
+        {
+            var platformsFilter = parameters.Platforms;
+            baseQuery = baseQuery.Where(w => w.Game.Platforms.Any(platform => platformsFilter.Contains(platform)));
+        }
+
+        if (parameters.MinPrice.HasValue)
+        {
+            baseQuery = baseQuery.Where(w => w.Game.Price >= parameters.MinPrice.Value);
+        }
+
+        if (parameters.MaxPrice.HasValue)
+        {
+            baseQuery = baseQuery.Where(w => w.Game.Price <= parameters.MaxPrice.Value);
+        }
+
+        if (parameters.OnSale.HasValue)
+        {
+            if (parameters.OnSale.Value)
+            {
+                baseQuery = baseQuery.Where(w => w.Game.DiscountPercent > 0 || (w.Game.SalePrice > 0 && w.Game.SalePrice < w.Game.Price));
+            }
+            else
+            {
+                baseQuery = baseQuery.Where(w => w.Game.DiscountPercent == 0 && (w.Game.SalePrice == 0 || w.Game.SalePrice >= w.Game.Price));
+            }
+        }
+
+        if (parameters.IsDlc.HasValue)
+        {
+            baseQuery = baseQuery.Where(w => w.Game.IsDlc == parameters.IsDlc.Value);
+        }
+
+        // Apply search
+        baseQuery = baseQuery.ApplySearch(parameters,
+            w => w.Game.Name,
+            w => w.Game.Developer,
+            w => w.Game.Publisher,
+            w => w.Game.Description);
+
+        // Get total count before pagination
+        var total = await baseQuery.CountAsync();
+
+        // Apply sorting and pagination
+        var items = await baseQuery
+            .ApplySorting(parameters)
+            .ApplyPagination(parameters)
+            .Select(w => w.Game)
+            .Select(SelectGameDto())
+            .ToListAsync();
+
+        return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
     }
 
     public async Task<bool> AddToWishlistAsync(Guid userId, Guid gameId)
