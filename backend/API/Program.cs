@@ -70,6 +70,8 @@ builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+builder.Services.AddScoped<ReviewRepository>();
+builder.Services.AddScoped<ReviewLikeRepository>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -80,9 +82,13 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
+// TODO: Add storage service when AWS packages are available
+// builder.Services.AddScoped<IStorageService, R2StorageService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+// TODO: Register AWS S3 client for R2 when packages are available
 
 // Add BaseUrl configuration
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
@@ -126,6 +132,13 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
+    // Add support for file uploads
+    options.MapType<IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
@@ -144,7 +157,8 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowCredentials()
+            .SetPreflightMaxAge(TimeSpan.FromSeconds(2520));
     });
 });
 

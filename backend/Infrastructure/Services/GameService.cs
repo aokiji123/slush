@@ -16,12 +16,10 @@ namespace Infrastructure.Services;
 public class GameService : IGameService
 {
     private readonly AppDbContext _db;
-    private readonly ReviewRepository _reviewRepo;
 
     public GameService(AppDbContext db)
     {
         _db = db;
-        _reviewRepo = new ReviewRepository(db);
     }
 
     public async Task<GameDto?> GetGameByIdAsync(Guid id)
@@ -304,45 +302,6 @@ public class GameService : IGameService
             .FirstOrDefaultAsync();
     }
 
-    public async Task AddReviewAsync(CreateReviewDto dto)
-    {
-        var review = new Review
-        {
-            Id = Guid.NewGuid(),
-            GameId = dto.GameId,
-            Username = dto.Username,
-            Content = dto.Content,
-            Rating = dto.Rating,
-            CreatedAt = DateTime.UtcNow,
-        };
-        await _reviewRepo.AddReviewAsync(review);
-        // Update game's rating to new average
-        var reviews = await _reviewRepo.GetReviewsByGameIdAsync(dto.GameId);
-        if (reviews.Count > 0)
-        {
-            var game = await _db.Games.FindAsync(dto.GameId);
-            if (game != null)
-            {
-                game.Rating = reviews.Average(r => r.Rating);
-                await _db.SaveChangesAsync();
-            }
-        }
-    }
-
-    public async Task<List<ReviewDto>> GetReviewsByGameIdAsync(Guid gameId)
-    {
-        var list = await _reviewRepo.GetReviewsByGameIdAsync(gameId);
-        return list.Select(r => new ReviewDto {
-            Id = r.Id,
-            GameId = r.GameId,
-            Username = r.Username,
-            Content = r.Content,
-            Rating = r.Rating,
-            CreatedAt = r.CreatedAt,
-            Likes = r.Likes,
-            Dislikes = r.Dislikes
-        }).ToList();
-    }
 
     private static QueryParameters CreateParameters(int page, int limit, string? sort)
     {
