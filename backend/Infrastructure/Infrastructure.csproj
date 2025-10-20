@@ -21,6 +21,7 @@
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
       <PackageReference Include="System.Text.Json" Version="10.0.0-preview.5.25277.114" />
+      <PackageReference Include="Supabase" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -121,9 +122,19 @@ public class CommunityController : ControllerBase
 	}
 
 	[HttpPost("upload")]
-	public async Task<IActionResult> Upload([FromQuery] Guid postId, [FromBody] UploadMediaDto dto)
+	public async Task<IActionResult> Upload([FromQuery] Guid postId, IFormFile file)
 	{
-		var media = await _communityService.UploadMediaAsync(postId, dto);
+		if (file == null)
+		{
+			return BadRequest(new { message = "No file provided" });
+		}
+
+		if (postId == Guid.Empty)
+		{
+			return BadRequest(new { message = "Post ID is required" });
+		}
+
+		var media = await _communityService.UploadMediaAsync(postId, file);
 		return Ok(media);
 	}
 }

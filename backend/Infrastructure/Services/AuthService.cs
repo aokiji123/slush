@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Infrastructure.Configuration;
 
 namespace Infrastructure.Services;
 
@@ -302,9 +303,7 @@ public class AuthService : IAuthService
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        var jwtKey = _configuration["Jwt:Key"];
-        if (string.IsNullOrWhiteSpace(jwtKey))
-            throw new InvalidOperationException("JWT key is not configured.");
+        var jwtKey = SecretsConfiguration.GetRequiredSecret("JWT_KEY", "JWT signing key");
 
         var email = user.Email ?? throw new InvalidOperationException("User email is not set.");
         var username = user.UserName ?? throw new InvalidOperationException("User username is not set.");
@@ -320,8 +319,8 @@ public class AuthService : IAuthService
                 new Claim(ClaimTypes.Name, username)
             }),
             Expires = DateTime.UtcNow.AddDays(7),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
+            Issuer = SecretsConfiguration.GetRequiredSecret("JWT_ISSUER", "JWT issuer"),
+            Audience = SecretsConfiguration.GetRequiredSecret("JWT_AUDIENCE", "JWT audience"),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)

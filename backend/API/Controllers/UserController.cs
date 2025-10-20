@@ -261,6 +261,45 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Uploads a new avatar for the authenticated user.
+    /// </summary>
+    [Authorize]
+    [HttpPost("{id:guid}/avatar")]
+    [ProducesResponseType(typeof(FileUploadDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<FileUploadDto>>> UploadAvatarAsync(Guid id, IFormFile file)
+    {
+        if (!TryGetUserIdFromClaims(out var currentUserId))
+        {
+            return Unauthorized(new ApiResponse<FileUploadDto>("Unable to determine the current user."));
+        }
+
+        if (currentUserId != id)
+        {
+            return Forbid();
+        }
+
+        if (file == null)
+        {
+            return BadRequest(new ApiResponse<FileUploadDto>("No file provided."));
+        }
+
+        try
+        {
+            var result = await _userService.UploadAvatarAsync(id, file);
+            return Ok(new ApiResponse<FileUploadDto>(result) { Message = "Avatar uploaded successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading avatar for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<FileUploadDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
     /// Updates notification preferences for the authenticated user.
     /// </summary>
     [Authorize]

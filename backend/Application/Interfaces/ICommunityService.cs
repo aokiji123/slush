@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.DTOs;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces;
 
@@ -22,7 +23,7 @@ public interface ICommunityService
 	Task<bool> LikeCommentAsync(Guid userId, Guid commentId);
 	Task<bool> UnlikeCommentAsync(Guid userId, Guid commentId);
 
-	Task<MediaDto> UploadMediaAsync(Guid postId, UploadMediaDto dto);
+	Task<MediaDto> UploadMediaAsync(Guid postId, IFormFile file);
 }
 
 
