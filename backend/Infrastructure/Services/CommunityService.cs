@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
@@ -13,10 +15,12 @@ namespace Infrastructure.Services;
 public class CommunityService : ICommunityService
 {
 	private readonly AppDbContext _db;
+	private readonly IStorageService _storageService;
 
-	public CommunityService(AppDbContext db)
+	public CommunityService(AppDbContext db, IStorageService storageService)
 	{
 		_db = db;
+		_storageService = storageService;
 	}
 
 	public async Task<IReadOnlyList<PostDto>> GetPostsByGameAsync(Guid gameId)
@@ -118,9 +122,22 @@ public class CommunityService : ICommunityService
 
 	public async Task<bool> DeletePostAsync(Guid authorId, Guid gameId, Guid postId)
 	{
-		var post = await _db.Posts.FirstOrDefaultAsync(p => p.Id == postId && p.GameId == gameId);
+		var post = await _db.Posts
+			.Include(p => p.Media)
+			.FirstOrDefaultAsync(p => p.Id == postId && p.GameId == gameId);
 		if (post == null) return false;
 		if (post.AuthorId != authorId) return false;
+
+		// Delete associated media files from storage
+		foreach (var media in post.Media)
+		{
+			var filePath = ExtractFilePathFromUrl(media.File);
+			if (!string.IsNullOrEmpty(filePath))
+			{
+				await _storageService.DeleteFileAsync(filePath);
+			}
+		}
+
 		_db.Posts.Remove(post);
 		await _db.SaveChangesAsync();
 		return true;
@@ -213,18 +230,43 @@ public class CommunityService : ICommunityService
 		return true;
 	}
 
-	public async Task<MediaDto> UploadMediaAsync(Guid postId, UploadMediaDto dto)
+	public async Task<MediaDto> UploadMediaAsync(Guid postId, IFormFile file)
 	{
+		// Validate file
+		var validation = _storageService.ValidateCommunityMediaFile(file);
+		if (!validation.IsValid)
+		{
+			throw new ArgumentException(validation.ErrorMessage);
+		}
+
+		// Verify post exists
+		var post = await _db.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+		if (post == null)
+		{
+			throw new ArgumentException("Post not found");
+		}
+
+		// Upload file to storage
+		var folder = $"community/posts/{postId}";
+		var result = await _storageService.UploadFileAsync(file, folder);
+
+		// Determine media type based on file extension
+		var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+		var mediaType = IsVideoExtension(extension) ? MediaType.Video : MediaType.Image;
+
+		// Save media record to database
 		var media = new Media
 		{
 			Id = Guid.NewGuid(),
-			File = dto.File,
-			IsCover = dto.IsCover,
-			Type = dto.Type,
+			File = result.Url,
+			IsCover = false, // Default to false, can be updated later
+			Type = mediaType,
 			PostId = postId
 		};
+
 		_db.Media.Add(media);
 		await _db.SaveChangesAsync();
+
 		return new MediaDto
 		{
 			Id = media.Id,
@@ -232,6 +274,37 @@ public class CommunityService : ICommunityService
 			IsCover = media.IsCover,
 			Type = media.Type
 		};
+	}
+
+	private static bool IsVideoExtension(string extension)
+	{
+		var videoExtensions = new[] { ".mp4", ".webm", ".avi", ".mov", ".mkv" };
+		return videoExtensions.Contains(extension);
+	}
+
+	private static string? ExtractFilePathFromUrl(string url)
+	{
+		if (string.IsNullOrEmpty(url)) return null;
+		
+		try
+		{
+			var uri = new Uri(url);
+			var pathSegments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			
+			// Supabase storage URLs typically have format: /storage/v1/object/public/bucket/path
+			// We need to extract the path after the bucket name
+			var bucketIndex = Array.IndexOf(pathSegments, "slush-storage");
+			if (bucketIndex >= 0 && bucketIndex + 1 < pathSegments.Length)
+			{
+				return string.Join("/", pathSegments.Skip(bucketIndex + 1));
+			}
+		}
+		catch
+		{
+			// If URL parsing fails, return null
+		}
+		
+		return null;
 	}
 }
 

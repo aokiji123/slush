@@ -16,14 +16,36 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
+using Infrastructure.Configuration;
+using DotNetEnv;
+
+// Load environment variables from .env file if it exists
+var currentDir = Directory.GetCurrentDirectory();
+var envPath = Path.Combine(currentDir, ".env");
+
+if (!File.Exists(envPath))
+{
+    // Try parent directory (backend root)
+    var parentDir = Directory.GetParent(currentDir)?.FullName ?? "";
+    envPath = Path.Combine(parentDir, ".env");
+}
+
+if (File.Exists(envPath))
+{
+    Env.Load(envPath);
+}
+
+// Validate that all required secrets are present
+SecretsConfiguration.ValidateRequiredSecrets();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(SecretsConfiguration.BuildConnectionString()));
 
 // Add Identity
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -52,10 +74,10 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = SecretsConfiguration.GetRequiredSecret("JWT_ISSUER", "JWT issuer"),
+            ValidAudience = SecretsConfiguration.GetRequiredSecret("JWT_AUDIENCE", "JWT audience"),
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured")))
+                Encoding.UTF8.GetBytes(SecretsConfiguration.GetRequiredSecret("JWT_KEY", "JWT signing key")))
         };
     });
 
@@ -84,15 +106,14 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
-// TODO: Add storage service when AWS packages are available
-// builder.Services.AddScoped<IStorageService, R2StorageService>();
+builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
 // TODO: Register AWS S3 client for R2 when packages are available
 
 // Add BaseUrl configuration
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
-var baseUrl = builder.Configuration["BaseUrl"] ?? "https://localhost:7020";
+var baseUrl = SecretsConfiguration.GetOptionalSecret("BASE_URL", "https://localhost:5088");
 builder.Services.AddHttpContextAccessor();
 // SWAGGER
 builder.Services.AddOpenApi();

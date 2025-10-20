@@ -41,6 +41,7 @@ Thumbs.db
 *.backup
 *.swp
 *.tmp
+*.env
 
 # --- Frontend (Node.js/Vite/React) ---
 frontend/node_modules/

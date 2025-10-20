@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using MimeKit;
 using System.Text;
 using System.Collections.Generic; // Added for List
+using Infrastructure.Configuration;
 
 namespace Infrastructure.Services
 {
@@ -32,10 +33,10 @@ namespace Infrastructure.Services
             // Validate configuration before proceeding
             ValidateEmailConfiguration();
             
-            var fromEmail = _configuration["Email:From"]!;
-            var smtpServer = _configuration["Email:SmtpServer"]!;
-            var port = _configuration["Email:Port"]!;
-            var username = _configuration["Email:Username"]!;
+            var fromEmail = SecretsConfiguration.GetRequiredSecret("EMAIL_FROM", "Email sender address");
+            var smtpServer = SecretsConfiguration.GetRequiredSecret("EMAIL_SMTP_SERVER", "SMTP server address");
+            var port = SecretsConfiguration.GetRequiredIntSecret("EMAIL_PORT", "SMTP server port");
+            var username = SecretsConfiguration.GetRequiredSecret("EMAIL_USERNAME", "Email username");
             
             _logger.LogDebug("SMTP Configuration - Server: {SmtpServer}, Port: {Port}, From: {From}", 
                 smtpServer, port, fromEmail);
@@ -52,12 +53,12 @@ namespace Infrastructure.Services
                 _logger.LogInformation("Connecting to SMTP server...");
                 await smtp.ConnectAsync(
                     smtpServer,
-                    int.Parse(port ?? "587"),
+                    port,
                     MailKit.Security.SecureSocketOptions.StartTls);
                 _logger.LogInformation("Connected to SMTP server");
 
                 _logger.LogInformation("Authenticating with SMTP server...");
-                await smtp.AuthenticateAsync(username, _configuration["Email:Password"]);
+                await smtp.AuthenticateAsync(username, SecretsConfiguration.GetRequiredSecret("EMAIL_PASSWORD", "Email password"));
                 _logger.LogInformation("Successfully authenticated with SMTP server");
 
                 _logger.LogInformation("Sending email...");
@@ -172,12 +173,12 @@ namespace Infrastructure.Services
 
         private void ValidateEmailConfiguration()
         {
-            var requiredSettings = new[] { "Email:From", "Email:SmtpServer", "Email:Port", "Email:Username", "Email:Password" };
+            var requiredSettings = new[] { "EMAIL_FROM", "EMAIL_SMTP_SERVER", "EMAIL_PORT", "EMAIL_USERNAME", "EMAIL_PASSWORD" };
             var missingSettings = new List<string>();
 
             foreach (var setting in requiredSettings)
             {
-                if (string.IsNullOrEmpty(_configuration[setting]))
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(setting)))
                 {
                     missingSettings.Add(setting);
                 }
