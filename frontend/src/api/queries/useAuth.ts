@@ -113,6 +113,16 @@ export const useResetPassword = () => {
   })
 }
 
+export function clearAuthToken() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('user')
+  
+  // Dispatch event to notify components of auth state change
+  window.dispatchEvent(new Event('authStateChanged'))
+}
+
 export function useAuthState() {
   const [user, setUser] = useState<LoginResponse | null>(null)
   const [isAuth, setIsAuth] = useState(false)

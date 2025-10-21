@@ -1,5 +1,5 @@
 import axios from 'axios'
-// import { clearAuthToken } from './queries/useAuth'
+import { clearAuthToken } from './queries/useAuth'
 
 const headers: Record<string, string> = {
   Accept: 'application/json',
@@ -11,19 +11,33 @@ const axiosInstance = axios.create({
   withCredentials: true,
 })
 
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       clearAuthToken()
+// Add request interceptor to include token in Authorization header
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
-//       if (window.location.pathname !== '/login') {
-//         window.location.href =
-//           '/login?message=Your session has expired. Please log in again.'
-//       }
-//     }
-//     return Promise.reject(error)
-//   },
-// )
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      clearAuthToken()
+
+      if (window.location.pathname !== '/login') {
+        window.location.href =
+          '/login?message=Your session has expired. Please log in again.'
+      }
+    }
+    return Promise.reject(error)
+  },
+)
 
 export default axiosInstance
