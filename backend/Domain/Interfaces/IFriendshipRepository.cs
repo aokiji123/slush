@@ -9,7 +9,7 @@ public interface IFriendshipRepository
 {
     Task<Friendship> CreateAsync(Friendship friendship);
     Task<bool> ExistsForPairAsync(Guid userAId, Guid userBId);
-    Task<IReadOnlyList<Friendship>> GetForUserAsync(Guid userId);
+    Task<IReadOnlyList<Friendship>> GetForUserAsync(Guid userId, bool includeUsers = false);
     Task<Friendship?> GetForPairAsync(Guid userAId, Guid userBId);
     Task DeleteAsync(Friendship friendship);
 }

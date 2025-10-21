@@ -35,12 +35,17 @@ public class FriendshipRepository : IFriendshipRepository
         return await _context.Friendships.AnyAsync(f => f.User1Id == first && f.User2Id == second);
     }
 
-    public async Task<IReadOnlyList<Friendship>> GetForUserAsync(Guid userId)
+    public async Task<IReadOnlyList<Friendship>> GetForUserAsync(Guid userId, bool includeUsers = false)
     {
-        return await _context.Friendships
-            .Where(f => f.User1Id == userId || f.User2Id == userId)
-            .OrderByDescending(f => f.CreatedAt)
-            .ToListAsync();
+        var query = _context.Friendships
+            .Where(f => f.User1Id == userId || f.User2Id == userId);
+
+        if (includeUsers)
+        {
+            query = query.Include(f => f.User1).Include(f => f.User2);
+        }
+
+        return await query.OrderByDescending(f => f.CreatedAt).ToListAsync();
     }
 
     public async Task<Friendship?> GetForPairAsync(Guid userAId, Guid userBId)

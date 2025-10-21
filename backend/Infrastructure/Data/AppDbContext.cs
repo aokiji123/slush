@@ -140,13 +140,13 @@ public class AppDbContext : DbContext
             .HasKey(fr => new { fr.SenderId, fr.ReceiverId });
 
         modelBuilder.Entity<FriendRequest>()
-            .HasOne<User>()
+            .HasOne(fr => fr.Sender)
             .WithMany()
             .HasForeignKey(fr => fr.SenderId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<FriendRequest>()
-            .HasOne<User>()
+            .HasOne(fr => fr.Receiver)
             .WithMany()
             .HasForeignKey(fr => fr.ReceiverId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -161,17 +161,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<FriendRequest>()
             .HasIndex(fr => fr.ReceiverId);
 
+        modelBuilder.Entity<FriendRequest>()
+            .HasIndex(fr => fr.Status);
+
         modelBuilder.Entity<Friendship>()
             .HasKey(f => new { f.User1Id, f.User2Id });
 
         modelBuilder.Entity<Friendship>()
-            .HasOne<User>()
+            .HasOne(f => f.User1)
             .WithMany()
             .HasForeignKey(f => f.User1Id)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Friendship>()
-            .HasOne<User>()
+            .HasOne(f => f.User2)
             .WithMany()
             .HasForeignKey(f => f.User2Id)
             .OnDelete(DeleteBehavior.Cascade);
