@@ -1,0 +1,92 @@
+{
+  "home": {
+    "title": "Ласкаво просимо до Slush",
+    "subtitle": "Відкрийте для себе чудові ігри",
+    "featuredGames": "Рекомендовані вам",
+    "newReleases": "Нові релізи",
+    "topSellers": "Топ продажів",
+    "freeGames": "Безкоштовні ігри",
+    "onSale": "Особливі пропозиції",
+    "under100": "До 100₴",
+    "comingSoon": "Незабаром"
+  },
+  "catalog": {
+    "title": "Каталог ігор",
+    "filters": "Фільтри",
+    "sortBy": "Сортувати за",
+    "sortOptions": {
+      "name": "Назвою",
+      "price": "Ціною",
+      "releaseDate": "Датою випуску",
+      "rating": "Рейтингом",
+      "popularity": "Популярністю",
+      "sortByRelevance": "Релевантністю"
+    },
+    "sortOrder": {
+      "asc": "За зростанням",
+      "desc": "За спаданням"
+    },
+    "priceRange": "Діапазон цін",
+    "categories": "Категорії",
+    "tags": "Теги",
+    "platforms": "Платформи",
+    "languages": "Мови",
+    "clearFilters": "Очистити фільтри",
+    "noGamesFound": "Ігор не знайдено",
+    "loadingGames": "Завантаження ігор...",
+    "loadMore": "Завантажити ще"
+  },
+  "product": {
+    "addToCart": "Додати в кошик",
+    "addToWishlist": "Додати в список бажань",
+    "removeFromWishlist": "Видалити зі списку бажань",
+    "buyNow": "Купити зараз",
+    "wishlist": "Список бажань",
+    "share": "Поділитися",
+    "report": "Поскаржитися",
+    "price": "Ціна",
+    "originalPrice": "Оригінальна ціна",
+    "discount": "Знижка",
+    "free": "Безкоштовно",
+    "comingSoon": "Незабаром",
+    "preOrder": "Передзамовлення",
+    "inCart": "В кошику",
+    "inWishlist": "В списку бажань",
+    "rating": "Рейтинг",
+    "reviews": "Відгуки",
+    "description": "Опис",
+    "systemRequirements": "Системні вимоги",
+    "minimum": "Мінімальні",
+    "recommended": "Рекомендовані",
+    "os": "ОС",
+    "processor": "Процесор",
+    "memory": "Пам'ять",
+    "graphics": "Графіка",
+    "directX": "DirectX",
+    "storage": "Сховище",
+    "sound": "Звукова карта"
+  },
+  "search": {
+    "placeholder": "Пошук ігор...",
+    "noResults": "Результатів не знайдено",
+    "searchResults": "Результати пошуку",
+    "suggestions": "Пропозиції"
+  },
+  "categories": {
+    "action": "Екшн",
+    "adventure": "Пригоди",
+    "rpg": "RPG",
+    "strategy": "Стратегія",
+    "simulation": "Симулятор",
+    "sports": "Спорт",
+    "racing": "Гонки",
+    "puzzle": "Головоломки",
+    "indie": "Інді",
+    "horror": "Жахи",
+    "shooter": "Шутер",
+    "platformer": "Платформер",
+    "fighting": "Файтинг",
+    "music": "Музика",
+    "educational": "Освітні"
+  }
+}

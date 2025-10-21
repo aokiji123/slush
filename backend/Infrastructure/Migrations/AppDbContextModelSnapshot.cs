@@ -125,22 +125,20 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("BaseGameId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
-                    b.Property<string>("Developer")
+                    b.Property<string>("DeveloperTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("DiscountPercent")
                         .HasColumnType("integer");
 
-                    b.PrimitiveCollection<List<string>>("Genre")
+                    b.Property<string>("GenreTranslations")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("jsonb");
 
                     b.PrimitiveCollection<List<string>>("Images")
                         .IsRequired()
@@ -154,10 +152,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.PrimitiveCollection<List<string>>("Platforms")
                         .IsRequired()
@@ -167,10 +164,9 @@ namespace Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.Property<string>("Publisher")
+                    b.Property<string>("PublisherTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.Property<double>("Rating")
                         .HasColumnType("double precision");
@@ -546,9 +542,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
 
                     b.HasKey("UserId", "ReviewId");
 

@@ -83,10 +83,11 @@ public static class QueryableExtensions
         switch (field)
         {
             case "relevancy":
-                return query.OrderByDescending(g => g.Rating).ThenBy(g => g.Name);
+                return query.OrderByDescending(g => g.Rating);
             case "alphabet":
             case "name":
-                return query.OrderBy(g => g.Name);
+                // Name sorting will be handled client-side due to localization
+                return query.OrderBy(g => g.Id);
             case "rating":
                 return query.OrderByDescending(g => g.Rating);
             case "publish_date":

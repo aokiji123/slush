@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Switch } from '@/components/Switch'
 import { useAuthenticatedUser, useNotifications, useUpdateNotifications } from '@/api/queries/useUser'
 import type { NotificationsSettings } from '@/api/types/user'
@@ -8,21 +9,23 @@ export const Route = createFileRoute('/settings/notifications')({
   component: RouteComponent,
 })
 
-const notificationSettings = [
-  { key: 'bigSale' as keyof NotificationsSettings, label: 'Великий розпродаж' },
-  { key: 'wishlistDiscount' as keyof NotificationsSettings, label: 'Знижка на ігри з мого Бажаного' },
-  { key: 'newProfileComment' as keyof NotificationsSettings, label: 'Новий коментар під моїм профілем' },
-  { key: 'newFriendRequest' as keyof NotificationsSettings, label: 'Новий запит на дружбу' },
-  { key: 'friendRequestAccepted' as keyof NotificationsSettings, label: 'Мій запит на дружбу прийнято' },
-  { key: 'friendRequestDeclined' as keyof NotificationsSettings, label: 'Мій запит на дружбу відхилено' },
+const getNotificationSettings = (t: any) => [
+  { key: 'bigSale' as keyof NotificationsSettings, label: t('notifications.bigSale') },
+  { key: 'wishlistDiscount' as keyof NotificationsSettings, label: t('notifications.wishlistDiscount') },
+  { key: 'newProfileComment' as keyof NotificationsSettings, label: t('notifications.newProfileComment') },
+  { key: 'newFriendRequest' as keyof NotificationsSettings, label: t('notifications.newFriendRequest') },
+  { key: 'friendRequestAccepted' as keyof NotificationsSettings, label: t('notifications.friendRequestAccepted') },
+  { key: 'friendRequestDeclined' as keyof NotificationsSettings, label: t('notifications.friendRequestDeclined') },
 ]
 
 function RouteComponent() {
+  const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const { data: notifications, isLoading: notificationsLoading } = useNotifications(user?.id || '')
   const updateNotificationsMutation = useUpdateNotifications()
   
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const notificationSettings = getNotificationSettings(t)
 
   const handleNotificationToggle = async (key: keyof NotificationsSettings, checked: boolean) => {
     if (!user || !notifications) return
@@ -46,10 +49,10 @@ function RouteComponent() {
         }
       })
 
-      setMessage({ type: 'success', text: 'Налаштування сповіщень оновлено!' })
+      setMessage({ type: 'success', text: t('notifications.success') })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
-      setMessage({ type: 'error', text: 'Помилка оновлення налаштувань сповіщень' })
+      setMessage({ type: 'error', text: t('notifications.error') })
       setTimeout(() => setMessage(null), 3000)
     }
   }
@@ -58,12 +61,12 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">Потрібно увійти в акаунт</p>
+          <p className="text-white text-lg mb-4">{t('notifications.loginRequired')}</p>
           <a 
             href="/login" 
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
-            Увійти
+            {t('notifications.loginButton')}
           </a>
         </div>
       </div>
@@ -73,7 +76,7 @@ function RouteComponent() {
   if (notificationsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-white">Завантаження налаштувань сповіщень...</p>
+        <p className="text-white">{t('notifications.loading')}</p>
       </div>
     )
   }
@@ -92,7 +95,7 @@ function RouteComponent() {
 
       <div className="w-full max-w-[500px] flex flex-col gap-[16px]">
         <p className="text-[20px] font-bold font-manrope">
-          Беззвучні сповіщення
+          {t('notifications.silentNotifications')}
         </p>
 
         <ul className="w-full flex flex-col gap-[16px]">
@@ -113,18 +116,18 @@ function RouteComponent() {
       </div>
 
       <div className="w-full max-w-[650px]">
-        <p className="text-[20px] font-bold font-manrope">Чат</p>
+        <p className="text-[20px] font-bold font-manrope">{t('notifications.chat')}</p>
 
         <div className="flex items-end justify-between">
-          <p>Нове повідомлення у чаті</p>
+          <p>{t('notifications.newChatMessage')}</p>
 
           <div className="flex items-center gap-[77px]">
             <div className="flex flex-col items-center gap-[8px]">
-              <p className="text-[16px] font-bold">Сповіщення</p>
+              <p className="text-[16px] font-bold">{t('notifications.notifications')}</p>
               <Switch checked />
             </div>
             <div className="flex flex-col items-center gap-[8px]">
-              <p className="text-[16px] font-bold">Звук</p>
+              <p className="text-[16px] font-bold">{t('notifications.sound')}</p>
               <Switch checked />
             </div>
           </div>

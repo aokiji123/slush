@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 import type { GameData } from '@/api/types/game'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 
 export const HomeProducts = ({ products, grid = 3, title }: Props) => {
   const navigate = useNavigate()
+  const { t } = useTranslation('common')
 
   if (!products || products.length === 0) {
     return null
@@ -25,7 +27,7 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
             navigate({ to: '/catalog', search: { title } })
           }}
         >
-          <p>Дивитись більше</p>
+          <p>{t('common.viewMore')}</p>
           <FaChevronRight size={12} />
         </div>
       </div>
@@ -76,7 +78,7 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
                       : ''
                   }`}
                 >
-                  {game.price ? `${game.price}₴` : 'Безкоштовно'}
+                  {game.price ? `${game.price}₴` : t('common.free')}
                 </p>
               </div>
             </div>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Domain.Entities;
 
 namespace Application.DTOs;
 
@@ -23,4 +24,38 @@ public class GameDto
     public List<string> Platforms { get; set; } = new();
     public bool IsDlc { get; set; }
     public Guid? BaseGameId { get; set; }
+
+    /// <summary>
+    /// Creates a GameDto from a Game entity with localized content
+    /// </summary>
+    /// <param name="game">Game entity to convert</param>
+    /// <param name="language">Target language for localization (default: "uk")</param>
+    /// <returns>Localized GameDto</returns>
+    public static GameDto FromEntity(Game game, string language = "uk")
+    {
+        if (game == null)
+            return null;
+
+        return new GameDto
+        {
+            Id = game.Id,
+            Name = game.GetLocalizedName(language),
+            Slug = game.Slug,
+            MainImage = game.MainImage,
+            Images = game.Images,
+            Price = (double)game.Price,
+            DiscountPercent = game.DiscountPercent,
+            SalePrice = (double)game.SalePrice,
+            SaleDate = game.SaleDate,
+            Rating = game.Rating,
+            Genre = game.GetLocalizedGenres(language),
+            Description = game.GetLocalizedDescription(language),
+            ReleaseDate = game.ReleaseDate,
+            Developer = game.GetLocalizedDeveloper(language),
+            Publisher = game.GetLocalizedPublisher(language),
+            Platforms = game.Platforms,
+            IsDlc = game.IsDlc,
+            BaseGameId = game.BaseGameId
+        };
+    }
 }

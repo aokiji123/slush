@@ -6,6 +6,7 @@ import {
   useNewGames,
   useRecommendedGames,
 } from '@/api/queries/useGame'
+import { useTranslation } from 'react-i18next'
 import { GamesByCategory, HomeProducts } from '@/components'
 
 const glowCoords = [
@@ -47,6 +48,7 @@ const glowCoords = [
 ]
 
 export const Home = () => {
+  const { t } = useTranslation('store')
   const { data: recommendedGames } = useRecommendedGames() // recommended
   const { data: under100 } = useGamesWithPriceLessThan(100) // cheaper than 100
   const { data: freeGames } = useFreeGames() // free
@@ -73,16 +75,16 @@ export const Home = () => {
         <HomeProducts
           products={discountedGames?.data}
           grid={3}
-          title="Особливі пропозиції"
+          title={t('home.onSale')}
         />
 
         <HomeProducts
           products={recommendedGames?.data}
           grid={4}
-          title="Рекомендовані вам"
+          title={t('home.featuredGames')}
         />
 
-        <HomeProducts products={under100?.data} grid={4} title="До 100₴" />
+        <HomeProducts products={under100?.data} grid={4} title={t('home.under100')} />
 
         <GamesByCategory
           hits={hitsGames?.data}

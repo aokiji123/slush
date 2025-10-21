@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthenticatedUser, useResetPassword } from '@/api/queries/useUser'
 
 export const Route = createFileRoute('/settings/password')({
@@ -7,6 +8,7 @@ export const Route = createFileRoute('/settings/password')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const resetPasswordMutation = useResetPassword()
   
@@ -20,10 +22,10 @@ function RouteComponent() {
 
   const validatePassword = (password: string) => {
     const errors = []
-    if (password.length < 7) errors.push('Мінімум 7 символів')
-    if (!/[a-zA-Z]/.test(password)) errors.push('Принаймні 1 літера')
-    if (!/\d/.test(password)) errors.push('Принаймні 1 цифра')
-    if (/\s/.test(password)) errors.push('Без пробілів')
+    if (password.length < 7) errors.push(t('password.validation.minLength'))
+    if (!/[a-zA-Z]/.test(password)) errors.push(t('password.validation.atLeastOneLetter'))
+    if (!/\d/.test(password)) errors.push(t('password.validation.atLeastOneDigit'))
+    if (/\s/.test(password)) errors.push(t('password.validation.noSpaces'))
     return errors
   }
 
@@ -39,11 +41,11 @@ function RouteComponent() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.oldPassword) {
-      newErrors.oldPassword = 'Введіть поточний пароль'
+      newErrors.oldPassword = t('password.validation.oldPasswordRequired')
     }
 
     if (!formData.newPassword) {
-      newErrors.newPassword = 'Введіть новий пароль'
+      newErrors.newPassword = t('password.validation.newPasswordRequired')
     } else {
       const passwordErrors = validatePassword(formData.newPassword)
       if (passwordErrors.length > 0) {
@@ -52,9 +54,9 @@ function RouteComponent() {
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Підтвердіть новий пароль'
+      newErrors.confirmPassword = t('password.validation.confirmPasswordRequired')
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Паролі не співпадають'
+      newErrors.confirmPassword = t('password.validation.passwordsNotMatch')
     }
 
     setErrors(newErrors)
@@ -71,10 +73,10 @@ function RouteComponent() {
         newPasswordConfirmed: formData.confirmPassword,
       })
       
-      setMessage({ type: 'success', text: 'Пароль успішно змінено!' })
+      setMessage({ type: 'success', text: t('password.successMessage') })
       setFormData({ oldPassword: '', newPassword: '', confirmPassword: '' })
     } catch (error) {
-      setMessage({ type: 'error', text: 'Помилка зміни паролю. Спробуйте ще раз.' })
+      setMessage({ type: 'error', text: t('password.errorMessage') })
     }
   }
 
@@ -82,12 +84,12 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">Потрібно увійти в акаунт</p>
+          <p className="text-white text-lg mb-4">{t('password.loginRequired')}</p>
           <a 
             href="/login" 
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
-            Увійти
+            {t('password.loginButton')}
           </a>
         </div>
       </div>
@@ -108,7 +110,7 @@ function RouteComponent() {
     <div className="flex items-center justify-center">
       <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
         <p className="text-[24px] font-bold text-center font-manrope">
-          Зміна паролю
+          {t('password.title')}
         </p>
         
         {/* Message Display */}
@@ -124,25 +126,25 @@ function RouteComponent() {
 
         <div className="bg-[var(--color-background-17)] rounded-[16px] py-[12px] px-[24px]">
           <ul className="flex flex-col gap-[4px] list-disc list-inside">
-            <li>Не використовуйте жодного з останніх 5 паролів</li>
-            <li>Використовуйте 7+ символів</li>
-            <li>Використовуйте принаймні 1 літеру</li>
-            <li>Використовуйте принаймні 1 цифру</li>
-            <li>Без пробілів</li>
+            <li>{t('password.requirements.noRecentPasswords')}</li>
+            <li>{t('password.requirements.minLength')}</li>
+            <li>{t('password.requirements.atLeastOneLetter')}</li>
+            <li>{t('password.requirements.atLeastOneDigit')}</li>
+            <li>{t('password.requirements.noSpaces')}</li>
           </ul>
         </div>
 
         <div className="flex flex-col gap-[16px]">
           <div className="flex flex-col gap-[8px]">
             <label htmlFor="password" className="text-[16px] font-bold">
-              Старий пароль
+              {t('password.oldPasswordLabel')}
             </label>
             <input
               type="password"
               id="password"
               value={formData.oldPassword}
               onChange={(e) => handleInputChange('oldPassword', e.target.value)}
-              placeholder="Введіть ваш поточний пароль..."
+              placeholder={t('password.oldPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {errors.oldPassword && (
@@ -152,14 +154,14 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[8px]">
             <label htmlFor="new-password" className="text-[16px] font-bold">
-              Новий пароль
+              {t('password.newPasswordLabel')}
             </label>
             <input
               type="password"
               id="new-password"
               value={formData.newPassword}
               onChange={(e) => handleInputChange('newPassword', e.target.value)}
-              placeholder="Введіть новий пароль..."
+              placeholder={t('password.newPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {formData.newPassword && (
@@ -171,8 +173,8 @@ function RouteComponent() {
                   />
                 </div>
                 <span className="text-sm text-gray-400">
-                  {passwordStrength.strength === 100 ? 'Сильний' : 
-                   passwordStrength.strength >= 60 ? 'Середній' : 'Слабкий'}
+                  {passwordStrength.strength === 100 ? t('password.strength.strong') : 
+                   passwordStrength.strength >= 60 ? t('password.strength.medium') : t('password.strength.weak')}
                 </span>
               </div>
             )}
@@ -185,7 +187,7 @@ function RouteComponent() {
               id="new-password-confirm"
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              placeholder="Повторіть новий пароль..."
+              placeholder={t('password.confirmPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {errors.confirmPassword && (
@@ -200,7 +202,7 @@ function RouteComponent() {
             disabled={resetPasswordMutation.isPending}
             className="h-[40px] w-[120px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-medium text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {resetPasswordMutation.isPending ? 'Збереження...' : 'Зберегти'}
+            {resetPasswordMutation.isPending ? t('password.saving') : t('password.submitButton')}
           </button>
         </div>
       </div>

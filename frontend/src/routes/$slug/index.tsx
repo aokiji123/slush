@@ -3,43 +3,49 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaChevronUp,
+  FaPlus,
 } from 'react-icons/fa'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
-import { GameComment, MasonryLayout, SortDropdown } from '@/components'
-import { useGameById, useGameDlcs } from '@/api/queries/useGame'
+import { useTranslation } from 'react-i18next'
+import { MasonryLayout, SortDropdown, GameComment } from '@/components'
+import { ReviewModal } from '@/components/ReviewModal'
+import { useGameById, useGameDlcs, useGameReviews } from '@/api/queries/useGame'
+import { useGameOwnership } from '@/api/queries/useLibrary'
+import { useGenreTranslation } from '@/utils/translateGenre'
+import type { Review } from '@/api/types/game'
 
 export const Route = createFileRoute('/$slug/')({
   component: RouteComponent,
 })
 
-const sortOptions = [
-  'Спочатку популярні',
-  'За оцінкою',
-  'За кількістю коментарів',
-  'Спочатку нові',
-  'Спочатку позитивні',
-  'Спочатку негативні',
+const getSortOptions = (t: any) => [
+  t('common:sorting.popular'),
+  t('common:sorting.rating'),
+  t('game:reviews.sortByComments'),
+  t('common:sorting.newest'),
+  t('game:reviews.sortByPositive'),
+  t('game:reviews.sortByNegative'),
 ]
 
-const commentsText = [
-  'Чудова гра',
-  'Імба. 10 з 10. Незважаючи на баги і проблему з економікою (купую за 50к продаю за 1к) це імба, всі любители рпг з відкритим світом і сюжетом мають в це пограти. Дякуєм за українську!',
-  'Топчиковий топ. Дякуємо панам та панессам з CDPR за українську локалізацію основної гри та DLC Ілюзія Свободи. Прийдеться проходити гру уже третій раз.',
-  'До зустрічі, Найт-Сіті',
-]
 
 function RouteComponent() {
+  const { t } = useTranslation(['game', 'common'])
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug' })
   const { data: game, isLoading, isError } = useGameById(slug)
   const { data: gameDlcs } = useGameDlcs(slug)
+  const { data: reviews, isLoading: reviewsLoading, refetch: refetchReviews } = useGameReviews(game?.data?.id || '')
+  const { data: ownsGame } = useGameOwnership(game?.data?.id || '')
+  const translateGenre = useGenreTranslation()
+  const sortOptions = getSortOptions(t)
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-white text-2xl">Завантаження...</p>
+        <p className="text-white text-2xl">{t('common.loading')}</p>
       </div>
     )
   }
@@ -47,7 +53,7 @@ function RouteComponent() {
   if (isError || !game) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-white text-2xl">Гру не знайдено</p>
+        <p className="text-white text-2xl">{t('game.notFound')}</p>
       </div>
     )
   }
@@ -95,7 +101,7 @@ function RouteComponent() {
               key={tag}
               className="text-[14px] font-medium min-w-[66px] h-[24px] flex items-center justify-center bg-[var(--color-background-16)] py-[4px] px-[12px] rounded-[20px] text-[var(--color-background-25)]"
             >
-              {tag}
+              {translateGenre(tag)}
             </div>
           )
         })}
@@ -112,17 +118,17 @@ function RouteComponent() {
       </div>
 
       <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
-        <p className="text-[32px] font-bold font-manrope">Комплекти</p>
+        <p className="text-[32px] font-bold font-manrope">{t('game:bundles.title')}</p>
         <div className="w-full bg-[var(--color-background-15)] min-h-[275px] rounded-[20px] p-[20px] flex flex-col gap-[20px]">
           <p className="text-[24px] font-bold font-manrope">{game.data.name}</p>
           <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
             <p className="text-[20px] font-normal">{game.data.description}</p>
             <div className="text-[20px] font-normal">
-              <p className="text-[var(--color-background-25)]">Вміст:</p>
+              <p className="text-[var(--color-background-25)]">{t('game:bundles.contents')}</p>
               <p className="ml-3">
                 • {game.data.name}{' '}
                 <span className="text-[var(--color-background-25)]">
-                  (базова гра)
+                  ({t('game:bundles.baseGame')})
                 </span>
               </p>
             </div>
@@ -145,11 +151,11 @@ function RouteComponent() {
                 </>
               ) : (
                 <p className="text-[20px] font-normal text-[var(--color-background)]">
-                  {game.data.price ? `${game.data.price}₴` : 'Безкоштовно'}
+                  {game.data.price ? `${game.data.price}₴` : t('game:actions.free')}
                 </p>
               )}
               <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-                <p>У кошик</p>
+                <p>{t('game:actions.addToCart')}</p>
               </div>
             </div>
           </div>
@@ -158,12 +164,12 @@ function RouteComponent() {
         {gameDlcs && gameDlcs.data.length > 0 && (
           <div className="flex flex-col gap-[20px]">
             <div className="flex items-center justify-between">
-              <p className="text-[32px] font-bold font-manrope">Інші DLC</p>
+              <p className="text-[32px] font-bold font-manrope">{t('game:dlc.otherDlc')}</p>
               <p
                 className="text-[16px] flex items-center gap-[8px] cursor-pointer"
                 onClick={() => navigate({ to: `/${slug}/dlc` })}
               >
-                Усі DLC <FaChevronRight />
+                {t('game:dlc.allDlc')} <FaChevronRight />
               </p>
             </div>
 
@@ -174,7 +180,7 @@ function RouteComponent() {
                   className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold"
                 >
                   <p className="font-manrope">{dlc.name}</p>
-                  <p>{dlc.price ? `${dlc.price}₴` : 'Безкоштовно'}</p>
+                  <p>{dlc.price ? `${dlc.price}₴` : t('game:actions.free')}</p>
                 </div>
               ))}
             </div>
@@ -185,7 +191,7 @@ function RouteComponent() {
                   {gameDlcs.data.reduce((total, dlc) => total + dlc.price, 0)}₴
                 </p>
                 <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-                  <p>Додати в кошик усі DLC</p>
+                  <p>{t('game:dlc.addAllDlcToCart')}</p>
                 </div>
               </div>
             </div>
@@ -196,22 +202,22 @@ function RouteComponent() {
       <div className="w-full flex flex-col gap-[24px]">
         <div className="flex items-center justify-between">
           <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
-            Рецензії
+            {t('game:reviews.title')}
           </p>
           <div className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-            <p>Написати рецензію</p>
+            <p>{t('game:actions.writeReview')}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-[10px] relative">
           <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-            Сортування:
+            {t('game:reviews.sorting')}
           </p>
           <button
             className="flex items-center gap-[8px] text-[16px] font-normal text-[var(--color-background)] cursor-pointer"
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
           >
-            Спочатку популярні{' '}
+            {t('game:reviews.mostPopularFirst')}{' '}
             {isSortDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
           </button>
           {isSortDropdownOpen && (
@@ -223,15 +229,41 @@ function RouteComponent() {
         </div>
 
         <div className="flex flex-col gap-[32px]">
+          {/* Write Review Button */}
+          {ownsGame && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-background-10)] text-[var(--color-background)] rounded-[12px] hover:bg-[var(--color-background-10)]/80 transition-colors"
+              >
+                <FaPlus size={16} />
+                {t('game.review.writeReview')}
+              </button>
+            </div>
+          )}
+
           <MasonryLayout
             columns={2}
             gap="16px"
             className="text-[var(--color-background)]"
           >
-            <GameComment text={commentsText[0]} stars={5} />
-            <GameComment text={commentsText[1]} stars={4} />
-            <GameComment text={commentsText[2]} stars={4} />
-            <GameComment text={commentsText[3]} stars={3} />
+            {reviewsLoading ? (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
+              </div>
+            ) : reviews?.data && Array.isArray(reviews.data) && reviews.data.length > 0 ? (
+              reviews.data.map((review: Review, index: number) => (
+                <GameComment
+                  key={review.id || index}
+                  review={review}
+                  onLikeToggle={() => refetchReviews()}
+                />
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-[var(--color-background-25)]">{t('game.review.noReviews')}</p>
+              </div>
+            )}
           </MasonryLayout>
 
           <div className="flex items-center justify-center cursor-pointer">
@@ -241,6 +273,17 @@ function RouteComponent() {
             />
           </div>
         </div>
+
+        {/* Review Modal */}
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          gameId={game?.data?.id || ''}
+          onReviewCreated={() => {
+            refetchReviews()
+            setIsReviewModalOpen(false)
+          }}
+        />
       </div>
     </>
   )

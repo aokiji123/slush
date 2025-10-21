@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthenticatedUser, useDeleteAccount } from '@/api/queries/useUser'
 
 export const Route = createFileRoute('/settings/delete-account')({
@@ -7,6 +8,7 @@ export const Route = createFileRoute('/settings/delete-account')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const deleteAccountMutation = useDeleteAccount()
   
@@ -31,19 +33,19 @@ function RouteComponent() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.nickname) {
-      newErrors.nickname = 'Введіть нікнейм'
+      newErrors.nickname = t('deleteAccount.validation.nicknameRequired')
     } else if (formData.nickname !== user?.nickname) {
-      newErrors.nickname = 'Нікнейм не співпадає з поточним'
+      newErrors.nickname = t('deleteAccount.validation.nicknameMismatch')
     }
 
     if (!formData.password) {
-      newErrors.password = 'Введіть пароль'
+      newErrors.password = t('deleteAccount.validation.passwordRequired')
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Підтвердіть пароль'
+      newErrors.confirmPassword = t('deleteAccount.validation.confirmPasswordRequired')
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Паролі не співпадають'
+      newErrors.confirmPassword = t('deleteAccount.validation.passwordsNotMatch')
     }
 
     setErrors(newErrors)
@@ -74,7 +76,7 @@ function RouteComponent() {
       sessionStorage.clear()
       window.location.href = '/'
     } catch (error) {
-      setMessage({ type: 'error', text: 'Помилка видалення акаунта. Перевірте дані та спробуйте ще раз.' })
+      setMessage({ type: 'error', text: t('deleteAccount.errorMessage') })
       setShowConfirmation(false)
     }
   }
@@ -89,12 +91,12 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">Потрібно увійти в акаунт</p>
+          <p className="text-white text-lg mb-4">{t('deleteAccount.loginRequired')}</p>
           <a 
             href="/login" 
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
-            Увійти
+            {t('deleteAccount.loginButton')}
           </a>
         </div>
       </div>
@@ -105,7 +107,7 @@ function RouteComponent() {
     <div className="flex items-center justify-center">
       <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
         <p className="text-[24px] font-bold text-center font-manrope">
-          Видалення акаунта
+          {t('deleteAccount.title')}
         </p>
 
         {/* Message Display */}
@@ -121,28 +123,21 @@ function RouteComponent() {
 
         <div className="p-[12px] bg-[#FF6F952E] rounded-[16px]">
           <p>
-            Натисніть{' '}
-            <span className="font-bold text-[var(--color-background-19)]">
-              видалити мій акаунт
-            </span>
-            , щоб розпочати процес остаточного видалення вашого акаунта Slush,
-            включно з усією особистою інформацією та купленим контентом. Після
-            видалення вашого акаунта Slush баланс вашого гаманця також буде
-            безповоротно видалено.
+            {t('deleteAccount.warning')}
           </p>
         </div>
 
         <div className="flex flex-col gap-[16px]">
           <div className="flex flex-col gap-[8px]">
             <label htmlFor="nickname" className="text-[16px] font-bold">
-              Нікнейм
+              {t('deleteAccount.nicknameLabel')}
             </label>
             <input
               type="text"
               id="nickname"
               value={formData.nickname}
               onChange={(e) => handleInputChange('nickname', e.target.value)}
-              placeholder="Введіть ваш поточний нікнейм..."
+              placeholder={t('deleteAccount.nicknamePlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {errors.nickname && (
@@ -152,14 +147,14 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[8px]">
             <label htmlFor="password" className="text-[16px] font-bold">
-              Пароль
+              {t('deleteAccount.passwordLabel')}
             </label>
             <input
               type="password"
               id="password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder="Введіть ваш поточний пароль..."
+              placeholder={t('deleteAccount.passwordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {errors.password && (
@@ -171,7 +166,7 @@ function RouteComponent() {
               id="confirm-password"
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              placeholder="Повторіть пароль..."
+              placeholder={t('deleteAccount.confirmPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
             {errors.confirmPassword && (
@@ -186,7 +181,7 @@ function RouteComponent() {
             disabled={deleteAccountMutation.isPending}
             className="h-[40px] rounded-[22px] bg-[var(--color-background-19)] text-[16px] font-medium text-black cursor-pointer px-[24px] py-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {deleteAccountMutation.isPending ? 'Видалення...' : 'Видалити мій акаунт'}
+            {deleteAccountMutation.isPending ? t('deleteAccount.deleting') : t('deleteAccount.deleteButton')}
           </button>
         </div>
 
@@ -195,24 +190,24 @@ function RouteComponent() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[var(--color-background-15)] rounded-[20px] p-[24px] max-w-md w-full mx-4">
               <h3 className="text-[20px] font-bold text-white mb-4 text-center">
-                Підтвердження видалення
+                {t('deleteAccount.confirmationTitle')}
               </h3>
               <p className="text-white mb-6 text-center">
-                Ви впевнені, що хочете видалити свій акаунт? Ця дія незворотна і всі ваші дані будуть втрачені назавжди.
+                {t('deleteAccount.confirmationMessage')}
               </p>
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={handleCancelDelete}
                   className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                 >
-                  Скасувати
+                  {t('deleteAccount.cancelButton')}
                 </button>
                 <button
                   onClick={handleConfirmDelete}
                   disabled={deleteAccountMutation.isPending}
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                 >
-                  {deleteAccountMutation.isPending ? 'Видалення...' : 'Видалити'}
+                  {deleteAccountMutation.isPending ? t('deleteAccount.deleting') : t('deleteAccount.confirmDeleteButton')}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import {
   useLocation,
 } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResetPassword } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/change-password')({
@@ -13,6 +14,7 @@ export const Route = createFileRoute('/change-password')({
 function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation('auth')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
@@ -26,17 +28,17 @@ function RouteComponent() {
     setError('')
 
     if (!password || !confirmPassword) {
-      setError('Будь ласка, заповніть всі поля')
+      setError(t('changePassword.errors.fillAllFields'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Паролі не співпадають')
+      setError(t('changePassword.errors.passwordsNotMatch'))
       return
     }
 
     if (password.length < 6) {
-      setError('Пароль має містити мінімум 6 символів')
+      setError(t('validation.minLength', { count: 6 }))
       return
     }
 
@@ -51,7 +53,7 @@ function RouteComponent() {
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
-          'Помилка зміни паролю. Спробуйте ще раз.',
+          t('changePassword.errors.changeError'),
       )
     }
   }
@@ -76,7 +78,7 @@ function RouteComponent() {
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">
-                Придумайте новий пароль
+                {t('changePassword.title')}
               </p>
             </div>
             {error && (
@@ -87,14 +89,14 @@ function RouteComponent() {
             <div className="flex flex-col gap-[16px]">
               <div className="flex flex-col gap-[8px]">
                 <label htmlFor="password" className="text-[16px] font-bold">
-                  Пароль
+                  {t('changePassword.newPasswordLabel')}
                 </label>
                 <input
                   type="password"
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Придумайте новий пароль..."
+                  placeholder={t('changePassword.newPasswordPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={resetPasswordMutation.isPending}
                 />
@@ -105,14 +107,14 @@ function RouteComponent() {
                   htmlFor="confirm-password"
                   className="text-[16px] font-bold"
                 >
-                  Підтвердіть пароль
+                  {t('changePassword.confirmPasswordLabel')}
                 </label>
                 <input
                   type="password"
                   id="confirm-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Напишіть пароль ще раз..."
+                  placeholder={t('changePassword.confirmPasswordPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={resetPasswordMutation.isPending}
                 />
@@ -124,7 +126,7 @@ function RouteComponent() {
             disabled={resetPasswordMutation.isPending}
             className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {resetPasswordMutation.isPending ? 'Збереження...' : 'Продовжити'}
+            {resetPasswordMutation.isPending ? t('changePassword.errors.loading') : t('changePassword.submit')}
           </button>
         </form>
       </div>

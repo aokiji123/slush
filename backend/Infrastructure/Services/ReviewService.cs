@@ -114,7 +114,6 @@ namespace Infrastructure.Services
 
             var reviewLike = new ReviewLike
             {
-                Id = Guid.NewGuid(),
                 ReviewId = reviewId,
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow

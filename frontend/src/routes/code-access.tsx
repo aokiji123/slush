@@ -4,6 +4,7 @@ import {
   useLocation,
 } from '@tanstack/react-router'
 import { useRef, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useVerifyCode, useResendVerificationCode } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/code-access')({
@@ -11,6 +12,7 @@ export const Route = createFileRoute('/code-access')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('auth')
   const [code, setCode] = useState(['', '', '', '', ''])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -54,7 +56,7 @@ function RouteComponent() {
     const codeString = code.join('')
 
     if (codeString.length !== 5) {
-      setError('Будь ласка, введіть повний 5-значний код')
+      setError(t('codeAccess.errors.codeRequired'))
       return
     }
 
@@ -67,7 +69,7 @@ function RouteComponent() {
       })
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || 'Неправильний код. Спробуйте ще раз.',
+        err?.response?.data?.message || t('codeAccess.errors.invalidCode'),
       )
     }
   }
@@ -78,13 +80,13 @@ function RouteComponent() {
 
     try {
       await resendCodeMutation.mutateAsync({ email })
-      setSuccess('Код успішно надіслано повторно!')
+      setSuccess(t('codeAccess.resendSuccess'))
       setCode(['', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
-          'Помилка відправки коду. Спробуйте ще раз.',
+          t('codeAccess.errors.resendError'),
       )
     }
   }
@@ -106,10 +108,10 @@ function RouteComponent() {
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">
-                Введіть код
+                {t('codeAccess.title')}
               </p>
               <p className="text-[16px] font-normal text-center">
-                На ваш e-mail був надісланий 5-значний код
+                {t('codeAccess.description')}
               </p>
             </div>
             {error && (
@@ -148,7 +150,7 @@ function RouteComponent() {
               disabled={verifyCodeMutation.isPending}
               className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {verifyCodeMutation.isPending ? 'Перевірка...' : 'Продовжити'}
+              {verifyCodeMutation.isPending ? t('codeAccess.errors.loading') : t('codeAccess.submit')}
             </button>
             <button
               onClick={handleResendCode}
@@ -156,8 +158,8 @@ function RouteComponent() {
               className="text-[16px] font-medium hover:underline cursor-pointer disabled:opacity-50"
             >
               {resendCodeMutation.isPending
-                ? 'Відправка...'
-                : 'Надіслати код ще раз'}
+                ? t('codeAccess.errors.loading')
+                : t('codeAccess.resendCode')}
             </button>
           </div>
         </div>

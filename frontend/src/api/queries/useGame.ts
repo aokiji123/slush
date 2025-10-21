@@ -1,10 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import axiosInstance from '..'
 import type {
   CreateReviewRequest,
   Game,
   GameCharacteristics,
   GamesListResponse,
+  Review,
 } from '../types/game'
 
 async function getGameById(id: string): Promise<Game> {
@@ -49,14 +51,22 @@ async function getFreeGames(): Promise<GamesListResponse> {
   return data
 }
 
-async function getGameReviews(id: string): Promise<Game> {
-  const { data } = await axiosInstance.get(`/game/${id}/reviews`)
+async function getGameReviews(id: string): Promise<{ success: boolean; message: string; data: any[] }> {
+  const { data } = await axiosInstance.get(`/review?GameId=${id}`)
   return data
 }
 
-async function createGameReview(review: CreateReviewRequest): Promise<void> {
-  const { data } = await axiosInstance.post('/game/review', review)
-  return data
+async function createGameReview(review: CreateReviewRequest): Promise<Review> {
+  const { data } = await axiosInstance.post('/review', review)
+  return data.data
+}
+
+async function likeReview(reviewId: string): Promise<void> {
+  await axiosInstance.post(`/review/${reviewId}/like`)
+}
+
+async function unlikeReview(reviewId: string): Promise<void> {
+  await axiosInstance.delete(`/review/${reviewId}/like`)
 }
 
 async function getGameCharacteristics(
@@ -97,8 +107,9 @@ export function useRecommendedGames() {
 }
 
 export function useGameById(id: string) {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['game', id],
+    queryKey: ['game', id, i18n.language],
     queryFn: () => getGameById(id),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -169,5 +180,17 @@ export function useGameCharacteristics(id: string) {
 export function useCreateGameReview() {
   return useMutation({
     mutationFn: (review: CreateReviewRequest) => createGameReview(review),
+  })
+}
+
+export function useLikeReview() {
+  return useMutation({
+    mutationFn: (reviewId: string) => likeReview(reviewId),
+  })
+}
+
+export function useUnlikeReview() {
+  return useMutation({
+    mutationFn: (reviewId: string) => unlikeReview(reviewId),
   })
 }

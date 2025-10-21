@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CustomCheckbox } from '../components'
 import { useRegister } from '@/api/queries/useAuth'
 
@@ -9,6 +10,7 @@ export const Route = createFileRoute('/sign-up')({
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const { t } = useTranslation('auth')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,28 +25,28 @@ function RouteComponent() {
     setError('')
 
     if (!username || !email || !password || !confirmPassword) {
-      setError('Будь ласка, заповніть всі поля')
+      setError(t('signUp.errors.fillAllFields'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Паролі не співпадають')
+      setError(t('signUp.errors.passwordsNotMatch'))
       return
     }
 
     if (password.length < 6) {
-      setError('Пароль має містити мінімум 6 символів')
+      setError(t('validation.minLength', { count: 6 }))
       return
     }
 
     if (!acceptedTerms) {
-      setError('Необхідно погодитись з умовами використання')
+      setError(t('signUp.errors.agreeTerms'))
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setError('Введіть коректну email адресу')
+      setError(t('validation.email'))
       return
     }
 
@@ -63,7 +65,7 @@ function RouteComponent() {
       navigate({ to: '/' })
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || 'Помилка реєстрації. Спробуйте ще раз.',
+        err?.response?.data?.message || t('signUp.errors.registrationError'),
       )
     }
   }
@@ -83,7 +85,7 @@ function RouteComponent() {
         >
           <div className="flex flex-col gap-[32px] h-[460px] w-full">
             <p className="text-[24px] font-bold text-center font-manrope">
-              Створіть новий акаунт
+              {t('signUp.title')}
             </p>
             {error && (
               <div className="bg-red-500/10 border border-red-500 rounded-[12px] p-[12px] text-red-500 text-center text-[14px]">
@@ -93,42 +95,42 @@ function RouteComponent() {
             <div className="flex flex-col gap-[16px]">
               <div className="flex flex-col gap-[8px]">
                 <label htmlFor="login" className="text-[16px] font-bold">
-                  Логін
+                  {t('signUp.nicknameLabel')}
                 </label>
                 <input
                   type="text"
                   id="login"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Придумайте новий логін..."
+                  placeholder={t('signUp.nicknamePlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={registerMutation.isPending}
                 />
               </div>
               <div className="flex flex-col gap-[8px]">
                 <label htmlFor="email" className="text-[16px] font-bold">
-                  Email
+                  {t('signUp.emailLabel')}
                 </label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Введіть ваш email..."
+                  placeholder={t('signUp.emailPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={registerMutation.isPending}
                 />
               </div>
               <div className="flex flex-col gap-[8px]">
                 <label htmlFor="password" className="text-[16px] font-bold">
-                  Пароль
+                  {t('signUp.passwordLabel')}
                 </label>
                 <input
                   type="password"
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Придумайте новий пароль..."
+                  placeholder={t('signUp.passwordPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={registerMutation.isPending}
                 />
@@ -138,14 +140,14 @@ function RouteComponent() {
                   htmlFor="confirmPassword"
                   className="text-[16px] font-bold"
                 >
-                  Повторіть пароль
+                  {t('signUp.confirmPasswordLabel')}
                 </label>
                 <input
                   type="password"
                   id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Напишіть пароль ще раз..."
+                  placeholder={t('signUp.confirmPasswordPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={registerMutation.isPending}
                 />
@@ -157,10 +159,7 @@ function RouteComponent() {
                   onChange={setAcceptedTerms}
                 />
                 <label htmlFor="checkbox">
-                  Я погоджуюсь з{' '}
-                  <span className="text-[var(--color-background-21)]">
-                    Умовами використання
-                  </span>
+                  {t('signUp.agreeTerms')}
                 </label>
               </div>
             </div>
@@ -171,12 +170,12 @@ function RouteComponent() {
               disabled={registerMutation.isPending}
               className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {registerMutation.isPending ? 'Завантаження...' : 'Продовжити'}
+              {registerMutation.isPending ? t('signUp.errors.loading') : t('signUp.submit')}
             </button>
             <p className="text-[12px] font-light">
-              Маєте акаунт?{' '}
+              {t('signUp.hasAccount')}{' '}
               <a href="/login" className="text-[var(--color-background-21)]">
-                Авторизуйтесь
+                {t('signUp.login')}
               </a>
             </p>
           </div>

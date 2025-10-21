@@ -13,40 +13,41 @@ import {
   ThemeIcon,
 } from '@/icons'
 import { Switch } from '@/components/Switch'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
 })
 
-const settings = [
+const getSettings = (t: any) => [
   {
     icon: ThemeIcon,
-    title: 'Темна тема',
+    title: t('navigation.darkTheme'),
     hasSwitch: true,
   },
   {
     icon: GeneralSettingsIcon,
-    title: 'Загальні налаштування',
+    title: t('navigation.general'),
     path: '/settings',
   },
   {
     icon: PasswordIcon,
-    title: 'Пароль',
+    title: t('navigation.password'),
     path: '/settings/password',
   },
   {
     icon: NotificationsIcon,
-    title: 'Сповіщення',
+    title: t('navigation.notifications'),
     path: '/settings/notifications',
   },
   {
     icon: PaymentsIcon,
-    title: 'Гаманець',
+    title: t('navigation.wallet'),
     path: '/settings/wallet',
   },
   {
     icon: DeleteAccountIcon,
-    title: 'Видалення акаунту',
+    title: t('navigation.deleteAccount'),
     path: '/settings/delete-account',
   },
 ]
@@ -78,6 +79,8 @@ const glowCoords = [
 function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation('settings')
+  const settings = getSettings(t)
 
   const handleSettingClick = (setting: (typeof settings)[0]) => {
     if (setting.hasSwitch) return
@@ -102,7 +105,7 @@ function RouteComponent() {
               <input
                 type="text"
                 className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
-                placeholder="Пошук налаштувань..."
+                placeholder={t('searchPlaceholder')}
               />
               <ul className="flex flex-col gap-[8px] text-white">
                 {settings.map((setting, index) => (

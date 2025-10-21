@@ -1,0 +1,112 @@
+{
+  "header": {
+    "store": "Крамниця",
+    "library": "Бібліотека",
+    "login": "Увійти",
+    "signUp": "Зареєструватися",
+    "profile": "Профіль",
+    "settings": "Налаштування",
+    "logout": "Вийти",
+    "notifications": "Сповіщення",
+    "cart": "Кошик",
+    "wishlist": "Список бажань"
+  },
+  "footer": {
+    "termsOfUse": "Умови використання",
+    "privacyPolicy": "Політика конфіденційності",
+    "refundPolicy": "Політика повернення коштів магазину",
+    "copyright": "© 2024, Zubarik inc, Inc. All rights reserved. Zubarik inc, Zubarik inc, the Zubarik inc logo, Zubarik, the Zubarik logo, Unreal, Unreal Engine, the Unreal Engine logo, Unreal Tournament, and the Unreal Tournament logo are trademarks or registered trademarks of Zubarik inc, Inc. in the United States of America and elsewhere. Other brands or product names are the trademarks of their respective owners."
+  },
+  "common": {
+    "loading": "Завантаження...",
+    "error": "Помилка",
+    "success": "Успішно",
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "delete": "Видалити",
+    "edit": "Редагувати",
+    "add": "Додати",
+    "remove": "Видалити",
+    "search": "Пошук",
+    "filter": "Фільтр",
+    "sort": "Сортувати",
+    "price": "Ціна",
+    "free": "Безкоштовно",
+    "sorting": "Сортування",
+    "buy": "Купити",
+    "addToCart": "Додати в кошик",
+    "addToWishlist": "Додати в список бажань",
+    "removeFromWishlist": "Видалити зі списку бажань",
+    "viewDetails": "Переглянути деталі",
+    "back": "Назад",
+    "next": "Далі",
+    "previous": "Попередній",
+    "close": "Закрити",
+    "open": "Відкрити",
+    "yes": "Так",
+    "no": "Ні",
+    "confirm": "Підтвердити",
+    "continue": "Продовжити",
+    "viewMore": "Дивитись більше"
+  },
+  "navigation": {
+    "catalog": "Каталог",
+    "new": "Новинки"
+  },
+  "search": {
+    "placeholder": "Пошук у крамниці...",
+    "tagsPlaceholder": "Пошук тегів..."
+  },
+  "filters": {
+    "title": "Фільтри",
+    "reset": "Скинути",
+    "view": "Вид:",
+    "genres": "Жанри",
+    "platforms": "Платформи",
+    "price": "Ціна",
+    "type": "Тип",
+    "features": "Особливості",
+    "events": "Івенти",
+    "genreOptions": {
+      "action": "Екшн",
+      "adventure": "Пригода",
+      "rpg": "RPG",
+      "strategy": "Стратегія"
+    },
+    "platformOptions": {
+      "pc": "PC",
+      "ps5": "PS5",
+      "xbox": "Xbox"
+    },
+    "priceOptions": {
+      "free": "Безкоштовно",
+      "under100": "До 100 гривень",
+      "under300": "До 300 гривень",
+      "under600": "До 600 гривень",
+      "under900": "До 900 гривень",
+      "unlimited": "Без обмежень",
+      "discounts": "Знижки"
+    },
+    "typeOptions": {
+      "games": "Ігри",
+      "addons": "Додатки",
+      "hints": "Ігри-підказки"
+    },
+    "featureOptions": {
+      "openWorld": "Відкритий світ",
+      "multiplayer": "Мультиплеєр",
+      "singleplayer": "Singleplayer"
+    }
+  },
+  "sorting": {
+    "label": "Сортування:",
+    "relevance": "За релевантністю",
+    "popular": "Спочатку популярні",
+    "newest": "Спочатку нові",
+    "rating": "За оцінкою",
+    "priceLowHigh": "Від дешевих до дорогих",
+    "priceHighLow": "Від дорогих до дешевих",
+    "nameAZ": "А - Я",
+    "nameZA": "Я - А"
+  }
+}

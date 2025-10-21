@@ -1,0 +1,68 @@
+{
+  "network": {
+    "connectionError": "Connection error. Please check your internet connection.",
+    "timeout": "Request timeout. Please try again.",
+    "serverError": "Server error. Please try again later.",
+    "notFound": "The requested resource was not found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "forbidden": "Access denied.",
+    "badRequest": "Invalid request. Please check your input."
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "password": "Password must be at least 8 characters long",
+    "passwordMatch": "Passwords do not match",
+    "nickname": "Nickname must be at least 3 characters long",
+    "phone": "Please enter a valid phone number",
+    "url": "Please enter a valid URL",
+    "number": "Please enter a valid number",
+    "minLength": "Must be at least {{count}} characters long",
+    "maxLength": "Must be no more than {{count}} characters long",
+    "min": "Must be at least {{count}}",
+    "max": "Must be no more than {{count}}"
+  },
+  "auth": {
+    "loginRequired": "Please log in to continue",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "invalidCredentials": "Invalid email or password",
+    "accountLocked": "Your account has been locked. Please contact support.",
+    "emailNotVerified": "Please verify your email address",
+    "passwordTooWeak": "Password is too weak. Please choose a stronger password.",
+    "emailAlreadyExists": "An account with this email already exists",
+    "nicknameAlreadyExists": "This nickname is already taken",
+    "invalidToken": "Invalid or expired token",
+    "accountNotFound": "Account not found"
+  },
+  "file": {
+    "uploadError": "Error uploading file",
+    "fileTooLarge": "File is too large. Maximum size is {{size}}MB",
+    "invalidFormat": "Invalid file format",
+    "uploadSuccess": "File uploaded successfully",
+    "deleteError": "Error deleting file",
+    "deleteSuccess": "File deleted successfully"
+  },
+  "game": {
+    "notFound": "Game not found",
+    "alreadyOwned": "You already own this game",
+    "notAvailable": "This game is not available",
+    "purchaseError": "Error purchasing game",
+    "purchaseSuccess": "Game purchased successfully",
+    "downloadError": "Error downloading game",
+    "installError": "Error installing game",
+    "uninstallError": "Error uninstalling game"
+  },
+  "general": {
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "operationFailed": "Operation failed. Please try again.",
+    "operationSuccess": "Operation completed successfully",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "updating": "Updating...",
+    "creating": "Creating...",
+    "retrying": "Retrying...",
+    "cancelled": "Operation cancelled",
+    "timeout": "Operation timed out"
+  }
+}

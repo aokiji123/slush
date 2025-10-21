@@ -1,0 +1,77 @@
+{
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": {
+      "title": "Your cart is empty",
+      "description": "Add some games to get started",
+      "browseStore": "Browse Store"
+    },
+    "items": "Items",
+    "item": "Item",
+    "price": "Price",
+    "quantity": "Quantity",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "discount": "Discount",
+    "remove": "Remove",
+    "update": "Update",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping",
+    "clearCart": "Clear Cart",
+    "confirmClear": "Are you sure you want to clear your cart?",
+    "itemRemoved": "Item removed from cart",
+    "itemUpdated": "Cart updated",
+    "cartCleared": "Cart cleared",
+    "moveToWishlist": "Move to Wishlist",
+    "youSave": "You save",
+    "taxNote": "Sales tax will be calculated during checkout",
+    "proceedToCheckout": "Proceed to Checkout"
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "empty": {
+      "title": "Your wishlist is empty",
+      "description": "Add games you want to buy later",
+      "browseStore": "Browse Store"
+    },
+    "addToCart": "Add to Cart",
+    "removeFromWishlist": "Remove from Wishlist",
+    "moveToCart": "Move to Cart",
+    "itemAdded": "Item added to wishlist",
+    "itemRemoved": "Item removed from wishlist",
+    "itemMovedToCart": "Item moved to cart",
+    "clearWishlist": "Clear Wishlist",
+    "confirmClear": "Are you sure you want to clear your wishlist?",
+    "discountValidUntil": "Discount valid until",
+    "searchPlaceholder": "Search wishlist..."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "paymentMethod": "Payment Method",
+    "billingAddress": "Billing Address",
+    "orderSummary": "Order Summary",
+    "placeOrder": "Place Order",
+    "processing": "Processing...",
+    "success": "Order placed successfully!",
+    "error": "Error processing order. Please try again.",
+    "requiredFields": "Please fill in all required fields",
+    "invalidPayment": "Invalid payment information"
+  },
+  "new": {
+    "title": "New Releases",
+    "comingSoon": "Coming Soon",
+    "preOrder": "Pre-order",
+    "releaseDate": "Release Date",
+    "availableNow": "Available Now",
+    "noNewGames": "No new games available",
+    "loading": "Loading new releases..."
+  },
+  "library": {
+    "allGames": "All Games",
+    "news": "News",
+    "communityHighlights": "Community Highlights",
+    "favorites": "Favorites",
+    "myCollection": "My Collection"
+  }
+}

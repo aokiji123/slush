@@ -1,0 +1,112 @@
+{
+  "header": {
+    "store": "Store",
+    "library": "Library",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "notifications": "Notifications",
+    "cart": "Cart",
+    "wishlist": "Wishlist"
+  },
+  "footer": {
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy",
+    "refundPolicy": "Store Refund Policy",
+    "copyright": "© 2024, Zubarik inc, Inc. All rights reserved. Zubarik inc, Zubarik inc, the Zubarik inc logo, Zubarik, the Zubarik logo, Unreal, Unreal Engine, the Unreal Engine logo, Unreal Tournament, and the Unreal Tournament logo are trademarks or registered trademarks of Zubarik inc, Inc. in the United States of America and elsewhere. Other brands or product names are the trademarks of their respective owners."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "price": "Price",
+    "free": "Free",
+  "sorting": "Sorting",
+    "buy": "Buy",
+    "addToCart": "Add to Cart",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "viewDetails": "View Details",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "viewMore": "View More"
+  },
+  "navigation": {
+    "catalog": "Catalog",
+    "new": "New"
+  },
+  "search": {
+    "placeholder": "Search in store...",
+    "tagsPlaceholder": "Search tags..."
+  },
+  "filters": {
+    "title": "Filters",
+    "reset": "Reset",
+    "view": "View:",
+    "genres": "Genres",
+    "platforms": "Platforms",
+    "price": "Price",
+    "type": "Type",
+    "features": "Features",
+    "events": "Events",
+    "genreOptions": {
+      "action": "Action",
+      "adventure": "Adventure",
+      "rpg": "RPG",
+      "strategy": "Strategy"
+    },
+    "platformOptions": {
+      "pc": "PC",
+      "ps5": "PS5",
+      "xbox": "Xbox"
+    },
+    "priceOptions": {
+      "free": "Free",
+      "under100": "Under 100 UAH",
+      "under300": "Under 300 UAH",
+      "under600": "Under 600 UAH",
+      "under900": "Under 900 UAH",
+      "unlimited": "No Limit",
+      "discounts": "Discounts"
+    },
+    "typeOptions": {
+      "games": "Games",
+      "addons": "Add-ons",
+      "hints": "Hints"
+    },
+    "featureOptions": {
+      "openWorld": "Open World",
+      "multiplayer": "Multiplayer",
+      "singleplayer": "Singleplayer"
+    }
+  },
+  "sorting": {
+    "label": "Sorting:",
+    "relevance": "By Relevance",
+    "popular": "Popular First",
+    "newest": "Newest First",
+    "rating": "By Rating",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "nameAZ": "A - Z",
+    "nameZA": "Z - A"
+  }
+}

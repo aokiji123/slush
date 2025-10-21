@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { clearAuthToken } from './queries/useAuth'
+import i18n from '@/lib/i18n'
 
 const headers: Record<string, string> = {
   Accept: 'application/json',
@@ -11,13 +12,18 @@ const axiosInstance = axios.create({
   withCredentials: true,
 })
 
-// Add request interceptor to include token in Authorization header
+// Add request interceptor to include token in Authorization header and language
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Add language header
+    const language = i18n.language || 'uk'
+    config.headers['Accept-Language'] = language
+    
     return config
   },
   (error) => {

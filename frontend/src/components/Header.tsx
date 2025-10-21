@@ -1,5 +1,6 @@
 import { GoDotFill } from 'react-icons/go'
 import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import {
   CartIcon,
   FavoriteIcon,
@@ -11,26 +12,27 @@ import { HiMenuAlt3 } from 'react-icons/hi'
 import { IoClose } from 'react-icons/io5'
 import { useAuthState } from '@/api/queries/useAuth'
 
-const tabs = [
-  {
-    name: 'Крамниця',
-    href: '/',
-  },
-  {
-    name: 'Бібліотека',
-    href: '/library',
-  },
-  // {
-  //   name: 'Чат',
-  //   href: '/',
-  // },
-]
-
 export const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation('common')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user, isAuth } = useAuthState()
+
+  const tabs = [
+    {
+      name: t('header.store'),
+      href: '/',
+    },
+    {
+      name: t('header.library'),
+      href: '/library',
+    },
+    // {
+    //   name: 'Чат',
+    //   href: '/',
+    // },
+  ]
 
   const isShopActive =
     location.pathname === '/' ||
@@ -98,7 +100,7 @@ export const Header = () => {
                 href="/login"
                 className="px-6 py-2 bg-[var(--color-background-16)] text-white rounded-[22px] text-[16px] font-medium"
               >
-                Увійти
+                {t('header.login')}
               </a>
             </div>
           ) : (
@@ -228,7 +230,7 @@ export const Header = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full px-6 py-3 bg-[var(--color-background-16)] text-white rounded-[22px] text-[16px] font-medium text-center"
                 >
-                  Увійти
+                  {t('header.login')}
                 </a>
               </div>
             ) : (
@@ -268,7 +270,7 @@ export const Header = () => {
                   onClick={() => handleNavigation('/settings')}
                 >
                   <SettingsIcon className="w-[24px] h-[24px]" />
-                  <span className="text-[16px] font-medium">Налаштування</span>
+                  <span className="text-[16px] font-medium">{t('header.settings')}</span>
                 </button>
 
                 <button
@@ -280,7 +282,7 @@ export const Header = () => {
                   onClick={() => handleNavigation('/settings/notifications')}
                 >
                   <NotificationsIcon className="w-[24px] h-[24px]" />
-                  <span className="text-[16px] font-medium">Сповіщення</span>
+                  <span className="text-[16px] font-medium">{t('header.notifications')}</span>
                 </button>
 
                 <button
@@ -292,7 +294,7 @@ export const Header = () => {
                   onClick={() => handleNavigation('/settings/notifications')}
                 >
                   <FavoriteIcon className="w-[24px] h-[24px]" />
-                  <span className="text-[16px] font-medium">Вішлист</span>
+                  <span className="text-[16px] font-medium">{t('header.wishlist')}</span>
                 </button>
 
                 <button

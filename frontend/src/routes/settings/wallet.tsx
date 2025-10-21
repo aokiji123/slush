@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WalletIcon } from '@/icons'
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useWalletBalance, useAddBalance, usePaymentHistory } from '@/api/queries/useWallet'
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/settings/wallet')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const { data: balance, isLoading: balanceLoading } = useWalletBalance()
   const addBalanceMutation = useAddBalance()
@@ -42,19 +44,19 @@ function RouteComponent() {
 
     const amountNum = parseFloat(amount)
     if (isNaN(amountNum) || amountNum <= 0) {
-      setMessage({ type: 'error', text: 'Введіть коректну суму' })
+      setMessage({ type: 'error', text: t('wallet.invalidAmount') })
       return
     }
 
     try {
       await addBalanceMutation.mutateAsync({
         amount: amountNum,
-        title: 'Поповнення балансу'
+        title: t('wallet.balanceReplenishment')
       })
       setAmount('')
-      setMessage({ type: 'success', text: 'Баланс успішно поповнено!' })
+      setMessage({ type: 'success', text: t('wallet.successMessage') })
     } catch (error) {
-      setMessage({ type: 'error', text: 'Помилка поповнення балансу' })
+      setMessage({ type: 'error', text: t('wallet.errorMessage') })
     }
   }
 
@@ -62,12 +64,12 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">Потрібно увійти в акаунт</p>
+          <p className="text-white text-lg mb-4">{t('wallet.loginRequired')}</p>
           <a 
             href="/login" 
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
-            Увійти
+            {t('wallet.loginButton')}
           </a>
         </div>
       </div>
@@ -147,10 +149,10 @@ function RouteComponent() {
           <WalletIcon className="w-[68px] h-[62px]" />
           <div>
             <p className="text-[20px] text-[var(--color-background-25)]">
-              Мій баланс
+              {t('wallet.myBalance')}
             </p>
             <p className="text-[36px] font-bold font-manrope">
-              {balanceLoading ? 'Завантаження...' : `${balance?.amount.toFixed(2) || '0.00'}₴`}
+              {balanceLoading ? t('wallet.loading') : `${balance?.amount.toFixed(2) || '0.00'}₴`}
             </p>
           </div>
         </div>
@@ -171,7 +173,7 @@ function RouteComponent() {
             htmlFor="amount"
             className="text-[16px] text-[var(--color-background-25)]"
           >
-            Поповнення балансу
+            {t('wallet.addBalance')}
           </label>
           <div className="flex items-center gap-[8px]">
             <input
@@ -179,7 +181,7 @@ function RouteComponent() {
               id="amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Сума"
+              placeholder={t('wallet.amountPlaceholder')}
               min="0"
               step="0.01"
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
@@ -189,7 +191,7 @@ function RouteComponent() {
               disabled={!amount || addBalanceMutation.isPending}
               className="h-[40px] py-[8px] px-[24px] rounded-[20px] bg-[var(--color-background-21)] text-[16px] font-medium text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {addBalanceMutation.isPending ? 'Поповнення...' : 'Поповнити'}
+              {addBalanceMutation.isPending ? t('wallet.adding') : t('wallet.addButton')}
             </button>
           </div>
         </div>
@@ -197,24 +199,24 @@ function RouteComponent() {
 
       <div className="w-full mt-[40px] flex flex-col gap-[20px]">
         <p className="text-[24px] font-bold text-center text-white">
-          Історія транзакцій
+          {t('wallet.transactionHistory')}
         </p>
         <div className="w-full bg-[var(--color-background-8)] rounded-[20px] p-[20px] flex flex-col">
           <div className="flex items-center px-[20px] text-[16px] text-white font-light mb-[20px]">
             <div className="w-[15%]">
-              <p>Сума</p>
+              <p>{t('wallet.amount')}</p>
             </div>
             <div className="w-[75%]">
-              <p>Найменування</p>
+              <p>{t('wallet.description')}</p>
             </div>
             <div className="w-[10%] text-right">
-              <p>Дата</p>
+              <p>{t('wallet.date')}</p>
             </div>
           </div>
           
           {historyLoading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-white">Завантаження історії...</p>
+              <p className="text-white">{t('wallet.loadingHistory')}</p>
             </div>
           ) : paymentHistory?.data && paymentHistory.data.length > 0 ? (
             <div className="w-full rounded-[20px] flex flex-col gap-[8px]">
@@ -236,7 +238,7 @@ function RouteComponent() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <p className="text-white">Історія транзакцій порожня</p>
+              <p className="text-white">{t('wallet.emptyHistory')}</p>
             </div>
           )}
 

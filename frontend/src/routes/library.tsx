@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
 import { FiPlusCircle } from 'react-icons/fi'
 import { Search } from '@/components'
@@ -79,6 +80,7 @@ const glowCoords = [
 ]
 
 function RouteComponent() {
+  const { t } = useTranslation('cart')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
 
@@ -96,7 +98,7 @@ function RouteComponent() {
             className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
           >
             {!isSidebarCollapsed && (
-              <h2 className="text-[20px] font-bold">Усі ігри</h2>
+              <h2 className="text-[20px] font-bold">{t('library.allGames')}</h2>
             )}
             <button
               type="button"
@@ -139,7 +141,7 @@ function RouteComponent() {
           />
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
-            <h3 className="text-[24px] font-bold text-white">Новини</h3>
+            <h3 className="text-[24px] font-bold text-white">{t('library.news')}</h3>
 
             <div className="relative">
               <div className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer">
@@ -149,8 +151,8 @@ function RouteComponent() {
                 <FaChevronRight className="size-[12px]" />
               </div>
               <div className="flex gap-[24px] overflow-x-auto">
-                {[1, 2, 3].map((_) => (
-                  <div className="flex items-center gap-[24px]">
+                {[1, 2, 3].map((_, index) => (
+                  <div key={index} className="flex items-center gap-[24px]">
                     <div className="w-[475px] min-h-[450px] rounded-[20px] overflow-hidden">
                       <img
                         src="/cyberpunk-image.png"
@@ -211,7 +213,7 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
             <h3 className="text-[24px] font-bold text-white">
-              Цікаве від Спільноти
+              {t('library.communityHighlights')}
             </h3>
 
             <div className="relative">
@@ -222,8 +224,8 @@ function RouteComponent() {
                 <FaChevronRight className="size-[12px]" />
               </div>
               <div className="flex gap-[24px] overflow-x-auto">
-                {[1, 2, 3].map((_) => (
-                  <div className="flex items-center gap-[24px]">
+                {[1, 2, 3].map((_, index) => (
+                  <div key={index} className="flex items-center gap-[24px]">
                     <div className="w-[475px] min-h-[400px] flex flex-col gap-[16px] rounded-[20px] overflow-hidden bg-[var(--color-background-15)] p-[20px]">
                       <div className="flex items-center justify-between">
                         <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer text-white">
@@ -285,13 +287,13 @@ function RouteComponent() {
           <div className="flex flex-col gap-[10px] w-full mb-[256px]">
             <div className="flex items-center gap-[45px] text-[24px]">
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                Усі ігри
+                {t('library.allGames')}
               </p>
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                Обране
+                {t('library.favorites')}
               </p>
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                Моя колекція
+                {t('library.myCollection')}
               </p>
               <div className="cursor-pointer text-[var(--color-background-21)]">
                 <FiPlusCircle size={24} />

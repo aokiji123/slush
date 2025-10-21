@@ -11,6 +11,7 @@ import {
   FaWindows,
   FaXbox,
 } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 import { Search } from '@/components'
 import { ComplaintIcon, FavoriteIcon, RepostIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
@@ -40,18 +41,18 @@ const glowCoords = [
   },
 ]
 
-function getTabs(slug: string) {
+function getTabs(slug: string, t: any) {
   return [
     {
-      name: 'Про гру',
+      name: t('game:tabs.about'),
       href: `/${slug}`,
     },
     {
-      name: 'Характеристики',
+      name: t('game:tabs.characteristics'),
       href: `/${slug}/characteristics`,
     },
     {
-      name: 'Спільнота',
+      name: t('game:tabs.community'),
       href: `/${slug}/community`,
     },
   ]
@@ -76,12 +77,13 @@ function RouteComponent() {
   const navigate = useNavigate()
   const location = useLocation()
   const { slug } = Route.useParams()
+  const { t, i18n } = useTranslation('game')
 
   const { data: game, isLoading, isError } = useGameById(slug)
 
   const currentPage = location.pathname.split('/')[2]
   const locationPath = location.pathname.split('/').slice(0, 3).join('/')
-  const tabs = getTabs(slug)
+  const tabs = getTabs(slug, t)
 
   const isActiveTab = (tabHref: string) => {
     return locationPath === tabHref
@@ -90,7 +92,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <div className="bg-[var(--color-night-background)] relative overflow-hidden min-h-screen flex items-center justify-center">
-        <p className="text-white text-2xl">Завантаження...</p>
+        <p className="text-white text-2xl">{t('common.loading')}</p>
       </div>
     )
   }
@@ -98,7 +100,7 @@ function RouteComponent() {
   if (isError || !game) {
     return (
       <div className="bg-[var(--color-night-background)] relative overflow-hidden min-h-screen flex items-center justify-center">
-        <p className="text-white text-2xl">Гру не знайдено</p>
+        <p className="text-white text-2xl">{t('notFound')}</p>
       </div>
     )
   }
@@ -191,17 +193,17 @@ function RouteComponent() {
                       <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
                         {game.data.price
                           ? `${game.data.price}₴`
-                          : 'Безкоштовно'}
+                          : t('actions.free')}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-col gap-[12px]">
                     <button className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
-                      <p>Купити</p>
+                      <p>{t('actions.buy')}</p>
                     </button>
                     <div className="w-full flex items-center gap-[8px]">
                       <button className="h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] cursor-pointer">
-                        <p>Додати у кошик</p>
+                        <p>{t('actions.addToCart')}</p>
                       </button>
                       <button className="h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] cursor-pointer">
                         <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
@@ -211,24 +213,24 @@ function RouteComponent() {
                       <button className="flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer w-[40%] gap-[12px]">
                         <RepostIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
                         <span className="text-[var(--color-background-21)]">
-                          Репост
+                          {t('actions.repost')}
                         </span>
                       </button>
                       <button className="flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer w-[60%] gap-[12px]">
                         <ComplaintIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
                         <span className="text-[var(--color-background-19)]">
-                          Поскаржитись
+                          {t('actions.report')}
                         </span>
                       </button>
                     </div>
                   </div>
                   <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">Дата виходу</p>
+                      <p className="text-[16px] font-bold">{t('sidebar.releaseDate')}</p>
                       <p className="text-[16px] font-normal">
                         {game.data.releaseDate
                           ? new Date(game.data.releaseDate).toLocaleDateString(
-                              'uk-UA',
+                              i18n.language === 'en' ? 'en-US' : 'uk-UA',
                               {
                                 year: 'numeric',
                                 month: 'long',
@@ -240,21 +242,21 @@ function RouteComponent() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">Розробник</p>
+                      <p className="text-[16px] font-bold">{t('sidebar.developer')}</p>
                       <p className="text-[16px] font-normal">
                         {game.data.developer}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">Видавець</p>
+                      <p className="text-[16px] font-bold">{t('sidebar.publisher')}</p>
                       <p className="text-[16px] font-normal">
                         {game.data.publisher}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">Платформи</p>
+                      <p className="text-[16px] font-bold">{t('sidebar.platforms')}</p>
                       <div className="flex items-center gap-[12px]">
                         {game.data.platforms.includes('windows') && (
                           <FaWindows size={24} />
@@ -272,7 +274,7 @@ function RouteComponent() {
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      Друзів бажають цю гру:{' '}
+                      {t('sidebar.friendsWantThis')}{' '}
                       <span className="font-light">2</span>
                     </p>
                     <div className="w-[155px] flex flex-col gap-[8px]">
@@ -303,7 +305,7 @@ function RouteComponent() {
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      Друзів мають цю гру:{' '}
+                      {t('sidebar.friendsHaveThis')}{' '}
                       <span className="font-light">12</span>
                     </p>
                     <div className="flex gap-[8px] flex-wrap">
