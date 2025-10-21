@@ -12,4 +12,14 @@ public class UserDto
     public string? Avatar { get; set; }
     public string? Banner { get; set; }
     public double Balance { get; set; }
+    
+    /// <summary>
+    /// When the user was last seen online
+    /// </summary>
+    public DateTime? LastSeenAt { get; set; }
+    
+    /// <summary>
+    /// Whether the user is currently online
+    /// </summary>
+    public bool IsOnline { get; set; }
 }

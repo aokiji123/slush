@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -13,4 +14,9 @@ public interface IUserService
     Task<bool> DeleteUserAsync(UserDeleteDto dto);
     Task<bool> UpdateNotificationsAsync(NotificationsDto dto);
     Task<FileUploadDto> UploadAvatarAsync(Guid userId, IFormFile file);
+    
+    // Online status methods
+    Task UpdateOnlineStatusAsync(Guid userId, bool isOnline);
+    Task UpdateLastSeenAsync(Guid userId);
+    Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId);
 }

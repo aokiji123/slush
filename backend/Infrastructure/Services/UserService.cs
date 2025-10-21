@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +16,13 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _db;
     private readonly IStorageService _storageService;
+    private readonly IFriendshipRepository _friendshipRepository;
 
-    public UserService(AppDbContext db, IStorageService storageService)
+    public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository)
     {
         _db = db;
         _storageService = storageService;
+        _friendshipRepository = friendshipRepository;
     }
 
     public async Task<UserDto?> GetUserAsync(Guid id)
@@ -35,7 +39,9 @@ public class UserService : IUserService
             Lang = user.Lang,
             Avatar = user.Avatar,
             Banner = user.Banner,
-            Balance = (double)user.Balance
+            Balance = (double)user.Balance,
+            LastSeenAt = user.LastSeenAt,
+            IsOnline = user.IsOnline
         };
     }
 
@@ -165,6 +171,45 @@ public class UserService : IUserService
         // додати нотифікації потім
         var exists = await _db.Set<User>().AnyAsync(u => u.Id == dto.UserId);
         return exists;
+    }
+
+    public async Task UpdateOnlineStatusAsync(Guid userId, bool isOnline)
+    {
+        var user = await _db.Set<User>().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user != null)
+        {
+            user.IsOnline = isOnline;
+            if (isOnline)
+            {
+                user.LastSeenAt = DateTime.UtcNow;
+            }
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    public async Task UpdateLastSeenAsync(Guid userId)
+    {
+        var user = await _db.Set<User>().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user != null)
+        {
+            user.LastSeenAt = DateTime.UtcNow;
+            // Consider user online if last seen within 5 minutes
+            user.IsOnline = user.LastSeenAt > DateTime.UtcNow.AddMinutes(-5);
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId)
+    {
+        var friendships = await _friendshipRepository.GetForUserAsync(userId);
+        var friendIds = friendships.Select(f => f.User1Id == userId ? f.User2Id : f.User1Id).ToList();
+        
+        var onlineFriends = await _db.Set<User>()
+            .Where(u => friendIds.Contains(u.Id) && u.IsOnline)
+            .Select(u => u.Id)
+            .ToListAsync();
+
+        return onlineFriends;
     }
 }
 

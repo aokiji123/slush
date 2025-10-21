@@ -24,6 +24,10 @@ public class User : IdentityUser<Guid>
     public string? Banner { get; set; }
     public decimal Balance { get; set; }
     public DateTime CreatedAtDateTime { get; set; } = DateTime.UtcNow;
+    
+    // Online status properties
+    public DateTime? LastSeenAt { get; set; }
+    public bool IsOnline { get; set; } = false;
 
     // Navigation properties
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

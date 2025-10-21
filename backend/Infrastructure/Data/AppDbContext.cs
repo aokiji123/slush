@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<ReviewLike> ReviewLikes { get; set; }
     public DbSet<FriendRequest> FriendRequests { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
+    public DbSet<UserBlock> UserBlocks { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Media> Media { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -184,6 +185,27 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Friendship>()
             .HasIndex(f => f.User2Id);
+
+        // UserBlock configuration
+        modelBuilder.Entity<UserBlock>()
+            .HasKey(ub => ub.Id);
+
+        modelBuilder.Entity<UserBlock>()
+            .HasIndex(ub => new { ub.BlockerId, ub.BlockedUserId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserBlock>()
+            .HasOne(ub => ub.Blocker)
+            .WithMany()
+            .HasForeignKey(ub => ub.BlockerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserBlock>()
+            .HasOne(ub => ub.BlockedUser)
+            .WithMany()
+            .HasForeignKey(ub => ub.BlockedUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Community: Posts
         modelBuilder.Entity<Post>()
             .HasKey(p => p.Id);

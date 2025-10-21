@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Infrastructure.Configuration;
+using API.Middleware;
 using DotNetEnv;
 
 // Load environment variables from .env file if it exists
@@ -92,6 +93,7 @@ builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 builder.Services.AddScoped<ReviewRepository>();
 builder.Services.AddScoped<ReviewLikeRepository>();
 
@@ -105,6 +107,7 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IUserBlockService, UserBlockService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -200,6 +203,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
+
+app.UseMiddleware<OnlineStatusMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

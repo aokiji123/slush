@@ -16,4 +16,5 @@ public interface IFriendshipService
     Task<IReadOnlyList<Guid>> GetPendingReceivedAsync(Guid receiverId);
     Task<IReadOnlyList<Friendship>> GetFriendshipsAsync(Guid userId);
     Task<IReadOnlyList<Guid>> GetFriendIdsAsync(Guid userId);
+    Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId);
 }
