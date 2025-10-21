@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { ChangeImageIcon } from '@/icons'
 import { Select } from '@/components/Select'
-import { useAuthenticatedUser, useUpdateUser, useUploadAvatar } from '@/api/queries/useUser'
+import { useAuthenticatedUser, useUpdateUser, useUploadAvatar, useUploadBanner } from '@/api/queries/useUser'
 import type { UserUpdateRequest } from '@/api/types/user'
 
 export const Route = createFileRoute('/settings/')({
@@ -26,6 +26,7 @@ function RouteComponent() {
   const { data: user, isLoading: userLoading } = useAuthenticatedUser()
   const updateUserMutation = useUpdateUser()
   const uploadAvatarMutation = useUploadAvatar()
+  const uploadBannerMutation = useUploadBanner()
   
   const [formData, setFormData] = useState({
     nickname: '',
@@ -79,16 +80,14 @@ function RouteComponent() {
 
   const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) return
+    if (!file || !user) return
 
-    // Convert to base64 for now (since no banner upload endpoint)
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string
-      // Store in form data, will be sent with profile update
-      setFormData(prev => ({ ...prev, banner: base64 }))
+    try {
+      await uploadBannerMutation.mutateAsync({ userId: user.id, file })
+      setMessage({ type: 'success', text: 'Банер успішно оновлено!' })
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Помилка завантаження банера' })
     }
-    reader.readAsDataURL(file)
   }
 
   const handleSave = async () => {
@@ -102,7 +101,7 @@ function RouteComponent() {
         bio: formData.bio,
         lang: formData.lang,
         avatar: user.avatar,
-        banner: formData.bio, // Using bio field as placeholder for banner
+        banner: user.banner,
       }
 
       await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })

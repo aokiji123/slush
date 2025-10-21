@@ -195,6 +195,32 @@ public class StorageService : IStorageService
         return (true, null);
     }
 
+    public (bool IsValid, string? ErrorMessage) ValidateBannerFile(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return (false, "No file provided");
+        }
+
+        if (file.Length > MaxAvatarSizeBytes)
+        {
+            return (false, $"File size exceeds maximum allowed size of {MaxAvatarSizeBytes / (1024 * 1024)}MB");
+        }
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(extension))
+        {
+            return (false, $"File type not allowed. Allowed types: {string.Join(", ", AllowedImageExtensions)}");
+        }
+
+        if (!AllowedImageMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+        {
+            return (false, $"MIME type not allowed. Allowed types: {string.Join(", ", AllowedImageMimeTypes)}");
+        }
+
+        return (true, null);
+    }
+
     public async Task<bool> TestBucketExistsAsync()
     {
         try

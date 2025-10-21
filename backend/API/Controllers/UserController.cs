@@ -50,6 +50,36 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Gets notification preferences for the authenticated user.
+    /// </summary>
+    [Authorize]
+    [HttpGet("{id:guid}/notifications")]
+    [ProducesResponseType(typeof(ApiResponse<NotificationsDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<NotificationsDto>>> GetNotificationsAsync(Guid id)
+    {
+        if (!TryGetUserIdFromClaims(out var currentUserId))
+        {
+            return Unauthorized(new ApiResponse<NotificationsDto>("Unable to determine the current user."));
+        }
+
+        if (currentUserId != id)
+        {
+            return Forbid();
+        }
+
+        var notifications = await _userService.GetNotificationsAsync(id);
+        if (notifications == null)
+        {
+            return NotFound(new ApiResponse<NotificationsDto>($"Notifications for user '{id}' not found."));
+        }
+
+        return Ok(new ApiResponse<NotificationsDto>(notifications));
+    }
+
+    /// <summary>
     /// Gets a user profile by identifier.
     /// </summary>
     [HttpGet("{id:guid}")]
@@ -295,6 +325,45 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading avatar for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<FileUploadDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Uploads a new banner for the authenticated user.
+    /// </summary>
+    [Authorize]
+    [HttpPost("{id:guid}/banner")]
+    [ProducesResponseType(typeof(FileUploadDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<FileUploadDto>>> UploadBannerAsync(Guid id, IFormFile file)
+    {
+        if (!TryGetUserIdFromClaims(out var currentUserId))
+        {
+            return Unauthorized(new ApiResponse<FileUploadDto>("Unable to determine the current user."));
+        }
+
+        if (currentUserId != id)
+        {
+            return Forbid();
+        }
+
+        if (file == null)
+        {
+            return BadRequest(new ApiResponse<FileUploadDto>("No file provided."));
+        }
+
+        try
+        {
+            var result = await _userService.UploadBannerAsync(id, file);
+            return Ok(new ApiResponse<FileUploadDto>(result) { Message = "Banner uploaded successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading banner for user {UserId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<FileUploadDto>(UnexpectedErrorMessage));
         }
     }

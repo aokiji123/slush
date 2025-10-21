@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<PostLike> PostLikes { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
+    public DbSet<Notifications> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +45,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Game>()
             .Property(g => g.Price)
             .HasPrecision(10, 2);
+
+        // Configure Notifications relationship
+        modelBuilder.Entity<Notifications>()
+            .HasOne(n => n.User)
+            .WithOne()
+            .HasForeignKey<Notifications>(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         
 

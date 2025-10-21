@@ -29,6 +29,16 @@ export type NotificationsRequest = {
   friendRequestDeclined: boolean
 }
 
+export type NotificationsSettings = {
+  userId: string
+  bigSale: boolean
+  wishlistDiscount: boolean
+  newProfileComment: boolean
+  newFriendRequest: boolean
+  friendRequestAccepted: boolean
+  friendRequestDeclined: boolean
+}
+
 export type DeleteAccountRequest = {
   userId: string
   nickname: string

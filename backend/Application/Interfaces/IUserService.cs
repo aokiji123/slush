@@ -13,7 +13,9 @@ public interface IUserService
     Task<bool> AddBalanceAsync(Guid id, decimal amountToAdd);
     Task<bool> DeleteUserAsync(UserDeleteDto dto);
     Task<bool> UpdateNotificationsAsync(NotificationsDto dto);
+    Task<NotificationsDto?> GetNotificationsAsync(Guid userId);
     Task<FileUploadDto> UploadAvatarAsync(Guid userId, IFormFile file);
+    Task<FileUploadDto> UploadBannerAsync(Guid userId, IFormFile file);
     
     // Online status methods
     Task UpdateOnlineStatusAsync(Guid userId, bool isOnline);
