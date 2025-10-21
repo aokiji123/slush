@@ -16,6 +16,10 @@ public class FriendRequest
     public string Status { get; set; } = FriendRequestStatus.Pending;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation properties
+    public User? Sender { get; set; }
+    public User? Receiver { get; set; }
 }
 
 public static class FriendRequestStatus

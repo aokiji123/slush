@@ -12,18 +12,34 @@ public class FriendshipService : IFriendshipService
 {
     private readonly IFriendRequestRepository _friendRequestRepository;
     private readonly IFriendshipRepository _friendshipRepository;
+    private readonly IUserService _userService;
 
     public FriendshipService(
         IFriendRequestRepository friendRequestRepository,
-        IFriendshipRepository friendshipRepository)
+        IFriendshipRepository friendshipRepository,
+        IUserService userService)
     {
         _friendRequestRepository = friendRequestRepository;
         _friendshipRepository = friendshipRepository;
+        _userService = userService;
     }
 
     public async Task<FriendRequest> SendRequestAsync(Guid senderId, Guid receiverId)
     {
         ValidateNotSelf(senderId, receiverId);
+
+        // Validate that both users exist
+        var sender = await _userService.GetUserAsync(senderId);
+        if (sender == null)
+        {
+            throw new ArgumentException("Sender user not found.");
+        }
+
+        var receiver = await _userService.GetUserAsync(receiverId);
+        if (receiver == null)
+        {
+            throw new ArgumentException("Receiver user not found.");
+        }
 
         var pendingExists = await _friendRequestRepository.ExistsPendingAsync(senderId, receiverId);
         if (pendingExists)
@@ -38,11 +54,6 @@ public class FriendshipService : IFriendshipService
         }
 
         var existingRequest = await _friendRequestRepository.GetByPairAsync(senderId, receiverId);
-        if (existingRequest is not null && existingRequest.Status == FriendRequestStatus.Accepted)
-        {
-            throw new InvalidOperationException("Users are already friends.");
-        }
-
         if (existingRequest is not null)
         {
             existingRequest.Status = FriendRequestStatus.Pending;
@@ -103,10 +114,42 @@ public class FriendshipService : IFriendshipService
         await _friendRequestRepository.UpdateAsync(request);
     }
 
+    public async Task CancelRequestAsync(Guid senderId, Guid receiverId)
+    {
+        ValidateNotSelf(senderId, receiverId);
+
+        var request = await _friendRequestRepository.GetByPairAsync(senderId, receiverId);
+        if (request is null || request.Status != FriendRequestStatus.Pending)
+        {
+            throw new KeyNotFoundException("Pending friend request not found.");
+        }
+
+        await _friendRequestRepository.DeleteAsync(request);
+    }
+
+    public async Task RemoveFriendshipAsync(Guid userId, Guid friendId)
+    {
+        ValidateNotSelf(userId, friendId);
+
+        var friendship = await _friendshipRepository.GetForPairAsync(userId, friendId);
+        if (friendship is null)
+        {
+            throw new KeyNotFoundException("Friendship not found.");
+        }
+
+        await _friendshipRepository.DeleteAsync(friendship);
+    }
+
     public async Task<IReadOnlyList<Guid>> GetPendingSentAsync(Guid senderId)
     {
         var pending = await _friendRequestRepository.GetPendingBySenderAsync(senderId);
         return pending.Select(fr => fr.ReceiverId).ToList();
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetPendingReceivedAsync(Guid receiverId)
+    {
+        var pending = await _friendRequestRepository.GetPendingByReceiverAsync(receiverId);
+        return pending.Select(fr => fr.SenderId).ToList();
     }
 
     public Task<IReadOnlyList<Friendship>> GetFriendshipsAsync(Guid userId)
@@ -114,11 +157,17 @@ public class FriendshipService : IFriendshipService
         return _friendshipRepository.GetForUserAsync(userId);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetFriendIdsAsync(Guid userId)
+    {
+        var friendships = await _friendshipRepository.GetForUserAsync(userId);
+        return friendships.Select(f => f.User1Id == userId ? f.User2Id : f.User1Id).ToList();
+    }
+
     private static void ValidateNotSelf(Guid senderId, Guid receiverId)
     {
         if (senderId == receiverId)
         {
-            throw new ArgumentException("Cannot send friend request to self.");
+            throw new ArgumentException("Cannot perform friendship action with self.");
         }
     }
 }

@@ -32,6 +32,12 @@ public class FriendRequestRepository : IFriendRequestRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task DeleteAsync(FriendRequest request)
+    {
+        _context.FriendRequests.Remove(request);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<bool> ExistsPendingAsync(Guid userAId, Guid userBId)
     {
         return await _context.FriendRequests.AnyAsync(fr =>
@@ -44,6 +50,14 @@ public class FriendRequestRepository : IFriendRequestRepository
     {
         return await _context.FriendRequests
             .Where(fr => fr.SenderId == senderId && fr.Status == FriendRequestStatus.Pending)
+            .OrderByDescending(fr => fr.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<FriendRequest>> GetPendingByReceiverAsync(Guid receiverId)
+    {
+        return await _context.FriendRequests
+            .Where(fr => fr.ReceiverId == receiverId && fr.Status == FriendRequestStatus.Pending)
             .OrderByDescending(fr => fr.CreatedAt)
             .ToListAsync();
     }
