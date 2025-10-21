@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { FaChevronDown, FaChevronUp, FaStar } from 'react-icons/fa'
 import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { Search, SidebarFilter, SortDropdown } from '@/components'
+import { useGenreTranslation } from '@/utils/translateGenre'
 
 export const Route = createFileRoute('/wishlist')({
   component: RouteComponent,
@@ -33,15 +35,15 @@ const glowCoords = [
 ]
 
 const sortOptions = [
-  'Спочатку знижки',
-  'За релевантністю',
-  'Спочатку популярні',
-  'Спочатку нові',
-  'За оцінкою',
-  'Від дешевих до дорогих',
-  'Від дорогих до дешевих',
-  'А - Я',
-  'Я - А',
+  'sortByDiscount',
+  'sortByRelevance',
+  'sortByPopularity',
+  'sortByNewest',
+  'sortByRating',
+  'sortByPriceAsc',
+  'sortByPriceDesc',
+  'sortByNameAsc',
+  'sortByNameDesc',
 ]
 
 const product = {
@@ -54,6 +56,8 @@ const product = {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation('cart')
+  const translateGenre = useGenreTranslation()
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
 
   function handleSortDropdownOpen() {
@@ -68,7 +72,7 @@ function RouteComponent() {
         </div>
 
         <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px] font-manrope">
-          Мій список бажаного
+          {t('wishlist.title')}
         </h2>
 
         <div className="flex gap-[24px] mt-[16px]">
@@ -81,17 +85,17 @@ function RouteComponent() {
               <div className="flex items-center justify-between">
                 <input
                   className="w-full max-w-[420px] h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
-                  placeholder="Пошук у Бажаному..."
+                  placeholder={t('wishlist.searchPlaceholder')}
                 />
                 <div className="flex items-center gap-[8px] relative">
                   <span className="text-[var(--color-background-25)] text-[16px] font-extralight">
-                    Сортування:{' '}
+                    {t('common.sorting')}:{' '}
                   </span>
                   <button
                     className="text-[var(--color-background)] text-[16px] flex items-center gap-[4px] cursor-pointer"
                     onClick={handleSortDropdownOpen}
                   >
-                    <p>За релевантністю</p>
+                    <p>{t('store.sortOptions.sortByRelevance')}</p>
 
                     {isSortDropdownOpen ? (
                       <FaChevronUp size={16} />
@@ -136,7 +140,7 @@ function RouteComponent() {
                               key={genre}
                               className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-medium text-[var(--color-background-25)] bg-[var(--color-background-18)]"
                             >
-                              {genre}
+                              {translateGenre(genre)}
                             </p>
                           ))}
                           <p className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-light text-[var(--color-background-25)] bg-[var(--color-background-18)]">
@@ -172,11 +176,11 @@ function RouteComponent() {
                                 </div>
                               </div>
                               <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-                                Знижка діє до 24.07.2024 10:00
+                                {t('wishlist.discountValidUntil')}
                               </p>
                             </div>
                             <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-                              <p>У кошик</p>
+                              <p>{t('wishlist.addToCart')}</p>
                             </div>
                           </div>
                         </div>

@@ -30,6 +30,23 @@ public class GameController : ControllerBase
     private const string CacheKeyPrefix = "GameController_";
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
+    /// <summary>
+    /// Extracts and normalizes the language from Accept-Language header
+    /// </summary>
+    /// <returns>Normalized language code (uk, en) with uk as default</returns>
+    private string ExtractLanguageFromHeader()
+    {
+        var acceptLanguage = HttpContext.Request.Headers["Accept-Language"]
+            .ToString().Split(',').FirstOrDefault()?.Split('-').FirstOrDefault() ?? "uk";
+        
+        return acceptLanguage.ToLower() switch
+        {
+            "en" => "en",
+            "uk" or "ua" => "uk",
+            _ => "uk" // Default fallback to Ukrainian
+        };
+    }
+
     public GameController(
         IGameService gameService,
         ILogger<GameController> logger,
@@ -53,17 +70,21 @@ public class GameController : ControllerBase
         {
             return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
         }
-        var cacheKey = $"{CacheKeyPrefix}Game_{id}";
+
+        // Extract language from Accept-Language header
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Game_{id}_{language}";
+        
         if (_cache.TryGetValue(cacheKey, out GameDto? cachedGame))
         {
-            _logger.LogInformation("Retrieved game {GameId} from cache", id);
+            _logger.LogInformation("Retrieved game {GameId} in language {Language} from cache", id, language);
             return Ok(new ApiResponse<GameDto>(cachedGame!));
         }
 
         try
         {
-            _logger.LogInformation("Retrieving game with ID: {GameId}", id);
-            var game = await _gameService.GetGameByIdAsync(id);
+            _logger.LogInformation("Retrieving game with ID: {GameId} in language: {Language}", id, language);
+            var game = await _gameService.GetGameByIdAsync(id, language);
             
             if (game is null)
             {
@@ -71,15 +92,15 @@ public class GameController : ControllerBase
                 return NotFound(new ApiResponse<GameDto>($"Game with ID {id} not found"));
             }
             
-            // Cache the game data
+            // Cache the game data with language-specific key
             _cache.Set(cacheKey, game, CacheExpiration);
             
-            _logger.LogInformation("Successfully retrieved game with ID: {GameId}", id);
+            _logger.LogInformation("Successfully retrieved game with ID: {GameId} in language: {Language}", id, language);
             return Ok(new ApiResponse<GameDto>(game));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving game {GameId}", id);
+            _logger.LogError(ex, "Error occurred while retrieving game {GameId} in language {Language}", id, language);
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 new ApiResponse<GameDto>("An error occurred while retrieving the game."));
         }
@@ -101,7 +122,8 @@ public class GameController : ControllerBase
         [FromQuery] string? platform = null,
         [FromQuery] decimal? priceUpperBound = null)
     {
-        var cacheKey = $"{CacheKeyPrefix}Search_g{genre}_p{platform}_price{priceUpperBound}";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Search_g{genre}_p{platform}_price{priceUpperBound}_{language}";
         if (_cache.TryGetValue(cacheKey, out object? cachedGames))
         {
             return Ok(new ApiResponse<object>(cachedGames!));
@@ -109,10 +131,10 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Searching games with criteria: Genre={Genre}, Platform={Platform}, PriceUpperBound={PriceUpperBound}", 
-                genre, platform, priceUpperBound);
+            _logger.LogInformation("Searching games with criteria: Genre={Genre}, Platform={Platform}, PriceUpperBound={PriceUpperBound}, Language={Language}", 
+                genre, platform, priceUpperBound, language);
                 
-            var games = await _gameService.SearchAsync(genre, platform, priceUpperBound);
+            var games = await _gameService.SearchAsync(genre, platform, priceUpperBound, language);
             
             // Map to the required response format
             var result = games.Select(g => new
@@ -125,9 +147,10 @@ public class GameController : ControllerBase
                 name = g.Name
             });
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Found {Count} games matching search criteria in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<object>(result));
         }
         catch (Exception ex)
@@ -148,7 +171,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetDiscount()
     {
-        var cacheKey = $"{CacheKeyPrefix}Discounted";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Discounted_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -156,17 +180,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving discounted games");
-            var result = await _gameService.GetDiscountedAsync();
+            _logger.LogInformation("Retrieving discounted games in language {Language}", language);
+            var result = await _gameService.GetDiscountedAsync(language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} discounted games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving discounted games");
+            _logger.LogError(ex, "Error occurred while retrieving discounted games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving discounted games."));
         }
@@ -182,7 +207,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetRecommended()
     {
-        var cacheKey = $"{CacheKeyPrefix}Recommended";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Recommended_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -190,17 +216,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving recommended games");
-            var result = await _gameService.GetRecommendedAsync();
+            _logger.LogInformation("Retrieving recommended games in language {Language}", language);
+            var result = await _gameService.GetRecommendedAsync(language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} recommended games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving recommended games");
+            _logger.LogError(ex, "Error occurred while retrieving recommended games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving recommended games."));
         }
@@ -219,7 +246,8 @@ public class GameController : ControllerBase
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetByPrice(
         [FromRoute, Required, Range(0, double.MaxValue)] decimal price)
     {
-        var cacheKey = $"{CacheKeyPrefix}Price_{price}";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Price_{price}_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -227,17 +255,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving games cheaper than {Price}", price);
-            var result = await _gameService.GetCheaperThanAsync(price);
+            _logger.LogInformation("Retrieving games cheaper than {Price} in language {Language}", price, language);
+            var result = await _gameService.GetCheaperThanAsync(price, language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} games cheaper than {Price} in language {Language}", result.Count(), price, language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving games cheaper than {Price}", price);
+            _logger.LogError(ex, "Error occurred while retrieving games cheaper than {Price} in language {Language}", price, language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving games."));
         }
@@ -253,7 +282,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetHits()
     {
-        var cacheKey = $"{CacheKeyPrefix}Hits";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Hits_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -261,17 +291,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving hit games");
-            var result = await _gameService.GetHitsAsync();
+            _logger.LogInformation("Retrieving hit games in language {Language}", language);
+            var result = await _gameService.GetHitsAsync(language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} hit games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving hit games");
+            _logger.LogError(ex, "Error occurred while retrieving hit games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving hit games."));
         }
@@ -287,7 +318,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetNew()
     {
-        var cacheKey = $"{CacheKeyPrefix}New";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}New_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -295,17 +327,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving new games");
-            var result = await _gameService.GetNewAsync();
+            _logger.LogInformation("Retrieving new games in language {Language}", language);
+            var result = await _gameService.GetNewAsync(language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} new games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving new games");
+            _logger.LogError(ex, "Error occurred while retrieving new games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving new games."));
         }
@@ -321,7 +354,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetFree()
     {
-        var cacheKey = $"{CacheKeyPrefix}Free";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Free_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -329,17 +363,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving free games");
-            var result = await _gameService.GetFreeAsync();
+            _logger.LogInformation("Retrieving free games in language {Language}", language);
+            var result = await _gameService.GetFreeAsync(language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
+            _logger.LogInformation("Successfully retrieved {Count} free games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving free games");
+            _logger.LogError(ex, "Error occurred while retrieving free games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving free games."));
         }
@@ -363,27 +398,28 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<IEnumerable<GameDto>>("Game ID cannot be empty"));
         }
 
-        var cacheKey = $"{CacheKeyPrefix}Dlcs_{gameId}";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Dlcs_{gameId}_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedDlcs))
         {
-            _logger.LogInformation("Retrieved DLCs for game {GameId} from cache", gameId);
+            _logger.LogInformation("Retrieved DLCs for game {GameId} in language {Language} from cache", gameId, language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedDlcs!));
         }
 
         try
         {
-            _logger.LogInformation("Retrieving DLCs for game with ID: {GameId}", gameId);
-            var result = await _gameService.GetDlcsByGameIdAsync(gameId);
+            _logger.LogInformation("Retrieving DLCs for game with ID: {GameId} in language {Language}", gameId, language);
+            var result = await _gameService.GetDlcsByGameIdAsync(gameId, language);
             
-            // Cache the results
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
-            _logger.LogInformation("Successfully retrieved {Count} DLCs for game with ID: {GameId}", result.Count(), gameId);
+            _logger.LogInformation("Successfully retrieved {Count} DLCs for game with ID: {GameId} in language {Language}", result.Count(), gameId, language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving DLCs for game {GameId}", gameId);
+            _logger.LogError(ex, "Error occurred while retrieving DLCs for game {GameId} in language {Language}", gameId, language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving DLCs."));
         }
@@ -445,7 +481,8 @@ public class GameController : ControllerBase
     [ResponseCache(Duration = CacheDurationSeconds)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetAllGames()
     {
-        var cacheKey = $"{CacheKeyPrefix}All";
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}All_{language}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedGames))
         {
             return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedGames!));
@@ -453,16 +490,18 @@ public class GameController : ControllerBase
 
         try
         {
-            _logger.LogInformation("Retrieving all games");
-            var result = await _gameService.SearchAsync(null, null, null); // Return all games, unfiltered
+            _logger.LogInformation("Retrieving all games in language {Language}", language);
+            var result = await _gameService.SearchAsync(null, null, null, language); // Return all games, unfiltered
 
+            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
 
+            _logger.LogInformation("Successfully retrieved {Count} games in language {Language}", result.Count(), language);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while retrieving all games");
+            _logger.LogError(ex, "Error occurred while retrieving all games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving all games."));
         }

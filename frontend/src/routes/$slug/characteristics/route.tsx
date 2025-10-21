@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { FaChevronDown, FaWindows } from 'react-icons/fa'
 import { useGameCharacteristics } from '@/api/queries/useGame'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/$slug/characteristics')({
   component: RouteComponent,
@@ -8,6 +9,7 @@ export const Route = createFileRoute('/$slug/characteristics')({
 
 function RouteComponent() {
   const { slug } = Route.useParams()
+  const { t } = useTranslation('game')
   const {
     data: characteristics,
     isLoading,
@@ -17,7 +19,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-white text-2xl">Завантаження характеристик...</p>
+        <p className="text-white text-2xl">{t('characteristics.loading')}</p>
       </div>
     )
   }
@@ -26,7 +28,7 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-white text-2xl">
-          Не вдалося завантажити характеристики
+          {t('characteristics.error')}
         </p>
       </div>
     )
@@ -36,24 +38,24 @@ function RouteComponent() {
 
   // Map API data to UI structure for minimal settings
   const minimalSettings = [
-    { name: 'ОС', value: data.minVersion },
-    { name: 'Процесор', value: data.minCpu },
-    { name: "Пам'ять", value: data.minRam },
-    { name: 'Відеокарта', value: data.minGpu },
-    { name: 'DirectX', value: data.minDirectX },
-    { name: 'Місце на диску', value: data.minMemory },
-    { name: 'Звукова карта', value: data.minAudioCard },
+    { name: t('characteristics.os'), value: data.minVersion },
+    { name: t('characteristics.processor'), value: data.minCpu },
+    { name: t('characteristics.memory'), value: data.minRam },
+    { name: t('characteristics.graphics'), value: data.minGpu },
+    { name: t('characteristics.directx'), value: data.minDirectX },
+    { name: t('characteristics.storage'), value: data.minMemory },
+    { name: t('characteristics.soundCard'), value: data.minAudioCard },
   ]
 
   // Map API data to UI structure for recommended settings
   const recommendedSettings = [
-    { name: 'ОС', value: data.recommendedVersion },
-    { name: 'Процесор', value: data.recommendedCpu },
-    { name: "Пам'ять", value: data.recommendedRam },
-    { name: 'Відеокарта', value: data.recommendedGpu },
-    { name: 'DirectX', value: data.recommendedDirectX },
-    { name: 'Місце на диску', value: data.recommendedMemory },
-    { name: 'Звукова карта', value: data.recommendedAudioCard },
+    { name: t('characteristics.os'), value: data.recommendedVersion },
+    { name: t('characteristics.processor'), value: data.recommendedCpu },
+    { name: t('characteristics.memory'), value: data.recommendedRam },
+    { name: t('characteristics.graphics'), value: data.recommendedGpu },
+    { name: t('characteristics.directx'), value: data.recommendedDirectX },
+    { name: t('characteristics.storage'), value: data.recommendedMemory },
+    { name: t('characteristics.soundCard'), value: data.recommendedAudioCard },
   ]
 
   return (
@@ -70,7 +72,7 @@ function RouteComponent() {
       <div className="w-full flex gap-[64px] mt-[16px] text-[var(--color-background)]">
         <div className="w-[50%] flex flex-col gap-[16px] text-[20px]">
           <p className="text-[24px] font-medium font-manrope">
-            Мінімальні налаштування
+            {t('characteristics.minimal')}
           </p>
           {minimalSettings.map((item, index) => (
             <div key={`min-${index}`} className="flex flex-col">
@@ -81,7 +83,7 @@ function RouteComponent() {
         </div>
         <div className="w-[50%] flex flex-col gap-[16px] text-[20px]">
           <p className="text-[24px] font-medium font-manrope">
-            Рекомендовані налаштування
+            {t('characteristics.recommended')}
           </p>
           {recommendedSettings.map((item, index) => (
             <div key={`rec-${index}`} className="flex flex-col">
@@ -97,15 +99,15 @@ function RouteComponent() {
         <div className="w-full mt-[32px] text-[var(--color-background)]">
           <div className="flex flex-col gap-[16px] text-[20px]">
             <p className="text-[24px] font-medium font-manrope">
-              Додаткова інформація
+              {t('characteristics.additionalInfo')}
             </p>
             <div className="flex flex-col">
-              <p className="font-bold">Керування</p>
+              <p className="font-bold">{t('characteristics.controls')}</p>
               <p className="font-light">{data.controller}</p>
             </div>
             {data.additional && (
               <div className="flex flex-col">
-                <p className="font-bold">Додатково</p>
+                <p className="font-bold">{t('characteristics.additional')}</p>
                 <p className="font-light">{data.additional}</p>
               </div>
             )}
@@ -118,17 +120,17 @@ function RouteComponent() {
         <div className="w-full mt-[32px] text-[var(--color-background)]">
           <div className="flex flex-col gap-[16px] text-[20px]">
             <p className="text-[24px] font-medium font-manrope">
-              Мовна підтримка
+              {t('characteristics.languageSupport')}
             </p>
             {data.langAudio.length > 0 && (
               <div className="flex flex-col">
-                <p className="font-bold">Аудіо</p>
+                <p className="font-bold">{t('characteristics.audio')}</p>
                 <p className="font-light">{data.langAudio.join(', ')}</p>
               </div>
             )}
             {data.langText.length > 0 && (
               <div className="flex flex-col">
-                <p className="font-bold">Текст</p>
+                <p className="font-bold">{t('characteristics.text')}</p>
                 <p className="font-light">{data.langText.join(', ')}</p>
               </div>
             )}

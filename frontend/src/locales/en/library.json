@@ -1,0 +1,44 @@
+{
+  "title": "My Library",
+  "empty": {
+    "title": "Your library is empty",
+    "description": "Games you purchase will appear here",
+    "browseStore": "Browse Store"
+  },
+  "filters": {
+    "all": "All Games",
+    "installed": "Installed",
+    "uninstalled": "Uninstalled",
+    "recent": "Recent",
+    "favorites": "Favorites"
+  },
+  "sortBy": {
+    "name": "Name",
+    "lastPlayed": "Last Played",
+    "playTime": "Play Time",
+    "purchaseDate": "Purchase Date"
+  },
+  "actions": {
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "play": "Play",
+    "viewDetails": "View Details",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist"
+  },
+  "stats": {
+    "totalGames": "Total Games",
+    "totalPlayTime": "Total Play Time",
+    "favoriteGenre": "Favorite Genre",
+    "lastPlayed": "Last Played"
+  },
+  "game": {
+    "lastPlayed": "Last played",
+    "playTime": "Play time",
+    "purchasedOn": "Purchased on",
+    "neverPlayed": "Never played",
+    "installing": "Installing...",
+    "installed": "Installed",
+    "notInstalled": "Not installed"
+  }
+}

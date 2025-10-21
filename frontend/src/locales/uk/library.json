@@ -1,0 +1,44 @@
+{
+  "title": "Моя бібліотека",
+  "empty": {
+    "title": "Ваша бібліотека порожня",
+    "description": "Ігри, які ви купите, з'являться тут",
+    "browseStore": "Переглянути магазин"
+  },
+  "filters": {
+    "all": "Всі ігри",
+    "installed": "Встановлені",
+    "uninstalled": "Не встановлені",
+    "recent": "Недавні",
+    "favorites": "Улюблені"
+  },
+  "sortBy": {
+    "name": "Назвою",
+    "lastPlayed": "Останньою грою",
+    "playTime": "Часом гри",
+    "purchaseDate": "Датою покупки"
+  },
+  "actions": {
+    "install": "Встановити",
+    "uninstall": "Видалити",
+    "play": "Грати",
+    "viewDetails": "Переглянути деталі",
+    "addToWishlist": "Додати в список бажань",
+    "removeFromWishlist": "Видалити зі списку бажань"
+  },
+  "stats": {
+    "totalGames": "Всього ігор",
+    "totalPlayTime": "Загальний час гри",
+    "favoriteGenre": "Улюблений жанр",
+    "lastPlayed": "Остання гра"
+  },
+  "game": {
+    "lastPlayed": "Остання гра",
+    "playTime": "Час гри",
+    "purchasedOn": "Куплено",
+    "neverPlayed": "Ніколи не грали",
+    "installing": "Встановлення...",
+    "installed": "Встановлено",
+    "notInstalled": "Не встановлено"
+  }
+}

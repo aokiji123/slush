@@ -7,6 +7,7 @@ import {
   GridRowIcon,
   SearchIcon,
 } from '@/icons'
+import { useTranslation } from 'react-i18next'
 
 type SearchProps = {
   className?: string
@@ -21,6 +22,7 @@ export const Search = ({
 }: SearchProps) => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation('common')
 
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
@@ -33,7 +35,7 @@ export const Search = ({
         <div className="w-[190px] sm:w-[320px] lg:w-[590px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative">
           <input
             type="text"
-            placeholder="Пошук у крамниці..."
+            placeholder={t('search.placeholder')}
             className="bg-transparent text-white text-[16px] h-[44px] w-full rounded-[20px] outline-none placeholder:text-[#CCF8FFA6] placeholder:text-[16px]"
           />
           <SearchIcon className="sm:block hidden absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
@@ -50,7 +52,7 @@ export const Search = ({
                 navigate({ to: '/catalog' })
               }}
             >
-              Каталог
+              {t('navigation.catalog')}
             </p>
             <p
               className={`text-[14px] sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
@@ -62,17 +64,17 @@ export const Search = ({
                 navigate({ to: '/new' })
               }}
             >
-              Новинки
+              {t('navigation.new')}
             </p>
           </div>
         ) : (
           <div className="pl-[24px] flex items-center justify-between w-full text-white">
             <div className="flex items-center gap-[8px]">
               <IoFilter size={24} />
-              <p className="text-[16px]">Фільтри</p>
+              <p className="text-[16px]">{t('filters.title')}</p>
             </div>
             <div className="flex items-center gap-[12px]">
-              <p className="text-[16px] mr-1">Вид:</p>
+              <p className="text-[16px] mr-1">{t('filters.view')}</p>
               <div onClick={() => onViewModeChange?.('grid')}>
                 <GridIcon
                   className={`cursor-pointer hover:text-[var(--color-background-23)] ${

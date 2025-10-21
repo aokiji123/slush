@@ -3,6 +3,7 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 import { IoMdClose } from 'react-icons/io'
 import { SortDropdown } from './SortDropdown'
 import { CustomCheckbox } from './CustomCheckbox'
+import { useTranslation } from 'react-i18next'
 
 type FilterOption = {
   label: string
@@ -15,73 +16,85 @@ type FilterSection = {
   options: Array<FilterOption>
 }
 
-const sortOptions = [
-  'За релевантністю',
-  'Спочатку популярні',
-  'Спочатку нові',
-  'За оцінкою',
-  'Від дешевих до дорогих',
-  'Від дорогих до дешевих',
-  'А - Я',
-  'Я - А',
+const getSortOptions = (t: any) => [
+  t('sorting.relevance'),
+  t('sorting.popular'),
+  t('sorting.newest'),
+  t('sorting.rating'),
+  t('sorting.priceLowHigh'),
+  t('sorting.priceHighLow'),
+  t('sorting.nameAZ'),
+  t('sorting.nameZA'),
 ]
 
-const filters: Array<FilterSection> = [
+const getFilters = (t: any): Array<FilterSection> => [
   {
-    title: 'Жанри',
+    title: t('filters.genres'),
     key: 'genres',
-    options: ['Екшн', 'Пригода', 'RPG', 'Стратегія'].map((label) => ({
-      label,
-      value: label,
-    })),
+    options: [
+      { label: t('filters.genreOptions.action'), value: 'action' },
+      { label: t('filters.genreOptions.adventure'), value: 'adventure' },
+      { label: t('filters.genreOptions.rpg'), value: 'rpg' },
+      { label: t('filters.genreOptions.strategy'), value: 'strategy' },
+    ],
   },
   {
-    title: 'Платформи',
+    title: t('filters.platforms'),
     key: 'platforms',
-    options: ['PC', 'PS5', 'Xbox'].map((label) => ({ label, value: label })),
+    options: [
+      { label: t('filters.platformOptions.pc'), value: 'pc' },
+      { label: t('filters.platformOptions.ps5'), value: 'ps5' },
+      { label: t('filters.platformOptions.xbox'), value: 'xbox' },
+    ],
   },
   {
-    title: 'Ціна',
+    title: t('filters.price'),
     key: 'price',
     options: [
-      'Безкоштовно',
-      'До 100 гривень',
-      'До 300 гривень',
-      'До 600 гривень',
-      'До 900 гривень',
-      'Без обмежень',
-      'Знижки',
-    ].map((label) => ({ label, value: label })),
+      { label: t('filters.priceOptions.free'), value: 'free' },
+      { label: t('filters.priceOptions.under100'), value: 'under100' },
+      { label: t('filters.priceOptions.under300'), value: 'under300' },
+      { label: t('filters.priceOptions.under600'), value: 'under600' },
+      { label: t('filters.priceOptions.under900'), value: 'under900' },
+      { label: t('filters.priceOptions.unlimited'), value: 'unlimited' },
+      { label: t('filters.priceOptions.discounts'), value: 'discounts' },
+    ],
   },
   {
-    title: 'Тип',
+    title: t('filters.type'),
     key: 'types',
-    options: ['Ігри', 'Додатки', 'Ігри-підказки'].map((label) => ({
-      label,
-      value: label,
-    })),
+    options: [
+      { label: t('filters.typeOptions.games'), value: 'games' },
+      { label: t('filters.typeOptions.addons'), value: 'addons' },
+      { label: t('filters.typeOptions.hints'), value: 'hints' },
+    ],
   },
   {
-    title: 'Особливості',
+    title: t('filters.features'),
     key: 'features',
-    options: ['Відкритий світ', 'Мультиплеєр', 'Singleplayer'].map((label) => ({
-      label,
-      value: label,
-    })),
+    options: [
+      { label: t('filters.featureOptions.openWorld'), value: 'openWorld' },
+      { label: t('filters.featureOptions.multiplayer'), value: 'multiplayer' },
+      { label: t('filters.featureOptions.singleplayer'), value: 'singleplayer' },
+    ],
   },
   {
-    title: 'Івенти',
+    title: t('filters.events'),
     key: 'events',
-    options: ['Відкритий світ', 'Мультиплеєр', 'Singleplayer'].map((label) => ({
-      label,
-      value: label,
-    })),
+    options: [
+      { label: t('filters.featureOptions.openWorld'), value: 'openWorld' },
+      { label: t('filters.featureOptions.multiplayer'), value: 'multiplayer' },
+      { label: t('filters.featureOptions.singleplayer'), value: 'singleplayer' },
+    ],
   },
 ]
 
 export const SidebarFilter = ({ noSort }: { noSort?: boolean }) => {
+  const { t } = useTranslation('common')
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
+  const sortOptions = getSortOptions(t)
+  const filters = getFilters(t)
 
   function handleSortDropdownOpen() {
     setIsSortDropdownOpen(!isSortDropdownOpen)
@@ -96,13 +109,13 @@ export const SidebarFilter = ({ noSort }: { noSort?: boolean }) => {
       {!noSort && (
         <div className="flex items-center gap-[8px] relative mb-[16px]">
           <span className="text-[var(--color-background-25)] text-[16px] font-extralight">
-            Сортування:{' '}
+            {t('sorting.label')}{' '}
           </span>
           <button
             className="text-[var(--color-background)] text-[16px] flex items-center gap-[4px] cursor-pointer"
             onClick={handleSortDropdownOpen}
           >
-            <p>За релевантністю</p>
+            <p>{t('sorting.relevance')}</p>
 
             {isSortDropdownOpen ? (
               <FaChevronUp size={16} />
@@ -122,17 +135,17 @@ export const SidebarFilter = ({ noSort }: { noSort?: boolean }) => {
       <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
         <div className="flex items-center justify-between">
           <p className="text-[20px] text-[var(--color-background)] font-manrope">
-            Фільтри
+            {t('filters.title')}
           </p>
           <button className="text-[16px] text-[var(--color-background-21)] cursor-pointer">
-            Скинути
+            {t('filters.reset')}
           </button>
         </div>
 
         <div className="relative">
           <input
             className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
-            placeholder="Пошук тегів..."
+            placeholder={t('search.tagsPlaceholder')}
           />
           <IoMdClose
             size={24}

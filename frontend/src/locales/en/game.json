@@ -1,0 +1,78 @@
+{
+  "characteristics": {
+    "loading": "Loading characteristics...",
+    "error": "Failed to load characteristics",
+    "minimal": "Minimum Requirements",
+    "recommended": "Recommended Requirements",
+    "os": "OS",
+    "processor": "Processor",
+    "memory": "Memory",
+    "graphics": "Graphics Card",
+    "directx": "DirectX",
+    "storage": "Storage",
+    "soundCard": "Sound Card",
+    "additionalInfo": "Additional Information",
+    "controls": "Controls",
+    "additional": "Additional",
+    "languageSupport": "Language Support",
+    "audio": "Audio",
+    "text": "Text"
+  },
+  "bundles": {
+    "title": "Bundles",
+    "contents": "Contents:",
+    "baseGame": "base game"
+  },
+  "dlc": {
+    "search": "Search...",
+    "filters": "Filters",
+    "sorting": "Sorting:",
+    "byRelevance": "By Relevance",
+    "free": "Free",
+    "included": "This digital pack includes:",
+    "addToCart": "Add to Cart",
+    "otherDlc": "Other DLC",
+    "allDlc": "All DLC",
+    "addAllDlcToCart": "Add all DLC to cart"
+  },
+  "actions": {
+    "addToCart": "Add to Cart",
+    "free": "Free",
+    "writeReview": "Write a review",
+    "buy": "Buy",
+    "repost": "Repost",
+    "report": "Report"
+  },
+  "tabs": {
+    "about": "About",
+    "characteristics": "Characteristics",
+    "community": "Community"
+  },
+  "sidebar": {
+    "releaseDate": "Release Date",
+    "developer": "Developer",
+    "publisher": "Publisher",
+    "platforms": "Platforms",
+    "friendsWantThis": "Friends want this game:",
+    "friendsHaveThis": "Friends have this game:"
+  },
+  "notFound": "Game not found",
+  "reviews": {
+    "title": "Reviews",
+    "sorting": "Sorting:",
+    "mostPopularFirst": "Most popular first",
+    "sortByComments": "By number of comments",
+    "sortByPositive": "Most positive first",
+    "sortByNegative": "Most negative first"
+  },
+  "review": {
+    "writeReview": "Write a Review",
+    "noReviews": "No reviews yet",
+    "rating": "Rating",
+    "content": "Review",
+    "contentPlaceholder": "Share your thoughts about this game...",
+    "contentRequired": "Review content is required",
+    "contentTooShort": "Review must be at least 10 characters long",
+    "ratingRequired": "Please select a rating"
+  }
+}

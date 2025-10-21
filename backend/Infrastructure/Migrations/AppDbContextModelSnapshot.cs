@@ -125,22 +125,20 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("BaseGameId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
-                    b.Property<string>("Developer")
+                    b.Property<string>("DeveloperTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("DiscountPercent")
                         .HasColumnType("integer");
 
-                    b.PrimitiveCollection<List<string>>("Genre")
+                    b.Property<string>("GenreTranslations")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("jsonb");
 
                     b.PrimitiveCollection<List<string>>("Images")
                         .IsRequired()
@@ -154,10 +152,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.PrimitiveCollection<List<string>>("Platforms")
                         .IsRequired()
@@ -167,10 +164,9 @@ namespace Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.Property<string>("Publisher")
+                    b.Property<string>("PublisherTranslations")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("jsonb");
 
                     b.Property<double>("Rating")
                         .HasColumnType("double precision");
@@ -347,6 +343,34 @@ namespace Infrastructure.Migrations
                     b.ToTable("Media");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Notifications", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("BigSale")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("FriendRequestAccepted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("FriendRequestDeclined")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NewFriendRequest")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NewProfileComment")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("WishlistDiscount")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -519,9 +543,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
                     b.HasKey("UserId", "ReviewId");
 
                     b.HasIndex("ReviewId");
@@ -562,9 +583,15 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Lang")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -603,6 +630,31 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserBlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BlockedUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BlockerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedUserId");
+
+                    b.HasIndex("BlockerId", "BlockedUserId")
+                        .IsUnique();
+
+                    b.ToTable("UserBlocks");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserRole", b =>
@@ -766,6 +818,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Notifications", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("Domain.Entities.Notifications", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.Payment", b =>
                 {
                     b.HasOne("Domain.Entities.Game", "Game")
@@ -842,6 +905,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("Review");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserBlock", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "BlockedUser")
+                        .WithMany()
+                        .HasForeignKey("BlockedUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlockedUser");
+
+                    b.Navigation("Blocker");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserRole", b =>

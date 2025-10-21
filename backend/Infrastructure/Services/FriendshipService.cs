@@ -13,20 +13,30 @@ public class FriendshipService : IFriendshipService
     private readonly IFriendRequestRepository _friendRequestRepository;
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IUserService _userService;
+    private readonly IUserBlockRepository _userBlockRepository;
 
     public FriendshipService(
         IFriendRequestRepository friendRequestRepository,
         IFriendshipRepository friendshipRepository,
-        IUserService userService)
+        IUserService userService,
+        IUserBlockRepository userBlockRepository)
     {
         _friendRequestRepository = friendRequestRepository;
         _friendshipRepository = friendshipRepository;
         _userService = userService;
+        _userBlockRepository = userBlockRepository;
     }
 
     public async Task<FriendRequest> SendRequestAsync(Guid senderId, Guid receiverId)
     {
         ValidateNotSelf(senderId, receiverId);
+
+        // Check if users have blocked each other
+        var isBlocked = await _userBlockRepository.IsBlockedAsync(senderId, receiverId);
+        if (isBlocked)
+        {
+            throw new InvalidOperationException("Cannot send friend request to blocked user.");
+        }
 
         // Validate that both users exist
         var sender = await _userService.GetUserAsync(senderId);
@@ -75,6 +85,13 @@ public class FriendshipService : IFriendshipService
     public async Task<Friendship> AcceptRequestAsync(Guid senderId, Guid receiverId)
     {
         ValidateNotSelf(senderId, receiverId);
+
+        // Check if users have blocked each other
+        var isBlocked = await _userBlockRepository.IsBlockedAsync(senderId, receiverId);
+        if (isBlocked)
+        {
+            throw new InvalidOperationException("Cannot accept friend request from blocked user.");
+        }
 
         var request = await _friendRequestRepository.GetByPairAsync(senderId, receiverId);
         if (request is null || request.Status != FriendRequestStatus.Pending)
@@ -161,6 +178,11 @@ public class FriendshipService : IFriendshipService
     {
         var friendships = await _friendshipRepository.GetForUserAsync(userId);
         return friendships.Select(f => f.User1Id == userId ? f.User2Id : f.User1Id).ToList();
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId)
+    {
+        return await _userService.GetOnlineFriendIdsAsync(userId);
     }
 
     private static void ValidateNotSelf(Guid senderId, Guid receiverId)

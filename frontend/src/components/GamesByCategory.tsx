@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { FaChevronRight } from 'react-icons/fa'
 import type { GameData } from '@/api/types/game'
 
@@ -22,6 +23,7 @@ export const GamesByCategory = ({
   newReleases,
   freeGames,
 }: GamesByCategoryProps) => {
+  const { t } = useTranslation(['store', 'common'])
   const transformGames = (games?: GameData[]): Product[] => {
     if (!games) return []
     return games.slice(0, 3).map((game) => ({
@@ -37,12 +39,12 @@ export const GamesByCategory = ({
   return (
     <div className="mt-[64px] mb-[192px] flex flex-col gap-[16px] relative text-white z-10">
       <div className="flex flex-col lg:flex-row items-center justify-center gap-[16px] md:gap-[24px] w-full">
-        <GamesColumn products={transformGames(hits)} title="Хіти продажу" />
+        <GamesColumn products={transformGames(hits)} title={t('home.topSellers')} />
         <GamesColumn
           products={transformGames(newReleases)}
-          title="Нові релізи"
+          title={t('home.newReleases')}
         />
-        <GamesColumn products={transformGames(freeGames)} title="Безкоштовні" />
+        <GamesColumn products={transformGames(freeGames)} title={t('home.freeGames')} />
       </div>
     </div>
   )
@@ -56,6 +58,7 @@ const GamesColumn = ({
   title: string
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation('common')
 
   return (
     <div className="flex flex-col gap-[16px] md:gap-[24px] w-full lg:w-[33%]">
@@ -103,7 +106,7 @@ const GamesColumn = ({
                     : ''
                 }`}
               >
-                {product.price ? `${product.price}₴` : 'Безкоштовно'}
+                {product.price ? `${product.price}₴` : t('common.free')}
               </p>
             </div>
           </div>

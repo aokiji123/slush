@@ -31,9 +31,21 @@ export type GamesListResponse = {
   data: GameData[]
 }
 
+export type Review = {
+  id: string
+  gameId: string
+  userId: string
+  username: string
+  userAvatar: string
+  content: string
+  rating: number
+  createdAt: string
+  likes: number
+  isLikedByCurrentUser: boolean
+}
+
 export type CreateReviewRequest = {
   gameId: string
-  username: string
   content: string
   rating: number
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForgotPassword } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/forgot-password')({
@@ -8,6 +9,7 @@ export const Route = createFileRoute('/forgot-password')({
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const { t } = useTranslation('auth')
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
 
@@ -18,13 +20,13 @@ function RouteComponent() {
     setError('')
 
     if (!email) {
-      setError('Будь ласка, введіть email')
+      setError(t('forgotPassword.errors.emailRequired'))
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setError('Введіть коректну email адресу')
+      setError(t('forgotPassword.errors.emailInvalid'))
       return
     }
 
@@ -38,7 +40,7 @@ function RouteComponent() {
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
-          'Помилка відправки коду. Спробуйте ще раз.',
+          t('forgotPassword.errors.sendError'),
       )
     }
   }
@@ -59,10 +61,10 @@ function RouteComponent() {
           <div className="flex flex-col gap-[32px] w-full">
             <div className="flex flex-col gap-[16px]">
               <p className="text-[24px] font-bold text-center font-manrope">
-                Забули пароль?
+                {t('forgotPassword.title')}
               </p>
               <p className="text-[16px] font-normal text-center">
-                Вам буде надіслано лист із кодом для зміни паролю
+                {t('forgotPassword.description')}
               </p>
             </div>
             {error && (
@@ -73,14 +75,14 @@ function RouteComponent() {
             <div className="flex flex-col gap-[16px]">
               <div className="flex flex-col gap-[8px]">
                 <label htmlFor="email" className="text-[16px] font-bold">
-                  Email
+                  {t('forgotPassword.emailLabel')}
                 </label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Введіть ваш email..."
+                  placeholder={t('forgotPassword.emailPlaceholder')}
                   className="bg-[var(--color-background-14)] rounded-[22px] py-[12px] px-[16px] text-[16px] font-bold placeholder:font-light border-1 border-[var(--color-background-16)]"
                   disabled={sendCodeMutation.isPending}
                 />
@@ -92,7 +94,7 @@ function RouteComponent() {
             disabled={sendCodeMutation.isPending}
             className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {sendCodeMutation.isPending ? 'Відправка...' : 'Продовжити'}
+            {sendCodeMutation.isPending ? t('forgotPassword.errors.loading') : t('forgotPassword.submit')}
           </button>
         </form>
       </div>

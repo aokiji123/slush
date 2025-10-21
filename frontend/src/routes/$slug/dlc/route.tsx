@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { FaChevronDown, FaChevronUp, FaStar } from 'react-icons/fa'
 import { IoFilter } from 'react-icons/io5'
+import { useTranslation } from 'react-i18next'
 
 type DLCItem = {
   id: string
@@ -13,15 +14,15 @@ type DLCItem = {
   isFree?: boolean
 }
 
-const sortOptions = [
-  'За релевантністю',
-  'Спочатку популярні',
-  'Спочатку нові',
-  'За оцінкою',
-  'Від дешевих до дорогих',
-  'Від дорогих до дешевих',
-  'А - Я',
-  'Я - А',
+const getSortOptions = (t: any) => [
+  t('common:sorting.relevance'),
+  t('common:sorting.popular'),
+  t('common:sorting.newest'),
+  t('common:sorting.rating'),
+  t('common:sorting.priceLowHigh'),
+  t('common:sorting.priceHighLow'),
+  t('common:sorting.nameAZ'),
+  t('common:sorting.nameZA'),
 ]
 
 const glowCoords = [
@@ -48,11 +49,11 @@ const glowCoords = [
   },
 ]
 
-const dlcItems: Array<DLCItem> = [
+const getDlcItems = (t: any): Array<DLCItem> => [
   {
     id: '1',
     name: 'Cyberpunk 2077 Bonus Content',
-    price: 'Безкоштовно',
+    price: t('game:dlc.free'),
     description:
       '- Оригінальний саундтрек, Арт-бук із добіркою ігрових малюнків, Цифровий комікс Cyberpunk 2077: Your Voice, Книжкова збірка «Cyberpunk 2020», Шпалери',
     image: '/dlc.png',
@@ -60,7 +61,7 @@ const dlcItems: Array<DLCItem> = [
   {
     id: '2',
     name: 'Cyberpunk 2077 REDmod',
-    price: 'Безкоштовно',
+    price: t('game:dlc.free'),
     description:
       'Офіційна підтримка модів для Cyberpunk 2077. Завантажуйте та створюйте власні модифікації для гри.',
     image: '/dlc.png',
@@ -80,7 +81,10 @@ export const Route = createFileRoute('/$slug/dlc')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation(['game', 'common'])
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
+  const sortOptions = getSortOptions(t)
+  const dlcItems = getDlcItems(t)
 
   function handleSortDropdownOpen() {
     setIsSortDropdownOpen(!isSortDropdownOpen)
@@ -96,23 +100,23 @@ function RouteComponent() {
             <input
               type="text"
               id="amount"
-              placeholder="Пошук..."
+              placeholder={t('game:dlc.search')}
               className="w-[400px] h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
             />
             <div className="flex items-center gap-[8px]">
               <IoFilter size={24} />
-              <p className="text-[16px]">Фільтри</p>
+              <p className="text-[16px]">{t('game:dlc.filters')}</p>
             </div>
           </div>
           <div className="flex items-center gap-[8px] relative">
             <span className="text-[var(--color-background-25)] text-[16px] font-extralight">
-              Сортування:{' '}
+              {t('game:dlc.sorting')}{' '}
             </span>
             <button
               className="text-[var(--color-background)] text-[16px] flex items-center gap-[4px] cursor-pointer"
               onClick={handleSortDropdownOpen}
             >
-              <p>За релевантністю</p>
+              <p>{t('game:dlc.byRelevance')}</p>
 
               {isSortDropdownOpen ? (
                 <FaChevronUp size={16} />
@@ -150,7 +154,7 @@ function RouteComponent() {
                     {item.name}
                   </p>
                   <div className="font-light">
-                    <p>До цифрового набору включено:</p>
+                    <p>{t('game:dlc.included')}</p>
                     <p className="line-clamp-2">{item.description}</p>
                   </div>
                   <div className="w-full flex items-center justify-end gap-[16px] mt-[16px]">
@@ -158,7 +162,7 @@ function RouteComponent() {
                       {item.price}
                     </button>
                     <button className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
-                      У кошик
+                      {t('game:dlc.addToCart')}
                     </button>
                   </div>
                 </div>

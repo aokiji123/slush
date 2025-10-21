@@ -1,0 +1,78 @@
+{
+  "characteristics": {
+    "loading": "Завантаження характеристик...",
+    "error": "Не вдалося завантажити характеристики",
+    "minimal": "Мінімальні налаштування",
+    "recommended": "Рекомендовані налаштування",
+    "os": "ОС",
+    "processor": "Процесор",
+    "memory": "Пам'ять",
+    "graphics": "Відеокарта",
+    "directx": "DirectX",
+    "storage": "Місце на диску",
+    "soundCard": "Звукова карта",
+    "additionalInfo": "Додаткова інформація",
+    "controls": "Керування",
+    "additional": "Додатково",
+    "languageSupport": "Мовна підтримка",
+    "audio": "Аудіо",
+    "text": "Текст"
+  },
+  "bundles": {
+    "title": "Комплекти",
+    "contents": "Вміст:",
+    "baseGame": "базова гра"
+  },
+  "dlc": {
+    "search": "Пошук...",
+    "filters": "Фільтри",
+    "sorting": "Сортування:",
+    "byRelevance": "За релевантністю",
+    "free": "Безкоштовно",
+    "included": "До цифрового набору включено:",
+    "addToCart": "У кошик",
+    "otherDlc": "Інші DLC",
+    "allDlc": "Усі DLC",
+    "addAllDlcToCart": "Додати в кошик усі DLC"
+  },
+  "actions": {
+    "addToCart": "У кошик",
+    "free": "Безкоштовно",
+    "writeReview": "Написати рецензію",
+    "buy": "Купити",
+    "repost": "Репост",
+    "report": "Поскаржитись"
+  },
+  "tabs": {
+    "about": "Про гру",
+    "characteristics": "Характеристики",
+    "community": "Спільнота"
+  },
+  "sidebar": {
+    "releaseDate": "Дата виходу",
+    "developer": "Розробник",
+    "publisher": "Видавець",
+    "platforms": "Платформи",
+    "friendsWantThis": "Друзів бажають цю гру:",
+    "friendsHaveThis": "Друзів мають цю гру:"
+  },
+  "notFound": "Гру не знайдено",
+  "reviews": {
+    "title": "Рецензії",
+    "sorting": "Сортування:",
+    "mostPopularFirst": "Спочатку популярні",
+    "sortByComments": "За кількістю коментарів",
+    "sortByPositive": "Спочатку позитивні",
+    "sortByNegative": "Спочатку негативні"
+  },
+  "review": {
+    "writeReview": "Написати рецензію",
+    "noReviews": "Поки що немає рецензій",
+    "rating": "Оцінка",
+    "content": "Рецензія",
+    "contentPlaceholder": "Поділіться своїми думками про цю гру...",
+    "contentRequired": "Вміст рецензії обов'язковий",
+    "contentTooShort": "Рецензія повинна містити принаймні 10 символів",
+    "ratingRequired": "Будь ласка, оберіть оцінку"
+  }
+}

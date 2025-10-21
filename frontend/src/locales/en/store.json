@@ -1,0 +1,92 @@
+{
+  "home": {
+    "title": "Welcome to Slush",
+    "subtitle": "Discover amazing games",
+    "featuredGames": "Recommended for you",
+    "newReleases": "New Releases",
+    "topSellers": "Top Sellers",
+    "freeGames": "Free Games",
+    "onSale": "Special Offers",
+    "under100": "Under 100₴",
+    "comingSoon": "Coming Soon"
+  },
+  "catalog": {
+    "title": "Game Catalog",
+    "filters": "Filters",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "name": "Name",
+      "price": "Price",
+      "releaseDate": "Release Date",
+      "rating": "Rating",
+      "popularity": "Popularity",
+      "sortByRelevance": "Relevance"
+    },
+    "sortOrder": {
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "priceRange": "Price Range",
+    "categories": "Categories",
+    "tags": "Tags",
+    "platforms": "Platforms",
+    "languages": "Languages",
+    "clearFilters": "Clear filters",
+    "noGamesFound": "No games found",
+    "loadingGames": "Loading games...",
+    "loadMore": "Load more"
+  },
+  "product": {
+    "addToCart": "Add to Cart",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "buyNow": "Buy Now",
+    "wishlist": "Wishlist",
+    "share": "Share",
+    "report": "Report",
+    "price": "Price",
+    "originalPrice": "Original Price",
+    "discount": "Discount",
+    "free": "Free",
+    "comingSoon": "Coming Soon",
+    "preOrder": "Pre-order",
+    "inCart": "In Cart",
+    "inWishlist": "In Wishlist",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "description": "Description",
+    "systemRequirements": "System Requirements",
+    "minimum": "Minimum",
+    "recommended": "Recommended",
+    "os": "OS",
+    "processor": "Processor",
+    "memory": "Memory",
+    "graphics": "Graphics",
+    "directX": "DirectX",
+    "storage": "Storage",
+    "sound": "Sound Card"
+  },
+  "search": {
+    "placeholder": "Search games...",
+    "noResults": "No results found",
+    "searchResults": "Search Results",
+    "suggestions": "Suggestions"
+  },
+  "categories": {
+    "action": "Action",
+    "adventure": "Adventure",
+    "rpg": "RPG",
+    "strategy": "Strategy",
+    "simulation": "Simulation",
+    "sports": "Sports",
+    "racing": "Racing",
+    "puzzle": "Puzzle",
+    "indie": "Indie",
+    "horror": "Horror",
+    "shooter": "Shooter",
+    "platformer": "Platformer",
+    "fighting": "Fighting",
+    "music": "Music",
+    "educational": "Educational"
+  }
+}

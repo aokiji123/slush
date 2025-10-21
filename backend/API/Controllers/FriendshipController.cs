@@ -22,10 +22,12 @@ namespace API.Controllers;
 public class FriendshipController : ControllerBase
 {
     private readonly IFriendshipService _friendshipService;
+    private readonly IUserBlockService _userBlockService;
 
-    public FriendshipController(IFriendshipService friendshipService)
+    public FriendshipController(IFriendshipService friendshipService, IUserBlockService userBlockService)
     {
         _friendshipService = friendshipService;
+        _userBlockService = userBlockService;
     }
 
     /// <summary>
@@ -338,6 +340,122 @@ public class FriendshipController : ControllerBase
 
         var friendIds = await _friendshipService.GetFriendIdsAsync(id);
         return Ok(new ApiResponse<IEnumerable<Guid>>(friendIds));
+    }
+
+    /// <summary>
+    /// Block a user (automatically removes friendship if exists)
+    /// </summary>
+    /// <param name="dto">Contains the BlockedUserId to block</param>
+    /// <returns>No content on successful block</returns>
+    /// <response code="204">User blocked successfully</response>
+    /// <response code="400">Invalid request data or validation failed</response>
+    /// <response code="409">User is already blocked</response>
+    [HttpPost("block")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> BlockUser([FromBody] BlockUserDto dto)
+    {
+        if (dto is null || dto.BlockedUserId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<object>("BlockedUserId is required."));
+        }
+
+        var userId = GetAuthenticatedUserId();
+
+        try
+        {
+            await _userBlockService.BlockUserAsync(userId, dto.BlockedUserId);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<object>(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new ApiResponse<object>(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Unblock a user
+    /// </summary>
+    /// <param name="dto">Contains the BlockedUserId to unblock</param>
+    /// <returns>No content on successful unblock</returns>
+    /// <response code="204">User unblocked successfully</response>
+    /// <response code="400">Invalid request data or validation failed</response>
+    /// <response code="404">Block relationship not found</response>
+    [HttpDelete("unblock")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UnblockUser([FromBody] UnblockUserDto dto)
+    {
+        if (dto is null || dto.BlockedUserId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<object>("BlockedUserId is required."));
+        }
+
+        var userId = GetAuthenticatedUserId();
+
+        try
+        {
+            await _userBlockService.UnblockUserAsync(userId, dto.BlockedUserId);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<object>(ex.Message));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ApiResponse<object>(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Get list of blocked user IDs
+    /// </summary>
+    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <returns>List of blocked user IDs</returns>
+    /// <response code="200">Blocked users retrieved successfully</response>
+    /// <response code="403">Access denied - can only view own blocked users</response>
+    [HttpGet("blocked/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<Guid>>>> GetBlockedUsers(Guid id)
+    {
+        var userId = GetAuthenticatedUserId();
+        if (id != userId)
+        {
+            return Forbid();
+        }
+
+        var blockedUserIds = await _userBlockService.GetBlockedUserIdsAsync(id);
+        return Ok(new ApiResponse<IEnumerable<Guid>>(blockedUserIds));
+    }
+
+    /// <summary>
+    /// Get only online friends (filtered list)
+    /// </summary>
+    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <returns>List of online friend user IDs only</returns>
+    /// <response code="200">Online friend IDs retrieved successfully</response>
+    /// <response code="403">Access denied - can only view own online friends</response>
+    [HttpGet("online/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<Guid>>>> GetOnlineFriends(Guid id)
+    {
+        var userId = GetAuthenticatedUserId();
+        if (id != userId)
+        {
+            return Forbid();
+        }
+
+        var onlineFriendIds = await _friendshipService.GetOnlineFriendIdsAsync(id);
+        return Ok(new ApiResponse<IEnumerable<Guid>>(onlineFriendIds));
     }
 
     private Guid GetAuthenticatedUserId()

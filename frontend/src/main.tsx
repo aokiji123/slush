@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -8,6 +8,9 @@ import { routeTree } from './routeTree.gen'
 
 // Import query client
 import { queryClient } from './lib/query-client'
+
+// Import i18n configuration
+import './lib/i18n'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
@@ -35,9 +38,11 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      <Suspense fallback={<div>Loading...</div>}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </Suspense>
     </StrictMode>,
   )
 }

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { MdClose } from 'react-icons/md'
 import { Search } from '@/components/Search'
 
@@ -41,6 +42,7 @@ const product = {
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const { t } = useTranslation('cart')
 
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
@@ -50,7 +52,7 @@ function RouteComponent() {
         </div>
 
         <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px] font-manrope">
-          Мій кошик
+          {t('cart.title')}
         </h2>
 
         <div className="flex gap-[24px] mt-[16px]">
@@ -80,7 +82,7 @@ function RouteComponent() {
                       </div>
                       <div className="flex flex-row items-center justify-between h-full">
                         <button className="text-[16px] text-[var(--color-background-21)] font-normal cursor-pointer">
-                          Перемістити до Бажаного
+                          {t('cart.moveToWishlist')}
                         </button>
                         <div className="flex items-center gap-[16px]">
                           {product.salePrice && (
@@ -115,28 +117,27 @@ function RouteComponent() {
               <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                 <div className="flex flex-col gap-[8px]">
                   <div className="flex items-center justify-between w-full">
-                    <p className="text-[16px] font-normal">Ви заощадите</p>
+                    <p className="text-[16px] font-normal">{t('cart.youSave')}</p>
                     <p className="text-[20px] font-bold">1000₴</p>
                   </div>
                   <div className="flex items-center justify-between w-full">
-                    <p className="text-[20px] font-normal">Усього</p>
+                    <p className="text-[20px] font-normal">{t('cart.total')}</p>
                     <p className="text-[24px] font-bold font-manrope">1000₴</p>
                   </div>
                 </div>
                 <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-                  Якщо застосовно, податок із продажу буде розраховано в процесі
-                  оплати.
+                  {t('cart.taxNote')}
                 </p>
               </div>
               <div className="flex flex-col gap-[12px] w-full">
                 <button className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] text-[20px] font-medium cursor-pointer">
-                  Перейти до оплати
+                  {t('cart.proceedToCheckout')}
                 </button>
                 <button className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] text-[20px] font-medium cursor-pointer">
-                  Продовжити покупки
+                  {t('cart.continueShopping')}
                 </button>
                 <button className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[var(--color-background-19)] text-[20px] font-medium cursor-pointer">
-                  Очистити кошик
+                  {t('cart.clearCart')}
                 </button>
               </div>
             </div>

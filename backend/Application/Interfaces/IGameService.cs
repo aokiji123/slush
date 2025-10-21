@@ -7,21 +7,21 @@ namespace Application.Interfaces;
 
 public interface IGameService
 {
-    Task<GameDto?> GetGameByIdAsync(Guid id);
-    Task<IEnumerable<GameDto>> SearchAsync(string? genre, string? platform, decimal? priceUpperBound);
-    Task<IEnumerable<GameDto>> GetDiscountedAsync();
-    Task<IEnumerable<GameDto>> GetTopPopularGamesAsync(int top);
-    Task<IEnumerable<BannerGameDto>> GetBannerGamesAsync();
-    Task<IEnumerable<GameDto>> GetSpecialOfferGamesAsync(int page, int limit, string sort);
-    Task<IEnumerable<GameDto>> GetNewAndTrendingGamesAsync(int page, int limit, string sort);
-    Task<IEnumerable<GameDto>> GetBestsellerGamesAsync(int page, int limit, string sort);
-    Task<IEnumerable<GameDto>> GetRecommendedGamesAsync(string userId, int page, int limit, string sort);
-    Task<IEnumerable<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request);
-    Task<IEnumerable<GameDto>> GetRecommendedAsync();
-    Task<IEnumerable<GameDto>> GetCheaperThanAsync(decimal priceUpperBound);
-    Task<IEnumerable<GameDto>> GetHitsAsync();
-    Task<IEnumerable<GameDto>> GetNewAsync();
-    Task<IEnumerable<GameDto>> GetFreeAsync();
-    Task<IEnumerable<GameDto>> GetDlcsByGameIdAsync(Guid gameId);
+    Task<GameDto?> GetGameByIdAsync(Guid id, string language = "uk");
+    Task<IEnumerable<GameDto>> SearchAsync(string? genre, string? platform, decimal? priceUpperBound, string language = "uk");
+    Task<IEnumerable<GameDto>> GetDiscountedAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetTopPopularGamesAsync(int top, string language = "uk");
+    Task<IEnumerable<BannerGameDto>> GetBannerGamesAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetSpecialOfferGamesAsync(int page, int limit, string sort, string language = "uk");
+    Task<IEnumerable<GameDto>> GetNewAndTrendingGamesAsync(int page, int limit, string sort, string language = "uk");
+    Task<IEnumerable<GameDto>> GetBestsellerGamesAsync(int page, int limit, string sort, string language = "uk");
+    Task<IEnumerable<GameDto>> GetRecommendedGamesAsync(string userId, int page, int limit, string sort, string language = "uk");
+    Task<IEnumerable<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request, string language = "uk");
+    Task<IEnumerable<GameDto>> GetRecommendedAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetCheaperThanAsync(decimal priceUpperBound, string language = "uk");
+    Task<IEnumerable<GameDto>> GetHitsAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetNewAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetFreeAsync(string language = "uk");
+    Task<IEnumerable<GameDto>> GetDlcsByGameIdAsync(Guid gameId, string language = "uk");
     Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId);
 }
