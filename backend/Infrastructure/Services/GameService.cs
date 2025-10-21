@@ -32,6 +32,16 @@ public class GameService : IGameService
         return game != null ? GameDto.FromEntity(game, language) : null;
     }
 
+    public async Task<GameDto?> GetGameBySlugAsync(string slug, string language = "uk")
+    {
+        var game = await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Slug == slug)
+            .FirstOrDefaultAsync();
+        
+        return game != null ? GameDto.FromEntity(game, language) : null;
+    }
+
     public async Task<IEnumerable<GameDto>> SearchAsync(string? genre, string? platform, decimal? priceUpperBound, string language = "uk")
     {
         var query = _db.Set<Game>().AsNoTracking().AsQueryable();
@@ -207,15 +217,43 @@ public class GameService : IGameService
         return gameDtos;
     }
 
-    public async Task<IEnumerable<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request, string language = "uk")
+    public async Task<PagedResult<GameDto>> GetGamesByFilterAsync(GamesFilterRequestDto request, string language = "uk")
     {
         if (request == null) throw new ArgumentNullException(nameof(request));
 
-        var query = _db.Set<Game>().AsNoTracking().AsQueryable();
+        try
+        {
+            var query = _db.Set<Game>().AsNoTracking().AsQueryable();
 
-        // Note: Search is disabled for now due to localization - Name and Description are NotMapped properties
-        // TODO: Implement proper search on JSON translation fields
-        // query = query.ApplySearch(request, g => g.Name, g => g.Description);
+            // Apply search filter using client-side evaluation for JSONB fields
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var searchTerm = request.Search.Trim().ToLowerInvariant();
+                
+                // Get all games first, then filter client-side for JSONB fields
+                var allGames = await query.ToListAsync();
+                
+                // Filter games based on search term in JSONB translation fields
+                var filteredGames = allGames.Where(g => 
+                    (g.NameTranslations?.ToString()?.ToLowerInvariant().Contains(searchTerm) == true) ||
+                    (g.DescriptionTranslations?.ToString()?.ToLowerInvariant().Contains(searchTerm) == true) ||
+                    (g.DeveloperTranslations?.ToString()?.ToLowerInvariant().Contains(searchTerm) == true) ||
+                    (g.PublisherTranslations?.ToString()?.ToLowerInvariant().Contains(searchTerm) == true)
+                ).AsQueryable();
+                
+                // Get total count
+                var searchTotalCount = filteredGames.Count();
+
+                // Apply sorting
+                var sortedGames = ApplySortingToList(filteredGames.ToList(), request);
+
+                // Apply pagination
+                var searchGames = ApplyPaginationToList(sortedGames, request);
+
+                var searchGameDtos = searchGames.Select(g => GameDto.FromEntity(g, language)).ToList();
+
+                return new PagedResult<GameDto>(searchGameDtos, request.Page, request.Limit, searchTotalCount);
+            }
 
         if (request.Genres?.Count > 0)
         {
@@ -256,23 +294,33 @@ public class GameService : IGameService
             query = query.Where(g => g.IsDlc == request.IsDlc.Value);
         }
 
+        // Get total count before pagination
+        var totalCount = await query.CountAsync();
+
+        // Apply sorting and pagination
         var games = await query
             .ApplySorting(request)
             .ApplyPagination(request)
             .ToListAsync();
 
-        var gameDtos = games.Select(g => GameDto.FromEntity(g, language));
+        var gameDtos = games.Select(g => GameDto.FromEntity(g, language)).ToList();
 
         // Handle name sorting client-side if needed
         if (request.SortBy?.ToLowerInvariant() is "alphabet" or "name")
         {
             var isDescending = request.SortDirection?.ToLowerInvariant() == "desc";
             gameDtos = isDescending 
-                ? gameDtos.OrderByDescending(g => g.Name)
-                : gameDtos.OrderBy(g => g.Name);
+                ? gameDtos.OrderByDescending(g => g.Name).ToList()
+                : gameDtos.OrderBy(g => g.Name).ToList();
         }
 
-        return gameDtos;
+            return new PagedResult<GameDto>(gameDtos, request.Page, request.Limit, totalCount);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging
+            throw new InvalidOperationException($"Error filtering games: {ex.Message}", ex);
+        }
     }
 
     public async Task<IEnumerable<GameDto>> GetRecommendedAsync(string language = "uk")
@@ -381,6 +429,35 @@ public class GameService : IGameService
             Limit = limit,
             SortBy = sort
         };
+    }
+
+    private static List<Game> ApplySortingToList(List<Game> games, GamesFilterRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SortBy))
+            return games;
+
+        return request.SortBy.ToLowerInvariant() switch
+        {
+            "price" => request.SortDirection?.ToLowerInvariant() == "desc" 
+                ? games.OrderByDescending(g => g.Price).ToList()
+                : games.OrderBy(g => g.Price).ToList(),
+            "rating" => request.SortDirection?.ToLowerInvariant() == "desc" 
+                ? games.OrderByDescending(g => g.Rating).ToList()
+                : games.OrderBy(g => g.Rating).ToList(),
+            "releasedate" => request.SortDirection?.ToLowerInvariant() == "desc" 
+                ? games.OrderByDescending(g => g.ReleaseDate).ToList()
+                : games.OrderBy(g => g.ReleaseDate).ToList(),
+            "name" or "alphabet" => request.SortDirection?.ToLowerInvariant() == "desc" 
+                ? games.OrderByDescending(g => g.Name).ToList()
+                : games.OrderBy(g => g.Name).ToList(),
+            _ => games
+        };
+    }
+
+    private static List<Game> ApplyPaginationToList(List<Game> games, GamesFilterRequestDto request)
+    {
+        var skip = (request.Page - 1) * request.Limit;
+        return games.Skip(skip).Take(request.Limit).ToList();
     }
 
 }

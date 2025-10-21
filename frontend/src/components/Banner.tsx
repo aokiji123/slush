@@ -69,6 +69,15 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
 
   return (
     <div className="h-[520px] bg-[var(--color-background-15)] relative z-10">
+      {/* Search component moved outside Swiper to persist across banner changes */}
+      <div className="absolute top-0 left-0 right-0 z-[100]">
+        <div className="container mx-auto max-w-[1460px]">
+          <div className="w-[500px] sm:w-[600px] lg:w-[800px] xl:w-[1400px] absolute top-[16px] left-1/2 -translate-x-1/2">
+            <Search className="md:px-0 px-[4px]" />
+          </div>
+        </div>
+      </div>
+      
       <style>
         {`
           .swiper-pagination {
@@ -115,7 +124,6 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
             >
               <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-[1]" />
               <div className="container mx-auto h-full flex flex-col items-center justify-center relative z-[2]">
-                <Search className="md:px-0 px-[4px] absolute top-[16px] left-1/2 -translate-x-1/2 z-[3]" />
                 <div className="flex justify-between items-center gap-[8px] absolute bottom-[56px] left-1/2 -translate-x-1/2 max-w-[1460px] w-full z-[3]">
                   <div className="flex flex-col sm:pl-0 pl-[16px]">
                     <p className="md:hidden block text-[24px] text-left text-white font-bold font-manrope">

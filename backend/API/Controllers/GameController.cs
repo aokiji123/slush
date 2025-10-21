@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -101,6 +102,55 @@ public class GameController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while retrieving game {GameId} in language {Language}", id, language);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<GameDto>("An error occurred while retrieving the game."));
+        }
+    }
+
+    [HttpGet("{identifier}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<GameDto>>> GetGameBySlug(
+        [FromRoute, Required] string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            return BadRequest(new ApiResponse<GameDto>("Game identifier cannot be empty"));
+        }
+
+        // Extract language from Accept-Language header
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Game_Slug_{identifier}_{language}";
+        
+        if (_cache.TryGetValue(cacheKey, out GameDto? cachedGame))
+        {
+            _logger.LogInformation("Retrieved game {Identifier} in language {Language} from cache", identifier, language);
+            return Ok(new ApiResponse<GameDto>(cachedGame!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving game with identifier: {Identifier} in language: {Language}", identifier, language);
+            var game = await _gameService.GetGameBySlugAsync(identifier, language);
+            
+            if (game is null)
+            {
+                _logger.LogWarning("Game with identifier {Identifier} not found", identifier);
+                return NotFound(new ApiResponse<GameDto>($"Game with identifier {identifier} not found"));
+            }
+            
+            // Cache the game data with language-specific key
+            _cache.Set(cacheKey, game, CacheExpiration);
+            
+            _logger.LogInformation("Successfully retrieved game with identifier: {Identifier} in language: {Language}", identifier, language);
+            return Ok(new ApiResponse<GameDto>(game));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving game {Identifier} in language {Language}", identifier, language);
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 new ApiResponse<GameDto>("An error occurred while retrieving the game."));
         }
@@ -504,6 +554,94 @@ public class GameController : ControllerBase
             _logger.LogError(ex, "Error occurred while retrieving all games in language {Language}", language);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving all games."));
+        }
+    }
+
+    /// <summary>
+    /// Get games with advanced filtering, sorting, and pagination
+    /// </summary>
+    /// <param name="search">Search term for game name, description, developer, or publisher</param>
+    /// <param name="genres">Comma-separated list of genres to filter by</param>
+    /// <param name="platforms">Comma-separated list of platforms to filter by</param>
+    /// <param name="minPrice">Minimum price filter</param>
+    /// <param name="maxPrice">Maximum price filter</param>
+    /// <param name="onSale">Filter by games on sale</param>
+    /// <param name="isDlc">Filter by DLC games</param>
+    /// <param name="page">Page number (1-based)</param>
+    /// <param name="limit">Items per page</param>
+    /// <param name="sortBy">Sort field and direction (e.g., "Price:desc", "Name:asc")</param>
+    /// <returns>Paginated list of games matching the filter criteria</returns>
+    [HttpGet("filter")]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<GameDto>>), StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<PagedResult<GameDto>>>> GetGamesByFilter(
+        [FromQuery] string? search = null,
+        [FromQuery] string? genres = null,
+        [FromQuery] string? platforms = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] bool? onSale = null,
+        [FromQuery] bool? isDlc = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int limit = 20,
+        [FromQuery] string? sortBy = null)
+    {
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Filter_s{search}_g{genres}_p{platforms}_min{minPrice}_max{maxPrice}_sale{onSale}_dlc{isDlc}_pg{page}_l{limit}_s{sortBy}_{language}";
+        
+        if (_cache.TryGetValue(cacheKey, out PagedResult<GameDto>? cachedResult))
+        {
+            return Ok(new ApiResponse<PagedResult<GameDto>>(cachedResult!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Received filter request: Search='{Search}', Page={Page}, Limit={Limit}, Language={Language}", 
+                search, page, limit, language);
+
+            var request = new GamesFilterRequestDto
+            {
+                Page = page,
+                Limit = limit,
+                SortBy = sortBy,
+                Search = search,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                OnSale = onSale,
+                IsDlc = isDlc
+            };
+
+            // Parse comma-separated values
+            if (!string.IsNullOrWhiteSpace(genres))
+            {
+                request.Genres = genres.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(g => g.Trim())
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(platforms))
+            {
+                request.Platforms = platforms.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .ToList();
+            }
+
+            _logger.LogInformation("Filtering games with search '{Search}' in language {Language}", search, language);
+            var result = await _gameService.GetGamesByFilterAsync(request, language);
+            
+            // Cache the results with language-specific key
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            _logger.LogInformation("Found {Count} games matching filter criteria in language {Language}", result.TotalCount, language);
+            return Ok(new ApiResponse<PagedResult<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while filtering games. Search='{Search}', Language={Language}", search, language);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<PagedResult<GameDto>>($"An error occurred while filtering games: {ex.Message}"));
         }
     }
 }

@@ -7,53 +7,13 @@ import { Search } from '@/components'
 import { BsThreeDots } from 'react-icons/bs'
 import { FaChevronLeft, FaChevronRight, FaRegStar } from 'react-icons/fa'
 import { CommentsIcon, FavoriteIcon } from '@/icons'
+import { useOwnedGames } from '@/api/queries/useLibrary'
+import { useDebounce } from '@/hooks/useDebounce'
 
 export const Route = createFileRoute('/library')({
   component: RouteComponent,
 })
 
-const myGames = [
-  {
-    id: 1,
-    name: 'Counter-Strike 2',
-    image: '/cs.png',
-  },
-  {
-    id: 2,
-    name: "Baldur's Gate 3",
-    image: '/baldurs-gate-3.png',
-  },
-  {
-    id: 3,
-    name: 'Ghost of Tsushima',
-    image: '/ghost-of-tsushima.png',
-  },
-  {
-    id: 4,
-    name: 'Destiny 2',
-    image: '/destiny-2.png',
-  },
-  {
-    id: 5,
-    name: 'Cyberpunk 2077',
-    image: '/cyberpunk.png',
-  },
-  {
-    id: 6,
-    name: 'The Witcher 3',
-    image: '/witcher-3.jpg',
-  },
-  {
-    id: 7,
-    name: 'Sekiro: Shadows Die Twice',
-    image: '/sekiro.jpg',
-  },
-  {
-    id: 8,
-    name: "No Man's Sky",
-    image: '/banner-settings.jpg',
-  },
-]
 
 const glowCoords = [
   {
@@ -83,10 +43,20 @@ function RouteComponent() {
   const { t } = useTranslation('cart')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
+  const [searchText, setSearchText] = useState('')
+  const [currentPage] = useState(1)
+  const debouncedSearchText = useDebounce(searchText, 300)
+
+  const { data: ownedGames, isLoading, isError } = useOwnedGames(currentPage, 20)
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed)
   }
+
+  // Filter games based on search text
+  const filteredGames = ownedGames?.items?.filter(game => 
+    game.title.toLowerCase().includes(debouncedSearchText.toLowerCase())
+  ) || []
 
   return (
     <div className="bg-[var(--color-night-background)] min-h-screen flex flex-col">
@@ -111,18 +81,34 @@ function RouteComponent() {
 
           {!isSidebarCollapsed && (
             <div className="flex flex-col gap-[20px]">
-              {myGames.map((game) => (
-                <div key={game.id} className="flex items-center gap-[16px]">
-                  <img
-                    src={game.image}
-                    alt={game.name}
-                    className="w-[40px] h-[40px] rounded-[10px] object-cover object-center flex-shrink-0"
-                  />
-                  <p className="text-[16px] font-bold line-clamp-1">
-                    {game.name}
+              {isLoading ? (
+                <div className="text-center py-4">
+                  <p className="text-[var(--color-background-25)]">Loading...</p>
+                </div>
+              ) : isError ? (
+                <div className="text-center py-4">
+                  <p className="text-red-400">Error loading games</p>
+                </div>
+              ) : filteredGames.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-[var(--color-background-25)]">
+                    {searchText ? 'No games found' : 'No games in library'}
                   </p>
                 </div>
-              ))}
+              ) : (
+                filteredGames.map((game) => (
+                  <div key={game.gameId} className="flex items-center gap-[16px]">
+                    <img
+                      src={game.mainImage}
+                      alt={game.title}
+                      className="w-[40px] h-[40px] rounded-[10px] object-cover object-center flex-shrink-0"
+                    />
+                    <p className="text-[16px] font-bold line-clamp-1">
+                      {game.title}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
@@ -138,6 +124,8 @@ function RouteComponent() {
             className="my-[16px] w-full"
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            searchText={searchText}
+            onSearchTextChange={setSearchText}
           />
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
@@ -300,65 +288,81 @@ function RouteComponent() {
               </div>
             </div>
 
-            <div
-              className={
-                viewMode === 'grid'
-                  ? 'flex flex-wrap gap-[24px]'
-                  : 'flex flex-col gap-[16px]'
-              }
-            >
-              {myGames.map((game) =>
-                viewMode === 'grid' ? (
-                  <div
-                    key={game.id}
-                    className="w-[225px] h-[300px] rounded-[20px]"
-                  >
-                    <img
-                      src={game.image}
-                      alt={game.name}
-                      className="w-full h-full object-cover rounded-[20px]"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    key={game.id}
-                    className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden"
-                  >
-                    <img
-                      src={game.image}
-                      alt={game.name}
-                      className="w-[320px] h-full object-cover"
-                    />
-                    <div className="flex flex-col justify-between pr-[24px] gap-[8px] flex-1">
-                      <h3 className="text-white text-[20px] font-bold font-manrope">
-                        {game.name}
-                      </h3>
-                      <div className="w-full flex items-center justify-between">
-                        <button className="h-[40px] w-[110px] flex items-center justify-center text-[16px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
-                          Скачати
-                        </button>
-                        <div className="flex flex-col">
-                          <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-                            Розмір на диску
-                          </p>
-                          <p className="text-[20px] font-bold text-white">
-                            10 ГБ
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-[8px]">
-                          <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
-                            <FaRegStar size={24} />
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-[var(--color-background-25)] text-lg">Loading games...</p>
+              </div>
+            ) : isError ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-red-400 text-lg">Error loading games</p>
+              </div>
+            ) : filteredGames.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-[var(--color-background-25)] text-lg">
+                  {searchText ? 'No games found matching your search' : 'No games in your library'}
+                </p>
+              </div>
+            ) : (
+              <div
+                className={
+                  viewMode === 'grid'
+                    ? 'flex flex-wrap gap-[24px]'
+                    : 'flex flex-col gap-[16px]'
+                }
+              >
+                {filteredGames.map((game) =>
+                  viewMode === 'grid' ? (
+                    <div
+                      key={game.gameId}
+                      className="w-[225px] h-[300px] rounded-[20px]"
+                    >
+                      <img
+                        src={game.mainImage}
+                        alt={game.title}
+                        className="w-full h-full object-cover rounded-[20px]"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      key={game.gameId}
+                      className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden"
+                    >
+                      <img
+                        src={game.mainImage}
+                        alt={game.title}
+                        className="w-[320px] h-full object-cover"
+                      />
+                      <div className="flex flex-col justify-between pr-[24px] gap-[8px] flex-1">
+                        <h3 className="text-white text-[20px] font-bold font-manrope">
+                          {game.title}
+                        </h3>
+                        <div className="w-full flex items-center justify-between">
+                          <button className="h-[40px] w-[110px] flex items-center justify-center text-[16px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
+                            Download
+                          </button>
+                          <div className="flex flex-col">
+                            <p className="text-[16px] font-normal text-[var(--color-background-25)]">
+                              Disk Size
+                            </p>
+                            <p className="text-[20px] font-bold text-white">
+                              10 GB
+                            </p>
                           </div>
-                          <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
-                            <BsThreeDots size={24} />
+                          <div className="flex items-center gap-[8px]">
+                            <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
+                              <FaRegStar size={24} />
+                            </div>
+                            <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
+                              <BsThreeDots size={24} />
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ),
-              )}
-            </div>
+                  ),
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
