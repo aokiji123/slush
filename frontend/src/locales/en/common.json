@@ -55,7 +55,12 @@
   },
   "search": {
     "placeholder": "Search in store...",
-    "tagsPlaceholder": "Search tags..."
+    "tagsPlaceholder": "Search tags...",
+    "results": "Results",
+    "searching": "Searching",
+    "noResults": "No games found",
+    "error": "Error searching games",
+    "viewAll": "View all"
   },
   "filters": {
     "title": "Filters",

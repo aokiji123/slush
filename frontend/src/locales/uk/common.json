@@ -55,7 +55,12 @@
   },
   "search": {
     "placeholder": "Пошук у крамниці...",
-    "tagsPlaceholder": "Пошук тегів..."
+    "tagsPlaceholder": "Пошук тегів...",
+    "results": "Результати",
+    "searching": "Пошук",
+    "noResults": "Ігор не знайдено",
+    "error": "Помилка пошуку ігор",
+    "viewAll": "Переглянути всі"
   },
   "filters": {
     "title": "Фільтри",

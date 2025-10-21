@@ -31,6 +31,18 @@ export type GamesListResponse = {
   data: GameData[]
 }
 
+export type PagedGamesResponse = {
+  success: boolean
+  message: string
+  data: {
+    items: GameData[]
+    page: number
+    pageSize: number
+    totalCount: number
+    totalPages: number
+  }
+}
+
 export type Review = {
   id: string
   gameId: string

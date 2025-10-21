@@ -6,6 +6,7 @@ import type {
   Game,
   GameCharacteristics,
   GamesListResponse,
+  PagedGamesResponse,
   Review,
 } from '../types/game'
 
@@ -73,6 +74,66 @@ async function getGameCharacteristics(
   id: string,
 ): Promise<GameCharacteristics> {
   const { data } = await axiosInstance.get(`/game/${id}/characteristics`)
+  return data
+}
+
+async function searchGames(
+  searchText: string,
+  filters?: {
+    genres?: string[]
+    platforms?: string[]
+    minPrice?: number
+    maxPrice?: number
+    onSale?: boolean
+    isDlc?: boolean
+    page?: number
+    limit?: number
+    sortBy?: string
+  }
+): Promise<PagedGamesResponse> {
+  const params = new URLSearchParams()
+  
+  if (searchText) {
+    params.append('search', searchText)
+  }
+  
+  if (filters?.genres?.length) {
+    params.append('genres', filters.genres.join(','))
+  }
+  
+  if (filters?.platforms?.length) {
+    params.append('platforms', filters.platforms.join(','))
+  }
+  
+  if (filters?.minPrice !== undefined) {
+    params.append('minPrice', filters.minPrice.toString())
+  }
+  
+  if (filters?.maxPrice !== undefined) {
+    params.append('maxPrice', filters.maxPrice.toString())
+  }
+  
+  if (filters?.onSale !== undefined) {
+    params.append('onSale', filters.onSale.toString())
+  }
+  
+  if (filters?.isDlc !== undefined) {
+    params.append('isDlc', filters.isDlc.toString())
+  }
+  
+  if (filters?.page) {
+    params.append('page', filters.page.toString())
+  }
+  
+  if (filters?.limit) {
+    params.append('limit', filters.limit.toString())
+  }
+  
+  if (filters?.sortBy) {
+    params.append('sortBy', filters.sortBy)
+  }
+
+  const { data } = await axiosInstance.get(`/game/filter?${params.toString()}`)
   return data
 }
 
@@ -180,6 +241,31 @@ export function useGameCharacteristics(id: string) {
 export function useCreateGameReview() {
   return useMutation({
     mutationFn: (review: CreateReviewRequest) => createGameReview(review),
+  })
+}
+
+export function useSearchGames(
+  searchText: string,
+  filters?: {
+    genres?: string[]
+    platforms?: string[]
+    minPrice?: number
+    maxPrice?: number
+    onSale?: boolean
+    isDlc?: boolean
+    page?: number
+    limit?: number
+    sortBy?: string
+  },
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: ['searchGames', searchText, filters],
+    queryFn: () => searchGames(searchText, filters),
+    enabled: enabled && searchText.length > 0,
+    staleTime: 1000 * 60 * 1, // 1 minute
+    retry: 2,
+    refetchOnWindowFocus: false,
   })
 }
 
