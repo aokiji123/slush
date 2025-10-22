@@ -7,7 +7,7 @@ import { Search } from '@/components'
 import { BsThreeDots } from 'react-icons/bs'
 import { FaChevronLeft, FaChevronRight, FaRegStar } from 'react-icons/fa'
 import { CommentsIcon, FavoriteIcon } from '@/icons'
-import { useOwnedGames } from '@/api/queries/useLibrary'
+import { useMyLibraryQuery } from '@/api/queries/useLibrary'
 import { useDebounce } from '@/hooks/useDebounce'
 
 export const Route = createFileRoute('/library')({
@@ -47,15 +47,18 @@ function RouteComponent() {
   const [currentPage] = useState(1)
   const debouncedSearchText = useDebounce(searchText, 300)
 
-  const { data: ownedGames, isLoading, isError } = useOwnedGames(currentPage, 20)
+  const { data: libraryData, isLoading, isError } = useMyLibraryQuery({
+    page: currentPage,
+    limit: 20,
+  })
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed)
   }
 
   // Filter games based on search text
-  const filteredGames = ownedGames?.items?.filter(game => 
-    game.title.toLowerCase().includes(debouncedSearchText.toLowerCase())
+  const filteredGames = libraryData?.data?.items?.filter(game => 
+    game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
   ) || []
 
   return (
@@ -97,14 +100,14 @@ function RouteComponent() {
                 </div>
               ) : (
                 filteredGames.map((game) => (
-                  <div key={game.gameId} className="flex items-center gap-[16px]">
+                  <div key={game.id} className="flex items-center gap-[16px]">
                     <img
                       src={game.mainImage}
-                      alt={game.title}
+                      alt={game.name}
                       className="w-[40px] h-[40px] rounded-[10px] object-cover object-center flex-shrink-0"
                     />
                     <p className="text-[16px] font-bold line-clamp-1">
-                      {game.title}
+                      {game.name}
                     </p>
                   </div>
                 ))
@@ -313,28 +316,28 @@ function RouteComponent() {
                 {filteredGames.map((game) =>
                   viewMode === 'grid' ? (
                     <div
-                      key={game.gameId}
+                      key={game.id}
                       className="w-[225px] h-[300px] rounded-[20px]"
                     >
                       <img
                         src={game.mainImage}
-                        alt={game.title}
+                        alt={game.name}
                         className="w-full h-full object-cover rounded-[20px]"
                       />
                     </div>
                   ) : (
                     <div
-                      key={game.gameId}
+                      key={game.id}
                       className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden"
                     >
                       <img
                         src={game.mainImage}
-                        alt={game.title}
+                        alt={game.name}
                         className="w-[320px] h-full object-cover"
                       />
                       <div className="flex flex-col justify-between pr-[24px] gap-[8px] flex-1">
                         <h3 className="text-white text-[20px] font-bold font-manrope">
-                          {game.title}
+                          {game.name}
                         </h3>
                         <div className="w-full flex items-center justify-between">
                           <button className="h-[40px] w-[110px] flex items-center justify-center text-[16px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">

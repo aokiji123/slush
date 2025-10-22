@@ -1,81 +1,69 @@
-import { useQuery } from '@tanstack/react-query'
-import axiosInstance from '..'
-import type { Game } from '../types/game'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { LibraryQueryParams, AddToLibraryRequest } from '../types/library'
+import {
+  getMyLibrary,
+  getMyLibraryWithQuery,
+  addToMyLibrary,
+  checkGameOwnership,
+  getOwnedGames,
+} from '../libraryAPI'
 
-export type OwnedGameDto = {
-  gameId: string
-  title: string
-  mainImage: string
-  purchasedAt: string
-  purchasePrice: number
+// Hook for simple library list (no filtering)
+export function useMyLibrary() {
+  return useQuery({
+    queryKey: ['library', 'me'],
+    queryFn: () => getMyLibrary(),
+    staleTime: 1000 * 60 * 5,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
 }
 
-export type PagedResult<T> = {
-  items: T[]
-  page: number
-  pageSize: number
-  totalCount: number
-  totalPages: number
+// Hook for advanced library query with filtering
+export function useMyLibraryQuery(params: LibraryQueryParams = {}) {
+  return useQuery({
+    queryKey: ['library', 'me', 'query', params],
+    queryFn: () => getMyLibraryWithQuery(params),
+    staleTime: 1000 * 60 * 5,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
 }
 
-export type LibraryResponse = {
-  success: boolean
-  message: string
-  data: Game[]
-}
-
-export type AddToLibraryRequest = {
-  userId: string
-  gameId: string
-}
-
-async function getOwnedGames(page: number = 1, limit: number = 20): Promise<PagedResult<OwnedGameDto>> {
-  const { data } = await axiosInstance.get(`/library/owned?page=${page}&limit=${limit}`)
-  return data
-}
-
-async function getUserLibrary(userId: string): Promise<LibraryResponse> {
-  const { data } = await axiosInstance.get(`/library/${userId}`)
-  return data
-}
-
-async function checkGameOwnership(gameId: string): Promise<boolean> {
-  try {
-    const { data } = await axiosInstance.get(`/library/owned`)
-    const pagedResult = data as PagedResult<OwnedGameDto>
-    return pagedResult.items?.some((game) => game.gameId === gameId) || false
-  } catch (error) {
-    console.error('Failed to check game ownership:', error)
-    return false
-  }
-}
-
+// Hook for owned games (legacy endpoint)
 export function useOwnedGames(page: number = 1, limit: number = 20) {
   return useQuery({
     queryKey: ['ownedGames', page, limit],
     queryFn: () => getOwnedGames(page, limit),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 3,
     refetchOnWindowFocus: false,
   })
 }
 
-export function useUserLibrary(userId: string) {
-  return useQuery({
-    queryKey: ['userLibrary', userId],
-    queryFn: () => getUserLibrary(userId),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 3,
-    refetchOnWindowFocus: false,
-  })
-}
-
+// Hook for checking game ownership
 export function useGameOwnership(gameId: string) {
   return useQuery({
     queryKey: ['gameOwnership', gameId],
     queryFn: () => checkGameOwnership(gameId),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 3,
     refetchOnWindowFocus: false,
+    enabled: !!gameId,
+  })
+}
+
+// Mutation hook for adding to library
+export function useAddToLibrary() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (request: AddToLibraryRequest) => addToMyLibrary(request),
+    onSuccess: () => {
+      // Invalidate all library queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['library'] })
+      queryClient.invalidateQueries({ queryKey: ['ownedGames'] })
+      queryClient.invalidateQueries({ queryKey: ['gameOwnership'] })
+    },
   })
 }

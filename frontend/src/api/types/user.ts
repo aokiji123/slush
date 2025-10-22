@@ -7,6 +7,8 @@ export type User = {
   avatar?: string
   banner?: string
   balance: number
+  isOnline?: boolean
+  lastSeenAt?: string
 }
 
 export type UserUpdateRequest = {

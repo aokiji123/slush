@@ -285,28 +285,29 @@ export const Header = () => {
                   <span className="text-[16px] font-medium">{t('header.notifications')}</span>
                 </button>
 
+                {/* Mobile only - Wishlist and Cart */}
                 <button
-                  className={`flex sm:hidden items-center gap-3 p-3 rounded-[12px] transition-colors ${
-                    location.pathname === '/settings/notifications'
+                  className={`flex sm:hidden items-center gap-3 p-3 rounded-[12px] transition-colors cursor-pointer ${
+                    location.pathname === '/wishlist'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-white hover:bg-[var(--color-background-16)]'
                   }`}
-                  onClick={() => handleNavigation('/settings/notifications')}
+                  onClick={() => handleNavigation('/wishlist')}
                 >
                   <FavoriteIcon className="w-[24px] h-[24px]" />
                   <span className="text-[16px] font-medium">{t('header.wishlist')}</span>
                 </button>
 
                 <button
-                  className={`flex sm:hidden items-center gap-3 p-3 rounded-[12px] transition-colors ${
-                    location.pathname === '/settings/notifications'
+                  className={`flex sm:hidden items-center gap-3 p-3 rounded-[12px] transition-colors cursor-pointer ${
+                    location.pathname === '/cart'
                       ? 'bg-white text-[var(--color-background-16)]'
                       : 'bg-[var(--color-background-17)] text-white hover:bg-[var(--color-background-16)]'
                   }`}
-                  onClick={() => handleNavigation('/settings/notifications')}
+                  onClick={() => handleNavigation('/cart')}
                 >
                   <CartIcon className="w-[24px] h-[24px]" />
-                  <span className="text-[16px] font-medium">Кошик</span>
+                  <span className="text-[16px] font-medium">{t('header.cart')}</span>
                 </button>
               </div>
             )}

@@ -2,7 +2,9 @@ import { useLocation, useNavigate } from '@tanstack/react-router'
 import { IoFilter } from 'react-icons/io5'
 import {
   CartIcon,
+  CartFilledIcon,
   FavoriteIcon,
+  FavoriteFilledIcon,
   GridIcon,
   GridRowIcon,
   SearchIcon,
@@ -11,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SearchModal } from './SearchModal'
+import { useCartStore } from '@/lib/cartStore'
 
 type SearchProps = {
   className?: string
@@ -32,6 +35,7 @@ export const Search = ({
   const { t } = useTranslation('common')
   const [internalSearchText, setInternalSearchText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const cartCount = useCartStore((state) => state.getCartCount())
   
   // Use external search text if provided, otherwise use internal state
   const searchText = externalSearchText !== undefined ? externalSearchText : internalSearchText
@@ -132,25 +136,23 @@ export const Search = ({
       {location.pathname !== '/library' && (
         <div className="sm:flex hidden items-center gap-[8px]">
           <div
-            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer transition-colors ${
               location.pathname === '/wishlist'
-                ? 'bg-white'
+                ? 'bg-[#F1FDFF]'
                 : 'bg-[var(--color-background-16)]'
             }`}
             onClick={() => {
               navigate({ to: '/wishlist' })
             }}
           >
-            <FavoriteIcon
-              className={`w-[24px] h-[24px] ${
-                location.pathname === '/wishlist'
-                  ? 'text-[var(--color-background-24)]'
-                  : 'text-white'
-              }`}
-            />
+            {location.pathname === '/wishlist' ? (
+              <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+            ) : (
+              <FavoriteIcon className="w-[24px] h-[24px] text-white" />
+            )}
           </div>
           <div
-            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer relative ${
               location.pathname === '/cart'
                 ? 'bg-white'
                 : 'bg-[var(--color-background-16)]'
@@ -159,13 +161,16 @@ export const Search = ({
               navigate({ to: '/cart' })
             }}
           >
-            <CartIcon
-              className={`w-[24px] h-[24px] ${
-                location.pathname === '/cart'
-                  ? 'text-[var(--color-background-24)]'
-                  : 'text-white'
-              }`}
-            />
+            {location.pathname === '/cart' ? (
+              <CartFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+            ) : (
+              <CartIcon className="w-[24px] h-[24px] text-white" />
+            )}
+            {cartCount > 0 && (
+              <div className="absolute -top-1 -right-1 bg-[var(--color-background-21)] text-[var(--color-night-background)] rounded-full w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold">
+                {cartCount > 99 ? '99+' : cartCount}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs;
 
@@ -14,6 +15,12 @@ public class LibraryDto
 public class AddToLibraryDto
 {
     public Guid UserId { get; set; }
+    public Guid GameId { get; set; }
+}
+
+public class LibraryMeRequestDto
+{
+    [Required]
     public Guid GameId { get; set; }
 }
 

@@ -1,11 +1,13 @@
 {
   "cart": {
     "title": "Shopping Cart",
-    "empty": {
+    "empty": "Your cart is empty",
+    "emptyMessage": {
       "title": "Your cart is empty",
       "description": "Add some games to get started",
       "browseStore": "Browse Store"
     },
+    "free": "Free",
     "items": "Items",
     "item": "Item",
     "price": "Price",
@@ -36,6 +38,7 @@
       "browseStore": "Browse Store"
     },
     "addToCart": "Add to Cart",
+    "inCart": "In Cart",
     "removeFromWishlist": "Remove from Wishlist",
     "moveToCart": "Move to Cart",
     "itemAdded": "Item added to wishlist",

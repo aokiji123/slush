@@ -458,6 +458,38 @@ public class FriendshipController : ControllerBase
         return Ok(new ApiResponse<IEnumerable<Guid>>(onlineFriendIds));
     }
 
+    /// <summary>
+    /// Get friends who own a specific game
+    /// </summary>
+    /// <param name="gameId">Game ID to check ownership for</param>
+    /// <returns>List of friend details who own the specified game</returns>
+    /// <response code="200">Friends with game retrieved successfully</response>
+    /// <response code="400">Invalid game ID</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("friends-with-game/{gameId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<FriendWithGameDto>>>> GetFriendsWithGame(Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<FriendWithGameDto>>("Game ID cannot be empty."));
+        }
+
+        try
+        {
+            var userId = GetAuthenticatedUserId();
+            var friendsWithGame = await _friendshipService.GetFriendsWithGameDetailsAsync(userId, gameId);
+            return Ok(new ApiResponse<IEnumerable<FriendWithGameDto>>(friendsWithGame));
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<IEnumerable<FriendWithGameDto>>("Unable to retrieve friends with game."));
+        }
+    }
+
     private Guid GetAuthenticatedUserId()
     {
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
