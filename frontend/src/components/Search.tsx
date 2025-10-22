@@ -3,6 +3,7 @@ import { IoFilter } from 'react-icons/io5'
 import {
   CartIcon,
   FavoriteIcon,
+  FavoriteFilledIcon,
   GridIcon,
   GridRowIcon,
   SearchIcon,
@@ -132,22 +133,20 @@ export const Search = ({
       {location.pathname !== '/library' && (
         <div className="sm:flex hidden items-center gap-[8px]">
           <div
-            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer transition-colors ${
               location.pathname === '/wishlist'
-                ? 'bg-white'
+                ? 'bg-[#F1FDFF]'
                 : 'bg-[var(--color-background-16)]'
             }`}
             onClick={() => {
               navigate({ to: '/wishlist' })
             }}
           >
-            <FavoriteIcon
-              className={`w-[24px] h-[24px] ${
-                location.pathname === '/wishlist'
-                  ? 'text-[var(--color-background-24)]'
-                  : 'text-white'
-              }`}
-            />
+            {location.pathname === '/wishlist' ? (
+              <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+            ) : (
+              <FavoriteIcon className="w-[24px] h-[24px] text-white" />
+            )}
           </div>
           <div
             className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${

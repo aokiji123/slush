@@ -130,6 +130,7 @@
   },
   "sorting": {
     "label": "Sorting:",
+    "discounts": "Discounts First",
     "relevance": "By Relevance",
     "popular": "Popular First",
     "newest": "Newest First",

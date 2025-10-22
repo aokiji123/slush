@@ -5,6 +5,9 @@ import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { Search, SidebarFilter, SortDropdown } from '@/components'
 import { useGenreTranslation } from '@/utils/translateGenre'
+import { useWishlistQuery, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import type { WishlistQueryParams } from '@/api/types/wishlist'
+import type { CatalogFilters } from '@/types/catalog'
 
 export const Route = createFileRoute('/wishlist')({
   component: RouteComponent,
@@ -34,34 +37,77 @@ const glowCoords = [
   },
 ]
 
-const sortOptions = [
-  'sortByDiscount',
-  'sortByRelevance',
-  'sortByPopularity',
-  'sortByNewest',
-  'sortByRating',
-  'sortByPriceAsc',
-  'sortByPriceDesc',
-  'sortByNameAsc',
-  'sortByNameDesc',
-]
-
-const product = {
-  name: "Baldur's Gate 3",
-  image: '/baldurs-gate-3.png',
-  genres: ['рпг', 'екшн', 'd&d', 'fantasy', 'відкритий світ'],
-  price: 1000,
-  salePrice: 900,
-  rating: 4.5,
-}
+// Sort options will be created dynamically using translations
 
 function RouteComponent() {
   const { t } = useTranslation('cart')
+  const { t: tCommon } = useTranslation('common')
   const translateGenre = useGenreTranslation()
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
+  const [searchText, setSearchText] = useState('')
+  const [sortBy, setSortBy] = useState('DiscountPercent:desc')
+  const [filters, setFilters] = useState<CatalogFilters>({
+    page: 1,
+    limit: 20,
+  })
+
+  // Create sort options dynamically using translations
+  const sortOptions = [
+    { label: tCommon('sorting.discounts'), value: 'DiscountPercent:desc' },
+    { label: tCommon('sorting.relevance'), value: 'AddedAtUtc:desc' },
+    { label: tCommon('sorting.popular'), value: 'Rating:desc' },
+    { label: tCommon('sorting.newest'), value: 'ReleaseDate:desc' },
+    { label: tCommon('sorting.priceLowHigh'), value: 'Price:asc' },
+    { label: tCommon('sorting.priceHighLow'), value: 'Price:desc' },
+    { label: tCommon('sorting.nameAZ'), value: 'Name:asc' },
+    { label: tCommon('sorting.nameZA'), value: 'Name:desc' },
+  ]
+
+  const removeFromWishlistMutation = useRemoveFromWishlist()
+
+  // Query params for backend (no search - handled client-side)
+  const queryParams: WishlistQueryParams = {
+    page: filters.page,
+    limit: filters.limit,
+    sortBy: sortBy,
+    genres: filters.genres,
+    platforms: filters.platforms,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    onSale: filters.onSale,
+    isDlc: filters.isDlc,
+  }
+
+  const { data: wishlistData, isLoading, isError } = useWishlistQuery(queryParams)
+
+  // Client-side search filtering (wishlist is small, instant filtering)
+  const filteredItems = wishlistData?.data?.items?.filter((game) => {
+    if (!searchText.trim()) return true
+    const searchLower = searchText.toLowerCase()
+    return (
+      game.name?.toLowerCase().includes(searchLower) ||
+      game.developer?.toLowerCase().includes(searchLower) ||
+      game.publisher?.toLowerCase().includes(searchLower) ||
+      game.description?.toLowerCase().includes(searchLower)
+    )
+  }) || []
 
   function handleSortDropdownOpen() {
     setIsSortDropdownOpen(!isSortDropdownOpen)
+  }
+
+  function handleSortChange(newSortBy: string) {
+    setSortBy(newSortBy)
+    setIsSortDropdownOpen(false)
+  }
+
+  function handleRemoveFromWishlist(gameId: string) {
+    removeFromWishlistMutation.mutate({ gameId })
+  }
+
+  function handleAddToCart(gameId: string) {
+    // TODO: Implement add to cart functionality
+    console.log('Add to cart:', gameId)
   }
 
   return (
@@ -77,7 +123,12 @@ function RouteComponent() {
 
         <div className="flex gap-[24px] mt-[16px]">
           <div className="w-[25%]">
-            <SidebarFilter noSort />
+            <SidebarFilter 
+              noSort 
+              filters={filters}
+              onFiltersChange={setFilters}
+              onSortChange={handleSortChange}
+            />
           </div>
 
           <div className="w-[75%] pb-[256px]">
@@ -86,16 +137,18 @@ function RouteComponent() {
                 <input
                   className="w-full max-w-[420px] h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
                   placeholder={t('wishlist.searchPlaceholder')}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                 />
                 <div className="flex items-center gap-[8px] relative">
                   <span className="text-[var(--color-background-25)] text-[16px] font-extralight">
-                    {t('common.sorting')}:{' '}
+                    {tCommon('sorting.label')}{' '}
                   </span>
                   <button
                     className="text-[var(--color-background)] text-[16px] flex items-center gap-[4px] cursor-pointer"
                     onClick={handleSortDropdownOpen}
                   >
-                    <p>{t('store.sortOptions.sortByRelevance')}</p>
+                    <p>{sortOptions.find(opt => opt.value === sortBy)?.label || tCommon('sorting.relevance')}</p>
 
                     {isSortDropdownOpen ? (
                       <FaChevronUp size={16} />
@@ -108,86 +161,114 @@ function RouteComponent() {
                     <SortDropdown
                       options={sortOptions}
                       className="absolute top-8 left-[100px] min-w-[240px]"
+                      onSelect={handleSortChange}
                     />
                   )}
                 </div>
               </div>
               <div className="flex flex-col gap-[8px]">
-                {Array.from({ length: 7 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-[var(--color-background-15)] rounded-[20px] p-[16px] flex gap-[20px]"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-[320px] h-[145px] rounded-[12px]"
-                    />
-                    <div className="flex flex-col gap-[20px] w-full">
-                      <div className="flex flex-col gap-[12px]">
-                        <div className="flex items-center justify-between">
-                          <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
-                            Baldur's Gate 3
-                          </p>
-                          <MdClose
-                            className="text-[var(--color-background-19)] cursor-pointer"
-                            size={24}
-                          />
+                      {isLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-[var(--color-background-25)] text-lg">Loading wishlist...</p>
                         </div>
-                        <div className="flex items-center gap-[8px]">
-                          {product.genres.map((genre) => (
-                            <p
-                              key={genre}
-                              className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-medium text-[var(--color-background-25)] bg-[var(--color-background-18)]"
-                            >
-                              {translateGenre(genre)}
+                      ) : isError ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-red-400 text-lg">Error loading wishlist</p>
+                        </div>
+                      ) : !filteredItems.length ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-[var(--color-background-25)] text-lg">
+                            {searchText ? 'No games found matching your search' : 'Your wishlist is empty'}
+                          </p>
+                        </div>
+                      ) : (
+                        filteredItems.map((game) => (
+                    <div
+                      key={game.id}
+                      className="bg-[var(--color-background-15)] rounded-[20px] p-[16px] flex gap-[20px]"
+                    >
+                      <img
+                        src={game.mainImage}
+                        alt={game.name}
+                        className="w-[320px] h-[145px] rounded-[12px] object-cover"
+                      />
+                      <div className="flex flex-col gap-[20px] w-full">
+                        <div className="flex flex-col gap-[12px]">
+                          <div className="flex items-center justify-between">
+                            <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
+                              {game.name}
                             </p>
-                          ))}
-                          <p className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-light text-[var(--color-background-25)] bg-[var(--color-background-18)]">
-                            +3
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between w-full">
-                        <div className="flex items-center gap-[4px] h-[24px] justify-center">
-                          <p className="text-[24px] font-medium text-[var(--color-background)]">
-                            {product.rating}
-                          </p>
-                          <FaStar
-                            size={24}
-                            className="text-[var(--color-background-10)]"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-[18px]">
-                            <div>
-                              <div className="flex items-center gap-[16px] h-[24px] justify-end">
-                                <p className="px-[8px] py-[4px] rounded-[20px] bg-[var(--color-background-10)] text-[var(--color-night-background)] h-[24px] flex items-center justify-center">
-                                  {' '}
-                                  -10%
-                                </p>
-                                <div className="flex items-center gap-[8px]">
-                                  <p className="text-[20px] font-bold text-[var(--color-background)]">
-                                    {product.price}₴
-                                  </p>
-                                  <p className="text-[20px] font-normal line-through text-[var(--color-background-25)]">
-                                    {product.salePrice}₴
-                                  </p>
-                                </div>
-                              </div>
-                              <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-                                {t('wishlist.discountValidUntil')}
+                            <MdClose
+                              className="text-[var(--color-background-19)] cursor-pointer hover:text-red-400 transition-colors"
+                              size={24}
+                              onClick={() => handleRemoveFromWishlist(game.id)}
+                            />
+                          </div>
+                          <div className="flex items-center gap-[8px] flex-wrap">
+                            {game.genre.slice(0, 3).map((genre) => (
+                              <p
+                                key={genre}
+                                className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-medium text-[var(--color-background-25)] bg-[var(--color-background-18)]"
+                              >
+                                {translateGenre(genre)}
                               </p>
-                            </div>
-                            <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-                              <p>{t('wishlist.addToCart')}</p>
+                            ))}
+                            {game.genre.length > 3 && (
+                              <p className="text-[14px] rounded-[20px] py-[4px] px-[12px] font-light text-[var(--color-background-25)] bg-[var(--color-background-18)]">
+                                +{game.genre.length - 3}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-between w-full">
+                          <div className="flex items-center gap-[4px] h-[24px] justify-center">
+                            <p className="text-[24px] font-medium text-[var(--color-background)]">
+                              {game.rating.toFixed(1)}
+                            </p>
+                            <FaStar
+                              size={24}
+                              className="text-[var(--color-background-10)]"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-[18px]">
+                              <div>
+                                <div className="flex items-center gap-[16px] h-[24px] justify-end">
+                                  {game.discountPercent > 0 && (
+                                    <p className="px-[8px] py-[4px] rounded-[20px] bg-[var(--color-background-10)] text-[var(--color-night-background)] h-[24px] flex items-center justify-center">
+                                      -{game.discountPercent}%
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-[8px]">
+                                    <p className="text-[20px] font-bold text-[var(--color-background)]">
+                                      {game.discountPercent > 0 ? game.salePrice : game.price}₴
+                                    </p>
+                                    {game.discountPercent > 0 && (
+                                      <p className="text-[20px] font-normal line-through text-[var(--color-background-25)]">
+                                        {game.price}₴
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                {game.saleDate && (
+                                  <p className="text-[14px] font-normal text-[var(--color-background-25)]">
+                                    {t('wishlist.discountValidUntil')} {new Date(game.saleDate).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                              <button 
+                                className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] transition-colors cursor-pointer"
+                                onClick={() => handleAddToCart(game.id)}
+                              >
+                                <p>{t('wishlist.addToCart')}</p>
+                              </button>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>

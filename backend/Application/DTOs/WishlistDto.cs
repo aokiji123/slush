@@ -11,3 +11,9 @@ public class WishlistRequestDto
     [Required]
     public Guid GameId { get; set; }
 }
+
+public class WishlistMeRequestDto
+{
+    [Required]
+    public Guid GameId { get; set; }
+}

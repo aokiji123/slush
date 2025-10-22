@@ -50,19 +50,13 @@ public class WishlistService : IWishlistService
             .Where(w => w.UserId == userId)
             .Include(w => w.Game);
 
-        // Apply filters
-        if (parameters.Genres?.Count > 0)
-        {
-            var genresFilter = parameters.Genres;
-            baseQuery = baseQuery.Where(w => w.Game.Genre.Any(genre => genresFilter.Contains(genre)));
-        }
+        // Track if we need genre or platform filtering (but don't apply yet - requires in-memory evaluation)
+        var needsGenreFilter = parameters.Genres?.Count > 0;
+        var needsPlatformFilter = parameters.Platforms?.Count > 0;
+        var genresFilter = parameters.Genres;
+        var platformsFilter = parameters.Platforms;
 
-        if (parameters.Platforms?.Count > 0)
-        {
-            var platformsFilter = parameters.Platforms;
-            baseQuery = baseQuery.Where(w => w.Game.Platforms.Any(platform => platformsFilter.Contains(platform)));
-        }
-
+        // Apply server-side filters (price, sale, DLC)
         if (parameters.MinPrice.HasValue)
         {
             baseQuery = baseQuery.Where(w => w.Game.Price >= parameters.MinPrice.Value);
@@ -97,18 +91,77 @@ public class WishlistService : IWishlistService
             w => w.Game.Publisher,
             w => w.Game.Description);
 
-        // Get total count before pagination
-        var total = await baseQuery.CountAsync();
+        // Project to games and apply sorting/pagination at Game level so Game fields are sortable
+        IQueryable<Game> gameQuery;
 
-        // Apply sorting and pagination
-        var items = await baseQuery
-            .ApplySorting(parameters)
-            .ApplyPagination(parameters)
-            .Select(w => w.Game)
-            .Select(SelectGameDto())
-            .ToListAsync();
+        // Special-case: relevance by when added to wishlist
+        var sortBy = parameters.SortBy?.Trim() ?? string.Empty;
+        if (sortBy.Contains("AddedAtUtc", StringComparison.OrdinalIgnoreCase))
+        {
+            // Order wishlists by AddedAtUtc, then project to games
+            gameQuery = baseQuery
+                .OrderByDescending(w => w.AddedAtUtc)
+                .Select(w => w.Game);
+        }
+        else
+        {
+            gameQuery = baseQuery.Select(w => w.Game);
+            // Apply domain-aware Game sorting (Rating, ReleaseDate, Price, DiscountPercent, etc.)
+            gameQuery = gameQuery.ApplySorting(parameters);
+        }
 
-        return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
+        // Note: Search is handled client-side in the frontend for wishlist (small dataset)
+        // parameters.Search is ignored here; filtering/sorting/pagination only
+
+        // If genre or platform filtering is needed, fetch all games and filter in-memory (like GameService does)
+        if (needsGenreFilter || needsPlatformFilter)
+        {
+            // Fetch all sorted games (no pagination yet)
+            var allGames = await gameQuery.ToListAsync();
+
+            // Filter by genre in-memory if needed
+            if (needsGenreFilter && genresFilter != null && genresFilter.Any())
+            {
+                allGames = allGames.Where(g => 
+                    g.GetLocalizedGenres(parameters.Language ?? "uk").Any(genre => 
+                        genresFilter.Any(filterGenre => 
+                            genre.ToLowerInvariant().Contains(filterGenre.ToLowerInvariant())))).ToList();
+            }
+
+            // Filter by platform in-memory if needed
+            if (needsPlatformFilter && platformsFilter != null && platformsFilter.Any())
+            {
+                allGames = allGames.Where(g => 
+                    g.Platforms != null && g.Platforms.Any() && 
+                    g.Platforms.Any(platform => 
+                        platformsFilter.Any(filterPlatform => 
+                            platform.ToLowerInvariant().Contains(filterPlatform.ToLowerInvariant())))).ToList();
+            }
+
+            // Get correct count and paginate in-memory
+            var total = allGames.Count;
+            var skip = (parameters.Page - 1) * parameters.Limit;
+            var items = allGames
+                .Skip(skip)
+                .Take(parameters.Limit)
+                .Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk"))
+                .ToList();
+
+            return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
+        }
+        else
+        {
+            // No genre/platform filtering - can use database pagination
+            var total = await gameQuery.CountAsync();
+            var games = await gameQuery
+                .ApplyPagination(parameters)
+                .ToListAsync();
+            
+            // Use FromEntity to respect language parameter for localized fields
+            var items = games.Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk")).ToList();
+
+            return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
+        }
     }
 
     public async Task<bool> AddToWishlistAsync(Guid userId, Guid gameId)

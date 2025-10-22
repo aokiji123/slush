@@ -111,6 +111,7 @@ builder.Services.AddScoped<IUserBlockService, UserBlockService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
 
 // TODO: Register AWS S3 client for R2 when packages are available
 

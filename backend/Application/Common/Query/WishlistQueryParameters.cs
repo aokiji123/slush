@@ -11,6 +11,7 @@ public class WishlistQueryParameters : QueryParameters
     public decimal? MaxPrice { get; set; }
     public bool? OnSale { get; set; }
     public bool? IsDlc { get; set; }
+    public string Language { get; set; } = "uk";
 
     public WishlistQueryParameters()
     {

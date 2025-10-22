@@ -1,14 +1,41 @@
-import type { Game } from './game'
+import type { Game, GameData } from './game'
 
 export type Wishlist = {
   success: boolean
   message: string
-  data: Game[]
+  data: GameData[]
+}
+
+export type PagedWishlistResponse = {
+  success: boolean
+  message: string
+  data: {
+    items: GameData[]
+    page: number
+    pageSize: number
+    totalCount: number
+    totalPages: number
+  }
+}
+
+export type WishlistQueryParams = {
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortDirection?: string
+  search?: string
+  genres?: string[]
+  platforms?: string[]
+  minPrice?: number
+  maxPrice?: number
+  onSale?: boolean
+  isDlc?: boolean
 }
 
 export type AddToWishlistRequest = {
-  userId: string
   gameId: string
 }
 
-export type RemoveFromWishlistRequest = AddToWishlistRequest
+export type RemoveFromWishlistRequest = {
+  gameId: string
+}

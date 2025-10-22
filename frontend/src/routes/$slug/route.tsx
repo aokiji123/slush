@@ -13,8 +13,9 @@ import {
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { Search } from '@/components'
-import { ComplaintIcon, FavoriteIcon, RepostIcon } from '@/icons'
+import { ComplaintIcon, FavoriteIcon, FavoriteFilledIcon, RepostIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
+import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
 
 export const Route = createFileRoute('/$slug')({
   component: RouteComponent,
@@ -80,6 +81,25 @@ function RouteComponent() {
   const { t, i18n } = useTranslation('game')
 
   const { data: game, isLoading, isError } = useGameById(slug)
+
+  // Fetch user's wishlist
+  const { data: wishlistData } = useWishlist()
+  const addToWishlistMutation = useAddToWishlist()
+  const removeFromWishlistMutation = useRemoveFromWishlist()
+
+  // Check if current game is in wishlist
+  const isInWishlist = wishlistData?.data?.some((wishlistGame) => wishlistGame.id === game?.data?.id) || false
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = () => {
+    if (!game?.data?.id) return
+    
+    if (isInWishlist) {
+      removeFromWishlistMutation.mutate({ gameId: game.data.id })
+    } else {
+      addToWishlistMutation.mutate({ gameId: game.data.id })
+    }
+  }
 
   const currentPage = location.pathname.split('/')[2]
   const locationPath = location.pathname.split('/').slice(0, 3).join('/')
@@ -205,8 +225,20 @@ function RouteComponent() {
                       <button className="h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] cursor-pointer">
                         <p>{t('actions.addToCart')}</p>
                       </button>
-                      <button className="h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] cursor-pointer">
-                        <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                      <button 
+                        onClick={handleWishlistToggle}
+                        disabled={addToWishlistMutation.isPending || removeFromWishlistMutation.isPending}
+                        className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                          isInWishlist 
+                            ? 'bg-[#F1FDFF]' 
+                            : 'bg-[var(--color-background-16)]'
+                        }`}
+                      >
+                        {isInWishlist ? (
+                          <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+                        ) : (
+                          <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                        )}
                       </button>
                     </div>
                     <div className="flex items-center gap-[12px] w-full">
