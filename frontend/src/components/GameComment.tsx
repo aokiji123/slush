@@ -9,10 +9,11 @@ import { useTranslation } from 'react-i18next'
 type GameCommentProps = {
   review: Review
   onLikeToggle?: () => void
+  isCurrentUserReview?: boolean
 }
 
-export const GameComment = ({ review, onLikeToggle }: GameCommentProps) => {
-  const { i18n } = useTranslation()
+export const GameComment = ({ review, onLikeToggle, isCurrentUserReview = false }: GameCommentProps) => {
+  const { t, i18n } = useTranslation(['game'])
   const [isLiked, setIsLiked] = useState(review.isLikedByCurrentUser)
   const [likeCount, setLikeCount] = useState(review.likes)
 
@@ -38,9 +39,19 @@ export const GameComment = ({ review, onLikeToggle }: GameCommentProps) => {
 
   return (
     <div
-      className="w-full p-[20px] rounded-[20px] flex flex-col gap-[30px] bg-[var(--color-background-15)] mb-[16px]"
+      className={`w-full p-[20px] rounded-[20px] flex flex-col gap-[30px] mb-[16px] relative ${
+        isCurrentUserReview 
+          ? 'bg-[var(--color-background-15)] border-2 border-[var(--color-background-21)]' 
+          : 'bg-[var(--color-background-15)]'
+      }`}
       style={{ breakInside: 'avoid' }}
     >
+      {/* Your Review Badge */}
+      {isCurrentUserReview && (
+        <div className="absolute top-2 right-2 bg-[var(--color-background-21)] text-[var(--color-night-background)] px-2 py-1 rounded-full text-xs font-medium z-10">
+          {t('review.yourReview')}
+        </div>
+      )}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-[16px]">
           <img

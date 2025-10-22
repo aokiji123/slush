@@ -25,5 +25,6 @@ public interface IGameService
     Task<IEnumerable<GameDto>> GetNewAsync(string language = "uk");
     Task<IEnumerable<GameDto>> GetFreeAsync(string language = "uk");
     Task<IEnumerable<GameDto>> GetDlcsByGameIdAsync(Guid gameId, string language = "uk");
+    Task<IEnumerable<GameDto>> GetDlcsByGameSlugAsync(string slug, string language = "uk");
     Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId);
 }

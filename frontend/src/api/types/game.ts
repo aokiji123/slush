@@ -57,9 +57,14 @@ export type Review = {
 }
 
 export type CreateReviewRequest = {
-  gameId: string
-  content: string
-  rating: number
+  GameId: string
+  Content: string
+  Rating: number
+}
+
+export type UpdateReviewRequest = {
+  Content: string
+  Rating: number
 }
 
 export type GameCharacteristics = {

@@ -44,12 +44,19 @@ const resources = {
   },
 }
 
+// Clear any unsupported language from localStorage
+const storedLang = localStorage.getItem('i18nextLng')
+if (storedLang && !['en', 'uk'].includes(storedLang)) {
+  localStorage.removeItem('i18nextLng')
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
     fallbackLng: 'uk',
+    supportedLngs: ['en', 'uk'],
     debug: process.env.NODE_ENV === 'development',
     
     // Language detection options
@@ -65,6 +72,9 @@ i18n
     
     // Enable namespace fallback
     fallbackNS: 'common',
+    
+    // Force fallback to supported language
+    load: 'languageOnly',
     
     // Interpolation options
     interpolation: {
