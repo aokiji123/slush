@@ -56,7 +56,11 @@
     "publisher": "Publisher",
     "platforms": "Platforms",
     "friendsWantThis": "Friends want this game:",
-    "friendsHaveThis": "Friends have this game:"
+    "friendsHaveThis": "Friends have this game:",
+    "friendWantsThis": "Friend wants this game:",
+    "friendHasThis": "Friend has this game:",
+    "noFriendsWantThis": "No friends want this game",
+    "noFriendsHaveThis": "No friends have this game"
   },
   "notFound": "Game not found",
   "reviews": {

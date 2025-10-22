@@ -15,10 +15,12 @@ namespace Infrastructure.Services;
 public class WishlistService : IWishlistService
 {
     private readonly AppDbContext _db;
+    private readonly IFriendshipService _friendshipService;
 
-    public WishlistService(AppDbContext db)
+    public WishlistService(AppDbContext db, IFriendshipService friendshipService)
     {
         _db = db;
+        _friendshipService = friendshipService;
     }
 
     public async Task<IEnumerable<Guid>> GetWishlistGameIdsAsync(Guid userId)
@@ -197,6 +199,47 @@ public class WishlistService : IWishlistService
         await _db.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetFriendsWithGameInWishlistAsync(Guid userId, Guid gameId)
+    {
+        var friendIds = await _friendshipService.GetFriendIdsAsync(userId);
+        if (!friendIds.Any())
+        {
+            return new List<Guid>();
+        }
+
+        // Query Wishlist table for friends who wishlisted the specified game
+        var friendsWithGameInWishlist = await _db.Wishlists
+            .AsNoTracking()
+            .Where(w => friendIds.Contains(w.UserId) && w.GameId == gameId)
+            .Select(w => w.UserId)
+            .ToListAsync();
+
+        return friendsWithGameInWishlist;
+    }
+
+    public async Task<IReadOnlyList<FriendWithGameDto>> GetFriendsWithGameInWishlistDetailsAsync(Guid userId, Guid gameId)
+    {
+        var friendIds = await _friendshipService.GetFriendIdsAsync(userId);
+        if (!friendIds.Any())
+        {
+            return new List<FriendWithGameDto>();
+        }
+
+        // Query Wishlist table for friends who wishlisted the specified game and join with Users to get details
+        var friendsWithGameInWishlist = await _db.Wishlists
+            .AsNoTracking()
+            .Where(w => friendIds.Contains(w.UserId) && w.GameId == gameId)
+            .Join(_db.Users, w => w.UserId, u => u.Id, (w, u) => new FriendWithGameDto
+            {
+                Id = u.Id,
+                Nickname = u.Nickname,
+                Avatar = u.Avatar
+            })
+            .ToListAsync();
+
+        return friendsWithGameInWishlist;
     }
 
     private static Expression<Func<Game, GameDto>> SelectGameDto()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Application.DTOs;
 using Domain.Entities;
 
 namespace Application.Interfaces;
@@ -17,4 +18,6 @@ public interface IFriendshipService
     Task<IReadOnlyList<Friendship>> GetFriendshipsAsync(Guid userId);
     Task<IReadOnlyList<Guid>> GetFriendIdsAsync(Guid userId);
     Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId);
+    Task<IReadOnlyList<Guid>> GetFriendsWithGameAsync(Guid userId, Guid gameId);
+    Task<IReadOnlyList<FriendWithGameDto>> GetFriendsWithGameDetailsAsync(Guid userId, Guid gameId);
 }

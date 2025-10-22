@@ -6,6 +6,7 @@ import type {
   RespondFriendRequestDto,
   BlockUserDto,
   UnblockUserDto,
+  FriendWithGame,
 } from '../types/friendship'
 
 // Send friend request
@@ -91,6 +92,18 @@ export async function getIncomingRequests(userId: string): Promise<string[]> {
 // Get outgoing requests
 export async function getOutgoingRequests(userId: string): Promise<string[]> {
   const { data } = await axiosInstance.get(`/friendship/outgoing/${userId}`)
+  return data.data
+}
+
+// Get friends who own a specific game
+export async function getFriendsWhoOwnGame(gameId: string): Promise<FriendWithGame[]> {
+  const { data } = await axiosInstance.get(`/friendship/friends-with-game/${gameId}`)
+  return data.data
+}
+
+// Get friends who have a game in their wishlist
+export async function getFriendsWhoWishlistGame(gameId: string): Promise<FriendWithGame[]> {
+  const { data } = await axiosInstance.get(`/wishlist/friends-wishlisted/${gameId}`)
   return data.data
 }
 

@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { MdClose } from 'react-icons/md'
 import { Search } from '@/components/Search'
 import { useCartStore } from '@/lib/cartStore'
-import { useAddToWishlist } from '@/api/queries/useWishlist'
+import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import { usePurchaseGame } from '@/api/queries/usePurchase'
+import { useWalletBalance } from '@/api/queries/useWallet'
 
 export const Route = createFileRoute('/cart')({
   component: RouteComponent,
@@ -38,6 +40,10 @@ function RouteComponent() {
   const { t } = useTranslation('cart')
   const { items, removeFromCart, clearCart, getCartTotal, getCartSavings } = useCartStore()
   const addToWishlistMutation = useAddToWishlist()
+  const purchaseGameMutation = usePurchaseGame()
+  const { data: walletBalance } = useWalletBalance()
+  const { data: wishlistData } = useWishlist()
+  const removeFromWishlistMutation = useRemoveFromWishlist()
 
   const handleMoveToWishlist = (gameId: string) => {
     addToWishlistMutation.mutate(
@@ -54,8 +60,57 @@ function RouteComponent() {
     navigate({ to: '/catalog' })
   }
 
+  const handleCheckout = async () => {
+    if (!walletBalance) {
+      alert('Unable to load wallet balance. Please try again.')
+      return
+    }
+
+    const totalPrice = getCartTotal()
+    
+    // Check if user has sufficient balance
+    if (walletBalance.amount < totalPrice) {
+      alert(`Insufficient funds. You need ${(totalPrice - walletBalance.amount).toFixed(2)}₴ more.`)
+      return
+    }
+
+    try {
+      // Purchase each game in the cart
+      for (const item of items) {
+        const result = await purchaseGameMutation.mutateAsync({ 
+          gameId: item.game.id,
+          title: `Purchase: ${item.game.name}`
+        })
+        
+        // Check if purchase was successful
+        if (!result.success) {
+          throw new Error(result.message || 'Purchase failed')
+        }
+      }
+      
+      // Remove purchased games from wishlist if they were in wishlist
+      for (const item of items) {
+        const isInWishlist = wishlistData?.data?.some(wishlistGame => wishlistGame.id === item.game.id)
+        if (isInWishlist) {
+          await removeFromWishlistMutation.mutateAsync({ gameId: item.game.id })
+        }
+      }
+      
+      // Clear cart after successful purchase
+      clearCart()
+      
+      // Show success message and redirect
+      alert('Purchase successful! Your games have been added to your library.')
+      navigate({ to: '/library' })
+    } catch (error) {
+      console.error('Checkout failed:', error)
+      alert(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   const totalPrice = getCartTotal()
   const savings = getCartSavings()
+  const hasInsufficientFunds = walletBalance && walletBalance.amount < totalPrice
 
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
@@ -159,6 +214,14 @@ function RouteComponent() {
               <div className="bg-[var(--color-background-8)] rounded-[20px] p-[20px] pt-[24px] flex flex-col gap-[24px] sticky top-[24px]">
                 <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                   <div className="flex flex-col gap-[8px]">
+                    {walletBalance && (
+                      <div className="flex items-center justify-between w-full">
+                        <p className="text-[16px] font-normal">Wallet Balance</p>
+                        <p className={`text-[18px] font-bold ${hasInsufficientFunds ? 'text-red-400' : 'text-green-400'}`}>
+                          {walletBalance.amount.toFixed(2)}₴
+                        </p>
+                      </div>
+                    )}
                     {savings > 0 && (
                       <div className="flex items-center justify-between w-full">
                         <p className="text-[16px] font-normal">{t('cart.youSave')}</p>
@@ -171,21 +234,55 @@ function RouteComponent() {
                         {totalPrice.toFixed(0)}₴
                       </p>
                     </div>
+                    {hasInsufficientFunds && (
+                      <div className="flex items-center justify-between w-full">
+                        <p className="text-[14px] font-normal text-red-400">
+                          Insufficient funds
+                        </p>
+                        <p className="text-[14px] font-bold text-red-400">
+                          Need {(totalPrice - walletBalance!.amount).toFixed(2)}₴ more
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <p className="text-[16px] font-normal text-[var(--color-background-25)]">
                     {t('cart.taxNote')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-[12px] w-full">
-                  <button className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] text-[20px] font-medium cursor-pointer hover:bg-[var(--color-background-22)] transition-colors">
-                    {t('cart.proceedToCheckout')}
-                  </button>
-                  <button
-                    onClick={handleContinueShopping}
-                    className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] text-[20px] font-medium cursor-pointer hover:bg-[var(--color-background-17)] transition-colors"
+                  <button 
+                    onClick={handleCheckout}
+                    disabled={hasInsufficientFunds || purchaseGameMutation.isPending || !walletBalance}
+                    className={`h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[20px] font-medium transition-colors ${
+                      hasInsufficientFunds || !walletBalance
+                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        : purchaseGameMutation.isPending
+                        ? 'bg-yellow-600 text-white cursor-wait'
+                        : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
+                    }`}
                   >
-                    {t('cart.continueShopping')}
+                    {purchaseGameMutation.isPending 
+                      ? 'Processing...' 
+                      : hasInsufficientFunds 
+                      ? 'Insufficient Funds' 
+                      : t('cart.proceedToCheckout')
+                    }
                   </button>
+                  {hasInsufficientFunds ? (
+                    <button
+                      onClick={() => navigate({ to: '/settings/wallet' })}
+                      className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-green-600 text-white text-[20px] font-medium cursor-pointer hover:bg-green-700 transition-colors"
+                    >
+                      Add Funds to Wallet
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleContinueShopping}
+                      className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] text-[20px] font-medium cursor-pointer hover:bg-[var(--color-background-17)] transition-colors"
+                    >
+                      {t('cart.continueShopping')}
+                    </button>
+                  )}
                   <button
                     onClick={clearCart}
                     className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[var(--color-background-19)] text-[20px] font-medium cursor-pointer hover:text-red-400 transition-colors"

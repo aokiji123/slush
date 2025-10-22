@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
@@ -14,17 +17,20 @@ public class FriendshipService : IFriendshipService
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IUserService _userService;
     private readonly IUserBlockRepository _userBlockRepository;
+    private readonly AppDbContext _context;
 
     public FriendshipService(
         IFriendRequestRepository friendRequestRepository,
         IFriendshipRepository friendshipRepository,
         IUserService userService,
-        IUserBlockRepository userBlockRepository)
+        IUserBlockRepository userBlockRepository,
+        AppDbContext context)
     {
         _friendRequestRepository = friendRequestRepository;
         _friendshipRepository = friendshipRepository;
         _userService = userService;
         _userBlockRepository = userBlockRepository;
+        _context = context;
     }
 
     public async Task<FriendRequest> SendRequestAsync(Guid senderId, Guid receiverId)
@@ -183,6 +189,47 @@ public class FriendshipService : IFriendshipService
     public async Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId)
     {
         return await _userService.GetOnlineFriendIdsAsync(userId);
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetFriendsWithGameAsync(Guid userId, Guid gameId)
+    {
+        var friendIds = await GetFriendIdsAsync(userId);
+        if (!friendIds.Any())
+        {
+            return new List<Guid>();
+        }
+
+        // Query Library table for friends who own the specified game
+        var friendsWithGame = await _context.Libraries
+            .AsNoTracking()
+            .Where(l => friendIds.Contains(l.UserId) && l.GameId == gameId)
+            .Select(l => l.UserId)
+            .ToListAsync();
+
+        return friendsWithGame;
+    }
+
+    public async Task<IReadOnlyList<FriendWithGameDto>> GetFriendsWithGameDetailsAsync(Guid userId, Guid gameId)
+    {
+        var friendIds = await GetFriendIdsAsync(userId);
+        if (!friendIds.Any())
+        {
+            return new List<FriendWithGameDto>();
+        }
+
+        // Query Library table for friends who own the specified game and join with Users to get details
+        var friendsWithGame = await _context.Libraries
+            .AsNoTracking()
+            .Where(l => friendIds.Contains(l.UserId) && l.GameId == gameId)
+            .Join(_context.Users, l => l.UserId, u => u.Id, (l, u) => new FriendWithGameDto
+            {
+                Id = u.Id,
+                Nickname = u.Nickname,
+                Avatar = u.Avatar
+            })
+            .ToListAsync();
+
+        return friendsWithGame;
     }
 
     private static void ValidateNotSelf(Guid senderId, Guid receiverId)

@@ -53,6 +53,14 @@ public class PurchaseService : IPurchaseService
             AddedAt = DateTime.UtcNow
         };
         _context.Libraries.Add(libraryEntry);
+        
+        // Remove from wishlist if the game is in user's wishlist
+        var wishlistItem = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == game.Id);
+        if (wishlistItem != null)
+        {
+            _context.Wishlists.Remove(wishlistItem);
+        }
+        
         await _context.SaveChangesAsync();
 
         var balance = await _walletService.GetBalanceAsync(userId);

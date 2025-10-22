@@ -379,4 +379,37 @@ public class WishlistController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<bool>("Unable to remove from wishlist."));
         }
     }
+
+    /// <summary>
+    /// Get friends who have a specific game in their wishlist
+    /// </summary>
+    /// <param name="gameId">Game ID to check wishlist for</param>
+    /// <returns>List of friend details who have the specified game in their wishlist</returns>
+    /// <response code="200">Friends with game in wishlist retrieved successfully</response>
+    /// <response code="400">Invalid game ID</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("friends-wishlisted/{gameId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<FriendWithGameDto>>>> GetFriendsWishlisted(Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<FriendWithGameDto>>("Game ID cannot be empty."));
+        }
+
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var friendsWishlisted = await _wishlistService.GetFriendsWithGameInWishlistDetailsAsync(userId, gameId);
+            return Ok(new ApiResponse<IEnumerable<FriendWithGameDto>>(friendsWishlisted));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve friends who wishlisted game {GameId}", gameId);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<IEnumerable<FriendWithGameDto>>("Unable to retrieve friends who wishlisted the game."));
+        }
+    }
 }

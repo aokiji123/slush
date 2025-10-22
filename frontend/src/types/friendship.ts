@@ -49,3 +49,15 @@ export type UnblockUserDto = {
   blockedUserId: string
 }
 
+export type FriendWithGame = {
+  id: string
+  nickname: string
+  avatar: string
+}
+
+export type FriendsWithGameResponse = {
+  success: boolean
+  message: string
+  data: FriendWithGame[]
+}
+

@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Outlet,
   createFileRoute,
@@ -16,6 +17,10 @@ import { Search } from '@/components'
 import { ComplaintIcon, FavoriteIcon, FavoriteFilledIcon, RepostIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import { usePurchaseGame } from '@/api/queries/usePurchase'
+import { useWalletBalance } from '@/api/queries/useWallet'
+import { useGameOwnership } from '@/api/queries/useLibrary'
+import { useFriendsWhoOwnGame, useFriendsWhoWishlistGame } from '@/api/queries/useFriendship'
 
 export const Route = createFileRoute('/$slug')({
   component: RouteComponent,
@@ -59,15 +64,6 @@ function getTabs(slug: string, t: any) {
   ]
 }
 
-const nicknames = [
-  'karl_vava',
-  'zuzeyka',
-  'NikaNii',
-  's1imerock',
-  'whysxugly',
-  'low_owl',
-  'mop_riderEX',
-]
 
 const TYPE_PAGE = {
   community: 'community',
@@ -87,6 +83,17 @@ function RouteComponent() {
   const addToWishlistMutation = useAddToWishlist()
   const removeFromWishlistMutation = useRemoveFromWishlist()
 
+  // Purchase functionality
+  const purchaseGameMutation = usePurchaseGame()
+  const { data: walletBalance } = useWalletBalance()
+  const { data: isOwned } = useGameOwnership(game?.data?.id || '')
+
+  // Friends data
+  const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(game?.data?.id || '')
+  const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data?.id || '')
+  
+  
+
   // Check if current game is in wishlist
   const isInWishlist = wishlistData?.data?.some((wishlistGame) => wishlistGame.id === game?.data?.id) || false
 
@@ -98,6 +105,43 @@ function RouteComponent() {
       removeFromWishlistMutation.mutate({ gameId: game.data.id })
     } else {
       addToWishlistMutation.mutate({ gameId: game.data.id })
+    }
+  }
+
+  // Handle purchase
+  const handlePurchase = async () => {
+    if (!game?.data?.id) return
+
+    const gamePrice = game.data.salePrice > 0 ? game.data.salePrice : game.data.price
+    
+    if (walletBalance && walletBalance.amount < gamePrice) {
+      // Redirect to wallet page if insufficient funds
+      navigate({ to: '/settings/wallet' })
+      return
+    }
+
+    try {
+      const result = await purchaseGameMutation.mutateAsync({
+        gameId: game.data.id,
+        title: `Purchase: ${game.data.name}`
+      })
+      
+      // Check if purchase was successful
+      if (!result.success) {
+        throw new Error(result.message || 'Purchase failed')
+      }
+      
+      // Remove from wishlist if the game was in wishlist
+      if (isInWishlist) {
+        await removeFromWishlistMutation.mutateAsync({ gameId: game.data.id })
+      }
+      
+      // Show success message and navigate to library
+      alert('Purchase successful! The game has been added to your library.')
+      navigate({ to: '/library' })
+    } catch (error) {
+      console.error('Purchase failed:', error)
+      alert(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -142,12 +186,12 @@ function RouteComponent() {
               const isActive = isActiveTab(tab.href)
               return (
                 <li
+                  key={tab.name}
                   className={`text-[25px] font-bold relative border-b-2 transition-colors font-manrope ${
                     isActive
                       ? 'text-[var(--color-background-21)] border-[var(--color-background-21)]'
                       : 'border-transparent hover:text-[var(--color-background-21)] hover:border-[var(--color-background-21)]'
                   }`}
-                  key={tab.name}
                   onClick={() => {
                     navigate({ to: tab.href })
                   }}
@@ -218,29 +262,55 @@ function RouteComponent() {
                     )}
                   </div>
                   <div className="flex flex-col gap-[12px]">
-                    <button className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
-                      <p>{t('actions.buy')}</p>
-                    </button>
-                    <div className="w-full flex items-center gap-[8px]">
-                      <button className="h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] cursor-pointer">
-                        <p>{t('actions.addToCart')}</p>
-                      </button>
+                    {isOwned ? (
                       <button 
-                        onClick={handleWishlistToggle}
-                        disabled={addToWishlistMutation.isPending || removeFromWishlistMutation.isPending}
-                        className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                          isInWishlist 
-                            ? 'bg-[#F1FDFF]' 
-                            : 'bg-[var(--color-background-16)]'
+                        disabled
+                        className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-bold rounded-[20px] bg-[#F1FDFF] text-[var(--color-background-16)] cursor-default"
+                      >
+                        <p>Owned</p>
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handlePurchase}
+                        disabled={purchaseGameMutation.isPending || !walletBalance}
+                        className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] transition-colors ${
+                          purchaseGameMutation.isPending || !walletBalance
+                            ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                            : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
                         }`}
                       >
-                        {isInWishlist ? (
-                          <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
-                        ) : (
-                          <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
-                        )}
+                        <p>
+                          {purchaseGameMutation.isPending 
+                            ? 'Processing...' 
+                            : walletBalance && walletBalance.amount < (game.data.salePrice > 0 ? game.data.salePrice : game.data.price)
+                            ? 'Insufficient Funds'
+                            : t('actions.buy')
+                          }
+                        </p>
                       </button>
-                    </div>
+                    )}
+                    {!isOwned && (
+                      <div className="w-full flex items-center gap-[8px]">
+                        <button className="h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] cursor-pointer">
+                          <p>{t('actions.addToCart')}</p>
+                        </button>
+                        <button 
+                          onClick={handleWishlistToggle}
+                          disabled={addToWishlistMutation.isPending || removeFromWishlistMutation.isPending}
+                          className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                            isInWishlist 
+                              ? 'bg-[#F1FDFF]' 
+                              : 'bg-[var(--color-background-16)]'
+                          }`}
+                        >
+                          {isInWishlist ? (
+                            <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+                          ) : (
+                            <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                     <div className="flex items-center gap-[12px] w-full">
                       <button className="flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer w-[40%] gap-[12px]">
                         <RepostIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
@@ -290,14 +360,16 @@ function RouteComponent() {
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">{t('sidebar.platforms')}</p>
                       <div className="flex items-center gap-[12px]">
-                        {game.data.platforms.includes('windows') && (
+                        {game.data.platforms.some(p => p.toLowerCase() === 'windows') && (
                           <FaWindows size={24} />
                         )}
-                        <FaApple size={24} />
-                        {game.data.platforms.includes('playstation') && (
+                        {game.data.platforms.some(p => p.toLowerCase() === 'apple') && (
+                          <FaApple size={24} />
+                        )}
+                        {game.data.platforms.some(p => p.toLowerCase() === 'playstation') && (
                           <FaPlaystation size={24} />
                         )}
-                        {game.data.platforms.includes('xbox') && (
+                        {game.data.platforms.some(p => p.toLowerCase() === 'xbox') && (
                           <FaXbox size={24} />
                         )}
                       </div>
@@ -306,62 +378,86 @@ function RouteComponent() {
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      {t('sidebar.friendsWantThis')}{' '}
-                      <span className="font-light">2</span>
+                      {friendsWhoWishlist && friendsWhoWishlist.length > 0 
+                        ? (friendsWhoWishlist.length === 1 
+                            ? t('sidebar.friendWantsThis')
+                            : t('sidebar.friendsWantThis'))
+                        : t('sidebar.noFriendsWantThis')
+                      }
                     </p>
                     <div className="w-[155px] flex flex-col gap-[8px]">
-                      <div className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer">
-                        <img
-                          src="/avatar.png"
-                          alt="avatar"
-                          className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
-                          loading="lazy"
-                        />
-                        <p className="text-right text-[16px] font-medium">
-                          ChostRogue
+                      {friendsWhoWishlist && friendsWhoWishlist.length > 0 ? (
+                        friendsWhoWishlist.slice(0, 2).map((friend) => (
+                          <div
+                            key={friend.id}
+                            className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                          >
+                            <img
+                              src={friend.avatar || `/avatar.png`}
+                              alt="avatar"
+                              className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/avatar.png';
+                              }}
+                            />
+                            <p className="text-right text-[16px] font-medium">
+                              {friend.nickname}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[14px] text-[var(--color-background-25)]">
+                          {t('sidebar.noFriendsWantThis')}
                         </p>
-                      </div>
-                      <div className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer">
-                        <img
-                          src="/avatar.png"
-                          alt="avatar"
-                          className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
-                          loading="lazy"
-                        />
-                        <p className="text-right text-[16px] font-medium">
-                          sanya_KAL
-                        </p>
-                      </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      {t('sidebar.friendsHaveThis')}{' '}
-                      <span className="font-light">12</span>
+                      {friendsWhoOwn && friendsWhoOwn.length > 0 
+                        ? (friendsWhoOwn.length === 1 
+                            ? t('sidebar.friendHasThis')
+                            : t('sidebar.friendsHaveThis'))
+                        : t('sidebar.noFriendsHaveThis')
+                      }
                     </p>
                     <div className="flex gap-[8px] flex-wrap">
-                      {nicknames.map((nickname, index) => {
-                        return (
-                          <div
-                            key={index}
-                            className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
-                          >
-                            <img
-                              src="/avatar.png"
-                              alt="avatar"
-                              className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
-                              loading="lazy"
-                            />
-                            <p className="text-right text-[16px] font-medium">
-                              {nickname}
-                            </p>
-                          </div>
-                        )
-                      })}
-                      <div className="w-[36px] h-[36px] flex items-center justify-center bg-[var(--color-background-18)] rounded-full text-[16px] font-extralight text-[var(--color-background-25)] cursor-pointer">
-                        +5
-                      </div>
+                      {friendsWhoOwn && friendsWhoOwn.length > 0 ? (
+                        <React.Fragment key="friends-who-own">
+                          {friendsWhoOwn.slice(0, 7).map((friend) => (
+                            <div
+                              key={friend.id}
+                              className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                            >
+                              <img
+                                src={friend.avatar || `/avatar.png`}
+                                alt="avatar"
+                                className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
+                                loading="lazy"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = '/avatar.png';
+                                }}
+                              />
+                              <p className="text-right text-[16px] font-medium">
+                                {friend.nickname}
+                              </p>
+                            </div>
+                          ))}
+                          {friendsWhoOwn.length > 7 && (
+                            <div className="w-[36px] h-[36px] flex items-center justify-center bg-[var(--color-background-18)] rounded-full text-[16px] font-extralight text-[var(--color-background-25)] cursor-pointer">
+                              +{friendsWhoOwn.length - 7}
+                            </div>
+                          )}
+                        </React.Fragment>
+                      ) : (
+                        <p className="text-[14px] text-[var(--color-background-25)]">
+                          {t('sidebar.noFriendsHaveThis')}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

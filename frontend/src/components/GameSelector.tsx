@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
-import { useUserLibrary } from '@/api/queries/useLibrary'
-import type { Game } from '@/api/types/game'
+import { useMyLibrary } from '@/api/queries/useLibrary'
+import type { GameData } from '@/api/types/game'
 
 interface GameSelectorProps {
-  userId: string
-  selectedGame: Game | null
-  onSelectGame: (game: Game | null) => void
+  selectedGame: GameData | null
+  onSelectGame: (game: GameData | null) => void
 }
 
-export const GameSelector = ({ userId, selectedGame, onSelectGame }: GameSelectorProps) => {
+export const GameSelector = ({ selectedGame, onSelectGame }: GameSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { data: libraryResponse } = useUserLibrary(userId)
+  const { data: libraryResponse } = useMyLibrary()
 
   const games = libraryResponse?.data ?? []
 
@@ -29,7 +28,7 @@ export const GameSelector = ({ userId, selectedGame, onSelectGame }: GameSelecto
     }
   }, [isOpen])
 
-  const handleSelectGame = (game: Game) => {
+  const handleSelectGame = (game: GameData) => {
     onSelectGame(game)
     setIsOpen(false)
   }
@@ -49,11 +48,11 @@ export const GameSelector = ({ userId, selectedGame, onSelectGame }: GameSelecto
           <div className="flex items-center gap-[8px]">
             <img
               src={selectedGame.mainImage}
-              alt={selectedGame.title}
+              alt={selectedGame.name}
               className="w-[32px] h-[32px] rounded-[6px] object-cover"
             />
             <span className="text-[14px] text-[var(--color-background)] font-medium">
-              {selectedGame.title}
+              {selectedGame.name}
             </span>
           </div>
         ) : (
@@ -115,7 +114,7 @@ export const GameSelector = ({ userId, selectedGame, onSelectGame }: GameSelecto
             </div>
           ) : (
             <div className="py-[8px]">
-              {games.map((game) => (
+              {games.map((game: GameData) => (
                 <button
                   key={game.id}
                   onClick={() => handleSelectGame(game)}
@@ -123,11 +122,11 @@ export const GameSelector = ({ userId, selectedGame, onSelectGame }: GameSelecto
                 >
                   <img
                     src={game.mainImage}
-                    alt={game.title}
+                    alt={game.name}
                     className="w-[40px] h-[40px] rounded-[6px] object-cover flex-shrink-0"
                   />
                   <span className="text-[14px] text-[var(--color-background)] font-medium line-clamp-2">
-                    {game.title}
+                    {game.name}
                   </span>
                 </button>
               ))}

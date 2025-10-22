@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchUsers } from '@/api/queries/useUser'
-import { useSendFriendRequest, useFriendRequests, useFriends } from '@/api/queries/useFriendship'
+import { useSendFriendRequest, useFriendRequests, useFriends, useBlockedUsers, useUnblockUser } from '@/api/queries/useFriendship'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 
 interface AddFriendModalProps {
@@ -15,10 +15,12 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const { data: currentUser } = useAuthenticatedUser()
   const { data: searchResults, isLoading: isSearching } = useSearchUsers(debouncedQuery)
   const sendFriendRequestMutation = useSendFriendRequest()
+  const unblockUserMutation = useUnblockUser()
   
-  // Get friend IDs and outgoing requests to check status
+  // Get friend IDs, outgoing requests, and blocked users to check status
   const { data: friends } = useFriends(currentUser?.id ?? '')
   const { outgoing } = useFriendRequests(currentUser?.id ?? '')
+  const { data: blockedUsers } = useBlockedUsers(currentUser?.id ?? '')
 
   // Debounce search query
   useEffect(() => {
@@ -34,18 +36,33 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const handleSendRequest = async (receiverId: string) => {
     try {
       await sendFriendRequestMutation.mutateAsync(receiverId)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send friend request:', error)
+      // Extract error message from API response
+      const errorMessage = error?.response?.data?.message || 'Failed to send friend request'
+      alert(errorMessage) // TODO: Replace with proper toast notification
+    }
+  }
+
+  const handleUnblock = async (blockedUserId: string) => {
+    try {
+      await unblockUserMutation.mutateAsync(blockedUserId)
+    } catch (error: any) {
+      console.error('Failed to unblock user:', error)
+      const errorMessage = error?.response?.data?.message || 'Failed to unblock user'
+      alert(errorMessage) // TODO: Replace with proper toast notification
     }
   }
 
   const getFriendIds = () => friends?.map((f) => f.userId) ?? []
   const getOutgoingIds = () => outgoing?.map((r) => r.userId) ?? []
+  const getBlockedIds = () => blockedUsers?.map((b) => b.userId) ?? []
 
   const getUserStatus = (userId: string) => {
     if (userId === currentUser?.id) return 'self'
     if (getFriendIds().includes(userId)) return 'friend'
     if (getOutgoingIds().includes(userId)) return 'pending'
+    if (getBlockedIds().includes(userId)) return 'blocked'
     return 'none'
   }
 
@@ -135,6 +152,14 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
                       <span className="text-[14px] text-[var(--color-background-25)] opacity-65">
                         Запит відправлено
                       </span>
+                    ) : status === 'blocked' ? (
+                      <button
+                        onClick={() => handleUnblock(user.id)}
+                        disabled={unblockUserMutation.isPending}
+                        className="bg-[var(--color-background-18)] rounded-[12px] px-[20px] py-[8px] text-[14px] text-[var(--color-background)] font-medium hover:bg-[var(--color-background-16)] transition-colors disabled:opacity-50"
+                      >
+                        Розблокувати
+                      </button>
                     ) : (
                       <button
                         onClick={() => handleSendRequest(user.id)}

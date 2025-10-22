@@ -11,7 +11,7 @@ const userToFriend = (user: User): Friend => ({
   nickname: user.nickname,
   avatar: user.avatar,
   banner: user.banner,
-  isOnline: user.isOnline,
+  isOnline: user.isOnline ?? false,
   level: 1, // TODO: Implement level calculation based on user data
   lastSeenAt: user.lastSeenAt,
   bio: user.bio,
@@ -124,7 +124,7 @@ export function useSendFriendRequest() {
 
   return useMutation({
     mutationFn: (receiverId: string) => friendshipAPI.sendFriendRequest(receiverId),
-    onSuccess: (_, receiverId) => {
+    onSuccess: () => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['outgoingRequests'] })
     },
@@ -212,6 +212,30 @@ export function useUnblockUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blockedUsers'] })
     },
+  })
+}
+
+// Query: Get friends who own a specific game
+export function useFriendsWhoOwnGame(gameId: string) {
+  return useQuery({
+    queryKey: ['friendsWhoOwnGame', gameId],
+    queryFn: () => friendshipAPI.getFriendsWhoOwnGame(gameId),
+    enabled: !!gameId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+// Query: Get friends who have a game in their wishlist
+export function useFriendsWhoWishlistGame(gameId: string) {
+  return useQuery({
+    queryKey: ['friendsWhoWishlistGame', gameId],
+    queryFn: () => friendshipAPI.getFriendsWhoWishlistGame(gameId),
+    enabled: !!gameId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
   })
 }
 

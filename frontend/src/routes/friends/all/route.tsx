@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import {
   useFriends,
@@ -7,7 +7,6 @@ import {
   useBlockedUsers,
   useFriendRequests,
 } from '@/api/queries/useFriendship'
-import { useUserLibrary } from '@/api/queries/useLibrary'
 import { FriendCard } from '@/components/FriendCard'
 import { FriendActivityCard } from '@/components/FriendActivityCard'
 import { AddFriendModal } from '@/components/AddFriendModal'
@@ -17,7 +16,7 @@ import { BlockedUserCard } from '@/components/BlockedUserCard'
 import { GameSelector } from '@/components/GameSelector'
 import { BackArrowIcon } from '@/icons'
 import { mockActivities } from './mockActivities'
-import type { Game } from '@/api/types/game'
+import type { GameData } from '@/api/types/game'
 
 export const Route = createFileRoute('/friends/all')({
   component: FriendsAllPage,
@@ -28,7 +27,7 @@ type TabType = 'all' | 'online' | 'blocked' | 'requests'
 function FriendsAllPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const [searchValue, setSearchValue] = useState('')
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null)
+  const [selectedGame, setSelectedGame] = useState<GameData | null>(null)
   const [showAddFriendModal, setShowAddFriendModal] = useState(false)
 
   // Get current user
@@ -360,7 +359,6 @@ function FriendsAllPage() {
                         style={{ width: '522px' }}
                       />
                       <GameSelector
-                        userId={currentUser?.id ?? ''}
                         selectedGame={selectedGame}
                         onSelectGame={setSelectedGame}
                       />

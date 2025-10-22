@@ -13,4 +13,6 @@ public interface IWishlistService
     Task<PagedResult<GameDto>> GetWishlistGamesAsync(Guid userId, WishlistQueryParameters parameters);
     Task<bool> AddToWishlistAsync(Guid userId, Guid gameId);
     Task<bool> RemoveFromWishlistAsync(Guid userId, Guid gameId);
+    Task<IReadOnlyList<Guid>> GetFriendsWithGameInWishlistAsync(Guid userId, Guid gameId);
+    Task<IReadOnlyList<FriendWithGameDto>> GetFriendsWithGameInWishlistDetailsAsync(Guid userId, Guid gameId);
 }

@@ -56,7 +56,11 @@
     "publisher": "Видавець",
     "platforms": "Платформи",
     "friendsWantThis": "Друзів бажають цю гру:",
-    "friendsHaveThis": "Друзів мають цю гру:"
+    "friendsHaveThis": "Друзів мають цю гру:",
+    "friendWantsThis": "Друг бажає цю гру:",
+    "friendHasThis": "Друг має цю гру:",
+    "noFriendsWantThis": "Жоден друг не бажає цю гру",
+    "noFriendsHaveThis": "Жоден друг не має цю гру"
   },
   "notFound": "Гру не знайдено",
   "reviews": {

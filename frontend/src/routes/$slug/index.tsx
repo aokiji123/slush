@@ -6,7 +6,7 @@ import {
   FaCheck,
 } from 'react-icons/fa'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MasonryLayout, SortDropdown, GameComment } from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
@@ -15,6 +15,7 @@ import { useAuthState } from '@/api/queries/useAuth'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
 import { useCartStore } from '@/lib/cartStore'
+import { useGameOwnership } from '@/api/queries/useLibrary'
 import type { Review } from '@/api/types/game'
 
 export const Route = createFileRoute('/$slug/')({
@@ -46,8 +47,48 @@ function RouteComponent() {
   const translateGenre = useGenreTranslation()
   const sortOptions = getSortOptions(t)
   const { addToCart, isInCart } = useCartStore()
+  const { data: isOwned } = useGameOwnership(game?.data?.id || '')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [selectedImage, setSelectedImage] = useState<string>('')
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+  const [scrollWidth, setScrollWidth] = useState(0)
   
   const gameInCart = game?.data ? isInCart(game.data.id) : false
+
+  // Create combined images array with mainImage as first element, avoiding duplicates
+  const allImages = game?.data ? [
+    game.data.mainImage, 
+    ...(game.data.images || []).filter(img => img !== game.data.mainImage)
+  ] : []
+
+  // Initialize selected image when game data loads
+  useEffect(() => {
+    if (game?.data) {
+      // Always use mainImage as the default selected image
+      setSelectedImage(game.data.mainImage)
+    }
+  }, [game?.data])
+
+  // Initialize scroll state and add scroll listener
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (container) {
+      updateScrollState()
+      container.addEventListener('scroll', handleScroll)
+      
+      // Add resize observer to handle window resizing
+      const resizeObserver = new ResizeObserver(() => {
+        updateScrollState()
+      })
+      resizeObserver.observe(container)
+      
+      return () => {
+        container.removeEventListener('scroll', handleScroll)
+        resizeObserver.disconnect()
+      }
+    }
+  }, [allImages.length])
 
   // Find user's existing review
   // Try to get user ID from authenticated user first, then fallback to auth state
@@ -68,6 +109,51 @@ function RouteComponent() {
         }
       })
     }
+  }
+
+  const handleScrollLeft = () => {
+    if (allImages.length > 0) {
+      const currentIndex = allImages.findIndex(img => img === selectedImage)
+      const newIndex = currentIndex > 0 ? currentIndex - 1 : allImages.length - 1
+      setSelectedImage(allImages[newIndex])
+      
+      // Scroll to show the selected image
+      if (scrollContainerRef.current) {
+        const itemWidth = 180 + 16 // 180px width + 16px gap
+        const scrollPosition = newIndex * itemWidth
+        scrollContainerRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' })
+      }
+    }
+  }
+
+  const handleScrollRight = () => {
+    if (allImages.length > 0) {
+      const currentIndex = allImages.findIndex(img => img === selectedImage)
+      const newIndex = currentIndex < allImages.length - 1 ? currentIndex + 1 : 0
+      setSelectedImage(allImages[newIndex])
+      
+      // Scroll to show the selected image
+      if (scrollContainerRef.current) {
+        const itemWidth = 180 + 16 // 180px width + 16px gap
+        const scrollPosition = newIndex * itemWidth
+        scrollContainerRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' })
+      }
+    }
+  }
+
+
+  const updateScrollState = () => {
+    const container = scrollContainerRef.current
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container
+      setScrollPosition(scrollLeft)
+      setContainerWidth(clientWidth)
+      setScrollWidth(scrollWidth)
+    }
+  }
+
+  const handleScroll = () => {
+    updateScrollState()
   }
 
   const handleSortSelect = (sortValue: string) => {
@@ -117,36 +203,59 @@ function RouteComponent() {
   return (
     <>
       <img
-        src={game.data.mainImage}
+        src={selectedImage || game.data.mainImage}
         alt={game.data.name}
         className="w-full object-cover h-[435px] rounded-[20px]"
         loading="lazy"
       />
       <div className="w-full relative mb-[24px]">
-        <div className="overflow-x-auto w-full pb-[16px]">
+        <div ref={scrollContainerRef} className="overflow-x-auto w-full pt-[4px] pb-[16px] scroll-smooth">
           <div className="flex gap-[16px] w-max relative">
-            {game.data.images.map((image, index) => {
+            {allImages.map((image, index) => {
+              const isSelected = selectedImage === image
               return (
-                <div key={index} className="w-[180px] h-[90px] flex-shrink-0">
+                <div 
+                  key={index} 
+                  className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
+                    isSelected ? 'ring-2 ring-[#F1FDFF]' : 'hover:opacity-80'
+                  }`}
+                  onClick={() => setSelectedImage(image)}
+                >
                   <img
                     src={image}
                     alt={`${game.data.name} ${index + 1}`}
-                    className="w-full object-cover h-full rounded-[20px]"
+                    className={`w-full object-cover h-full rounded-[20px] transition-all duration-200 ${
+                      isSelected ? 'opacity-100' : 'opacity-90 hover:opacity-100'
+                    }`}
                     loading="lazy"
                   />
                 </div>
               )
             })}
           </div>
-          <div className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] cursor-pointer absolute -left-3 top-[35px] z-10">
+          <div 
+            className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -left-3 top-[35px] z-10 shadow-lg cursor-pointer"
+            onClick={handleScrollLeft}
+          >
             <FaChevronLeft size={16} />
           </div>
-          <div className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] cursor-pointer absolute -right-3 top-[35px] z-10">
+          <div 
+            className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -right-3 top-[35px] z-10 shadow-lg cursor-pointer"
+            onClick={handleScrollRight}
+          >
             <FaChevronRight size={16} />
           </div>
-          <div className="h-[8px] w-full bg-[var(--sky-25)] absolute bottom-0 left-0 rounded-[20px] flex items-center px-[2px]">
-            <div className="h-[4px] w-[160px] bg-[var(--color-night-background)] rounded-[20px]"></div>
-          </div>
+          {allImages.length > 3 && scrollWidth > containerWidth && (
+            <div className="h-[8px] w-full bg-[var(--sky-25)] absolute bottom-0 left-0 rounded-[20px] flex items-center px-[2px]">
+              <div 
+                className="h-[4px] bg-[var(--color-night-background)] rounded-[20px] transition-all duration-300"
+                style={{
+                  width: `${Math.min(160, (160 * containerWidth) / scrollWidth)}px`,
+                  transform: `translateX(${scrollPosition * (160 / scrollWidth)}px)`
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -210,24 +319,33 @@ function RouteComponent() {
                   {game.data.price ? `${game.data.price}₴` : t('game:actions.free')}
                 </p>
               )}
-              <button
-                onClick={handleAddToCart}
-                disabled={gameInCart}
-                className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
-                  gameInCart
-                    ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
-                    : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
-                }`}
-              >
-                {gameInCart ? (
-                  <div className="flex items-center gap-[8px]">
-                    <FaCheck size={16} />
-                    <p>{t('game:actions.inCart')}</p>
-                  </div>
-                ) : (
-                  <p>{t('game:actions.addToCart')}</p>
-                )}
-              </button>
+              {isOwned ? (
+                <button 
+                  disabled
+                  className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-bold rounded-[20px] bg-[#F1FDFF] text-[var(--color-background-16)] cursor-default"
+                >
+                  <p>Owned</p>
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  disabled={gameInCart}
+                  className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
+                    gameInCart
+                      ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
+                      : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
+                  }`}
+                >
+                  {gameInCart ? (
+                    <div className="flex items-center gap-[8px]">
+                      <FaCheck size={16} />
+                      <p>{t('game:actions.inCart')}</p>
+                    </div>
+                  ) : (
+                    <p>{t('game:actions.addToCart')}</p>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -301,15 +419,17 @@ function RouteComponent() {
         </div>
 
         <div className="flex flex-col gap-[32px]">
-          {/* Write Review Button */}
-          <div className="flex justify-end">
-            <button
-              onClick={() => setIsReviewModalOpen(true)}
-              className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
-            >
-              {userReview ? t('game:actions.editReview') : t('game:actions.writeReview')}
-            </button>
-          </div>
+          {/* Write Review Button - Only show if user owns the game */}
+          {isOwned && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
+              >
+                {userReview ? t('game:actions.editReview') : t('game:actions.writeReview')}
+              </button>
+            </div>
+          )}
 
           <MasonryLayout
             columns={2}
