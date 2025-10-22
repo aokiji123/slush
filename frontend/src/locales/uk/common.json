@@ -47,7 +47,11 @@
     "no": "Ні",
     "confirm": "Підтвердити",
     "continue": "Продовжити",
-    "viewMore": "Дивитись більше"
+    "viewMore": "Дивитись більше",
+    "submit": "Надіслати",
+    "submitting": "Надсилання...",
+    "submitted": "надіслано",
+    "update": "Оновити"
   },
   "navigation": {
     "catalog": "Каталог",
@@ -73,15 +77,36 @@
     "features": "Особливості",
     "events": "Івенти",
     "genreOptions": {
-      "action": "Екшн",
-      "adventure": "Пригода",
-      "rpg": "RPG",
-      "strategy": "Стратегія"
+      "Action": "Екшн",
+      "Adventure": "Пригода",
+      "RPG": "RPG",
+      "Strategy": "Стратегія",
+      "Simulation": "Симулятор",
+      "Sports": "Спорт",
+      "Racing": "Гонки",
+      "Fighting": "Файтинг",
+      "Shooter": "Шутер",
+      "Puzzle": "Головоломка",
+      "Horror": "Хоррор",
+      "Platform": "Платформер",
+      "Stealth": "Стелс",
+      "Survival": "Виживання",
+      "Battle Royale": "Королівська битва",
+      "MOBA": "MOBA",
+      "MMO": "MMO",
+      "Indie": "Інді",
+      "Casual": "Казуальна",
+      "Educational": "Освітня"
     },
     "platformOptions": {
       "pc": "PC",
-      "ps5": "PS5",
-      "xbox": "Xbox"
+      "ps5": "PlayStation 5",
+      "ps4": "PlayStation 4",
+      "xbox": "Xbox Series X/S",
+      "xbox-one": "Xbox One",
+      "switch": "Nintendo Switch",
+      "mac": "Mac",
+      "linux": "Linux"
     },
     "priceOptions": {
       "free": "Безкоштовно",
@@ -113,5 +138,17 @@
     "priceHighLow": "Від дорогих до дешевих",
     "nameAZ": "А - Я",
     "nameZA": "Я - А"
+  },
+  "game": {
+    "review": {
+      "noReviews": "Поки що немає відгуків",
+      "writeReview": "Написати відгук",
+      "rating": "Оцінка",
+      "content": "Зміст відгуку",
+      "contentPlaceholder": "Поділіться своїми думками про цю гру...",
+      "contentRequired": "Зміст відгуку є обов'язковим",
+      "contentTooShort": "Відгук повинен містити принаймні 10 символів",
+      "ratingRequired": "Будь ласка, оберіть оцінку"
+    }
   }
 }

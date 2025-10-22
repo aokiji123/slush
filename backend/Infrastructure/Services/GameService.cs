@@ -51,11 +51,9 @@ public class GameService : IGameService
             query = query.Where(g => g.Price <= priceUpperBound.Value);
         }
 
-        if (!string.IsNullOrWhiteSpace(genre))
-        {
-            var searchGenre = genre.ToLower();
-            query = query.Where(g => g.Genre.Any(x => x.ToLower() == searchGenre));
-        }
+        // Track if we need genre filtering (but don't apply it yet)
+        var needsGenreFilter = !string.IsNullOrWhiteSpace(genre);
+        var searchGenre = genre?.ToLower() ?? string.Empty;
 
         if (!string.IsNullOrWhiteSpace(platform))
         {
@@ -64,6 +62,15 @@ public class GameService : IGameService
         }
 
         var games = await query.ToListAsync();
+        
+        // NOW apply genre filtering in-memory (after database operations)
+        if (needsGenreFilter)
+        {
+            games = games.Where(g => 
+                g.GetLocalizedGenres(language).Any(genre => 
+                    genre.ToLowerInvariant().Contains(searchGenre))).ToList();
+        }
+        
         return games.Select(g => GameDto.FromEntity(g, language));
     }
 
@@ -255,17 +262,11 @@ public class GameService : IGameService
                 return new PagedResult<GameDto>(searchGameDtos, request.Page, request.Limit, searchTotalCount);
             }
 
-        if (request.Genres?.Count > 0)
-        {
-            var genresFilter = request.Genres;
-            query = query.Where(g => g.Genre.Any(genre => genresFilter.Contains(genre)));
-        }
-
-        if (request.Platforms?.Count > 0)
-        {
-            var platformsFilter = request.Platforms;
-            query = query.Where(g => g.Platforms.Any(platform => platformsFilter.Contains(platform)));
-        }
+        // Track if we need genre or platform filtering (but don't apply it yet - these require client-side evaluation)
+        var needsGenreFilter = request.Genres?.Count > 0;
+        var needsPlatformFilter = request.Platforms?.Count > 0;
+        var genresFilter = request.Genres;
+        var platformsFilter = request.Platforms;
 
         if (request.MinPrice.HasValue)
         {
@@ -294,27 +295,82 @@ public class GameService : IGameService
             query = query.Where(g => g.IsDlc == request.IsDlc.Value);
         }
 
-        // Get total count before pagination
-        var totalCount = await query.CountAsync();
-
-        // Apply sorting and pagination
-        var games = await query
-            .ApplySorting(request)
-            .ApplyPagination(request)
-            .ToListAsync();
-
-        var gameDtos = games.Select(g => GameDto.FromEntity(g, language)).ToList();
-
-        // Handle name sorting client-side if needed
-        if (request.SortBy?.ToLowerInvariant() is "alphabet" or "name")
+        // If genre or platform filtering is needed, we must filter before pagination (client-side evaluation)
+        if (needsGenreFilter || needsPlatformFilter)
         {
-            var isDescending = request.SortDirection?.ToLowerInvariant() == "desc";
-            gameDtos = isDescending 
-                ? gameDtos.OrderByDescending(g => g.Name).ToList()
-                : gameDtos.OrderBy(g => g.Name).ToList();
-        }
+            // Fetch ALL matching games (no pagination yet)
+            var allGames = await query.ApplySorting(request).ToListAsync();
+            
+            // If no games found at all, return empty result early
+            if (allGames == null || !allGames.Any())
+            {
+                return new PagedResult<GameDto>(new List<GameDto>(), request.Page, request.Limit, 0);
+            }
+            
+            // Filter by genre in-memory if needed
+            if (needsGenreFilter && genresFilter != null && genresFilter.Any())
+            {
+                allGames = allGames.Where(g => 
+                    g.GetLocalizedGenres(language).Any(genre => 
+                        genresFilter.Any(filterGenre => 
+                            genre.ToLowerInvariant().Contains(filterGenre.ToLowerInvariant())))).ToList();
+            }
+            
+            // Filter by platform in-memory if needed
+            if (needsPlatformFilter && platformsFilter != null && platformsFilter.Any())
+            {
+                allGames = allGames.Where(g => 
+                    g.Platforms != null && g.Platforms.Any() && 
+                    g.Platforms.Any(platform => 
+                        platformsFilter.Any(filterPlatform => 
+                            platform.ToLowerInvariant().Contains(filterPlatform.ToLowerInvariant())))).ToList();
+            }
+            
+            // If no games match after filtering, return empty result
+            if (allGames == null || !allGames.Any())
+            {
+                return new PagedResult<GameDto>(new List<GameDto>(), request.Page, request.Limit, 0);
+            }
+            
+            // NOW get correct count and paginate
+            var totalCount = allGames.Count;
+            var games = allGames.Skip((request.Page - 1) * request.Limit).Take(request.Limit).ToList();
+            
+            var gameDtos = games.Select(g => GameDto.FromEntity(g, language)).ToList();
+
+            // Handle name sorting client-side if needed
+            if (request.SortBy?.ToLowerInvariant() is "alphabet" or "name")
+            {
+                var isDescending = request.SortDirection?.ToLowerInvariant() == "desc";
+                gameDtos = isDescending 
+                    ? gameDtos.OrderByDescending(g => g.Name).ToList()
+                    : gameDtos.OrderBy(g => g.Name).ToList();
+            }
 
             return new PagedResult<GameDto>(gameDtos, request.Page, request.Limit, totalCount);
+        }
+        else
+        {
+            // No genre/platform filtering - use efficient database pagination
+            var totalCount = await query.CountAsync();
+            var games = await query
+                .ApplySorting(request)
+                .ApplyPagination(request)
+                .ToListAsync();
+
+            var gameDtos = games.Select(g => GameDto.FromEntity(g, language)).ToList();
+
+            // Handle name sorting client-side if needed
+            if (request.SortBy?.ToLowerInvariant() is "alphabet" or "name")
+            {
+                var isDescending = request.SortDirection?.ToLowerInvariant() == "desc";
+                gameDtos = isDescending 
+                    ? gameDtos.OrderByDescending(g => g.Name).ToList()
+                    : gameDtos.OrderBy(g => g.Name).ToList();
+            }
+
+            return new PagedResult<GameDto>(gameDtos, request.Page, request.Limit, totalCount);
+        }
         }
         catch (Exception ex)
         {
@@ -387,6 +443,23 @@ public class GameService : IGameService
         var sortedGames = games.OrderBy(g => g.GetLocalizedName(language));
 
         return sortedGames.Select(g => GameDto.FromEntity(g, language));
+    }
+
+    public async Task<IEnumerable<GameDto>> GetDlcsByGameSlugAsync(string slug, string language = "uk")
+    {
+        // First, find the game by slug
+        var game = await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Slug == slug)
+            .FirstOrDefaultAsync();
+
+        if (game == null)
+        {
+            return new List<GameDto>();
+        }
+
+        // Then get DLCs for that game
+        return await GetDlcsByGameIdAsync(game.Id, language);
     }
 
     public async Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId)

@@ -32,7 +32,7 @@
     "sort": "Sort",
     "price": "Price",
     "free": "Free",
-  "sorting": "Sorting",
+    "sorting": "Sorting",
     "buy": "Buy",
     "addToCart": "Add to Cart",
     "addToWishlist": "Add to Wishlist",
@@ -47,7 +47,11 @@
     "no": "No",
     "confirm": "Confirm",
     "continue": "Continue",
-    "viewMore": "View More"
+    "viewMore": "View More",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "submitted": "submitted",
+    "update": "Update"
   },
   "navigation": {
     "catalog": "Catalog",
@@ -73,15 +77,36 @@
     "features": "Features",
     "events": "Events",
     "genreOptions": {
-      "action": "Action",
-      "adventure": "Adventure",
-      "rpg": "RPG",
-      "strategy": "Strategy"
+      "Action": "Action",
+      "Adventure": "Adventure",
+      "RPG": "RPG",
+      "Strategy": "Strategy",
+      "Simulation": "Simulation",
+      "Sports": "Sports",
+      "Racing": "Racing",
+      "Fighting": "Fighting",
+      "Shooter": "Shooter",
+      "Puzzle": "Puzzle",
+      "Horror": "Horror",
+      "Platform": "Platform",
+      "Stealth": "Stealth",
+      "Survival": "Survival",
+      "Battle Royale": "Battle Royale",
+      "MOBA": "MOBA",
+      "MMO": "MMO",
+      "Indie": "Indie",
+      "Casual": "Casual",
+      "Educational": "Educational"
     },
     "platformOptions": {
       "pc": "PC",
-      "ps5": "PS5",
-      "xbox": "Xbox"
+      "ps5": "PlayStation 5",
+      "ps4": "PlayStation 4",
+      "xbox": "Xbox Series X/S",
+      "xbox-one": "Xbox One",
+      "switch": "Nintendo Switch",
+      "mac": "Mac",
+      "linux": "Linux"
     },
     "priceOptions": {
       "free": "Free",
@@ -113,5 +138,17 @@
     "priceHighLow": "Price: High to Low",
     "nameAZ": "A - Z",
     "nameZA": "Z - A"
+  },
+  "game": {
+    "review": {
+      "noReviews": "No reviews yet",
+      "writeReview": "Write a Review",
+      "rating": "Rating",
+      "content": "Review Content",
+      "contentPlaceholder": "Share your thoughts about this game...",
+      "contentRequired": "Review content is required",
+      "contentTooShort": "Review must be at least 10 characters long",
+      "ratingRequired": "Please select a rating"
+    }
   }
 }

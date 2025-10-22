@@ -475,6 +475,52 @@ public class GameController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get all DLCs of a specific game by slug
+    /// </summary>
+    /// <param name="slug">The slug identifier of the game</param>
+    /// <returns>List of DLCs for the specified game</returns>
+    [HttpGet("dlcs/slug/{slug}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetDlcsBySlug(
+        [FromRoute, Required] string slug)
+    {
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("Game slug cannot be empty"));
+        }
+
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}Dlcs_Slug_{slug}_{language}";
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<GameDto>? cachedDlcs))
+        {
+            _logger.LogInformation("Retrieved DLCs for game {Slug} in language {Language} from cache", slug, language);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(cachedDlcs!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving DLCs for game with slug: {Slug} in language {Language}", slug, language);
+            var result = await _gameService.GetDlcsByGameSlugAsync(slug, language);
+            
+            // Cache the results with language-specific key
+            _cache.Set(cacheKey, result, CacheExpiration);
+            
+            _logger.LogInformation("Successfully retrieved {Count} DLCs for game with slug: {Slug} in language {Language}", result.Count(), slug, language);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving DLCs for game {Slug} in language {Language}", slug, language);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<IEnumerable<GameDto>>("An error occurred while retrieving DLCs."));
+        }
+    }
+
 
     /// <summary>
     /// Get game characteristics by game id

@@ -3,7 +3,6 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaChevronUp,
-  FaPlus,
 } from 'react-icons/fa'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -11,7 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { MasonryLayout, SortDropdown, GameComment } from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
 import { useGameById, useGameDlcs, useGameReviews } from '@/api/queries/useGame'
-import { useGameOwnership } from '@/api/queries/useLibrary'
+import { useAuthState } from '@/api/queries/useAuth'
+import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
 import type { Review } from '@/api/types/game'
 
@@ -33,14 +33,49 @@ function RouteComponent() {
   const { t } = useTranslation(['game', 'common'])
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [selectedSort, setSelectedSort] = useState('createdat:desc') // Default to newest
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug' })
   const { data: game, isLoading, isError } = useGameById(slug)
   const { data: gameDlcs } = useGameDlcs(slug)
-  const { data: reviews, isLoading: reviewsLoading, refetch: refetchReviews } = useGameReviews(game?.data?.id || '')
-  const { data: ownsGame } = useGameOwnership(game?.data?.id || '')
+  const { data: reviews, isLoading: reviewsLoading, refetch: refetchReviews } = useGameReviews(game?.data?.id || '', selectedSort)
+  const { user: authUser } = useAuthState()
+  const { data: authenticatedUser } = useAuthenticatedUser()
   const translateGenre = useGenreTranslation()
   const sortOptions = getSortOptions(t)
+
+  // Find user's existing review
+  // Try to get user ID from authenticated user first, then fallback to auth state
+  const userId = authenticatedUser?.id || (authUser as any)?.id
+  const userReview = reviews?.data?.find((review: Review) => review.userId === userId)
+
+  const handleSortSelect = (sortValue: string) => {
+    // Map frontend sort options to backend values
+    const sortMapping: Record<string, string> = {
+      [t('common:sorting.popular')]: 'likes:desc',
+      [t('common:sorting.rating')]: 'rating:desc',
+      [t('game:reviews.sortByComments')]: 'likes:desc',
+      [t('common:sorting.newest')]: 'createdat:desc',
+      [t('game:reviews.sortByPositive')]: 'rating:desc',
+      [t('game:reviews.sortByNegative')]: 'rating:asc',
+    }
+    
+    const backendSort = sortMapping[sortValue] || 'createdat:desc'
+    setSelectedSort(backendSort)
+    setIsSortDropdownOpen(false)
+  }
+
+  const getCurrentSortLabel = () => {
+    // Map backend sort values back to frontend labels
+    const reverseMapping: Record<string, string> = {
+      'likes:desc': t('common:sorting.popular'),
+      'rating:desc': t('common:sorting.rating'),
+      'createdat:desc': t('common:sorting.newest'),
+      'rating:asc': t('game:reviews.sortByNegative'),
+    }
+    
+    return reverseMapping[selectedSort] || t('common:sorting.newest')
+  }
 
   if (isLoading) {
     return (
@@ -204,9 +239,6 @@ function RouteComponent() {
           <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
             {t('game:reviews.title')}
           </p>
-          <div className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-            <p>{t('game:actions.writeReview')}</p>
-          </div>
         </div>
 
         <div className="flex items-center gap-[10px] relative">
@@ -217,30 +249,28 @@ function RouteComponent() {
             className="flex items-center gap-[8px] text-[16px] font-normal text-[var(--color-background)] cursor-pointer"
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
           >
-            {t('game:reviews.mostPopularFirst')}{' '}
+            {getCurrentSortLabel()}{' '}
             {isSortDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
           </button>
           {isSortDropdownOpen && (
             <SortDropdown
               className="absolute top-8 left-[100px]"
               options={sortOptions}
+              onSelect={handleSortSelect}
             />
           )}
         </div>
 
         <div className="flex flex-col gap-[32px]">
           {/* Write Review Button */}
-          {ownsGame && (
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsReviewModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-background-10)] text-[var(--color-background)] rounded-[12px] hover:bg-[var(--color-background-10)]/80 transition-colors"
-              >
-                <FaPlus size={16} />
-                {t('game.review.writeReview')}
-              </button>
-            </div>
-          )}
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsReviewModalOpen(true)}
+              className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
+            >
+              {userReview ? t('game:actions.editReview') : t('game:actions.writeReview')}
+            </button>
+          </div>
 
           <MasonryLayout
             columns={2}
@@ -257,6 +287,7 @@ function RouteComponent() {
                   key={review.id || index}
                   review={review}
                   onLikeToggle={() => refetchReviews()}
+                  isCurrentUserReview={review.userId === userId}
                 />
               ))
             ) : (
@@ -279,6 +310,7 @@ function RouteComponent() {
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
           gameId={game?.data?.id || ''}
+          existingReview={userReview}
           onReviewCreated={() => {
             refetchReviews()
             setIsReviewModalOpen(false)

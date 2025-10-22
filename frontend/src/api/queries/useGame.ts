@@ -8,6 +8,7 @@ import type {
   GamesListResponse,
   PagedGamesResponse,
   Review,
+  UpdateReviewRequest,
 } from '../types/game'
 
 async function getGameById(id: string): Promise<Game> {
@@ -26,7 +27,7 @@ async function getDiscountedGames(): Promise<GamesListResponse> {
 }
 
 async function getGameDlcs(id: string): Promise<GamesListResponse> {
-  const { data } = await axiosInstance.get(`/game/dlcs/${id}`)
+  const { data } = await axiosInstance.get(`/game/dlcs/slug/${id}`)
   return data
 }
 
@@ -52,13 +53,27 @@ async function getFreeGames(): Promise<GamesListResponse> {
   return data
 }
 
-async function getGameReviews(id: string): Promise<{ success: boolean; message: string; data: any[] }> {
-  const { data } = await axiosInstance.get(`/review?GameId=${id}`)
+async function getGameReviews(id: string, sortBy?: string): Promise<{ success: boolean; message: string; data: any[] }> {
+  const params = new URLSearchParams()
+  params.append('GameId', id)
+  
+  if (sortBy) {
+    const [field, order] = sortBy.split(':')
+    params.append('SortBy', field)
+    params.append('SortOrder', order || 'desc')
+  }
+  
+  const { data } = await axiosInstance.get(`/review?${params.toString()}`)
   return data
 }
 
 async function createGameReview(review: CreateReviewRequest): Promise<Review> {
   const { data } = await axiosInstance.post('/review', review)
+  return data.data
+}
+
+async function updateGameReview(reviewId: string, review: UpdateReviewRequest): Promise<Review> {
+  const { data } = await axiosInstance.put(`/review/${reviewId}`, review)
   return data.data
 }
 
@@ -74,6 +89,11 @@ async function getGameCharacteristics(
   id: string,
 ): Promise<GameCharacteristics> {
   const { data } = await axiosInstance.get(`/game/${id}/characteristics`)
+  return data
+}
+
+async function getAllGames(): Promise<GamesListResponse> {
+  const { data } = await axiosInstance.get('/game/all')
   return data
 }
 
@@ -113,12 +133,14 @@ async function searchGames(
     params.append('maxPrice', filters.maxPrice.toString())
   }
   
-  if (filters?.onSale !== undefined) {
-    params.append('onSale', filters.onSale.toString())
+  if (filters?.onSale === true) {
+    params.append('onSale', 'true')
   }
   
-  if (filters?.isDlc !== undefined) {
-    params.append('isDlc', filters.isDlc.toString())
+  if (filters?.isDlc === true) {
+    params.append('isDlc', 'true')
+  } else if (filters?.isDlc === false) {
+    params.append('isDlc', 'false')
   }
   
   if (filters?.page) {
@@ -218,10 +240,10 @@ export function useGameDlcs(id: string) {
   })
 }
 
-export function useGameReviews(id: string) {
+export function useGameReviews(id: string, sortBy?: string) {
   return useQuery({
-    queryKey: ['gameReviews', id],
-    queryFn: () => getGameReviews(id),
+    queryKey: ['gameReviews', id, sortBy],
+    queryFn: () => getGameReviews(id, sortBy),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,
@@ -244,6 +266,23 @@ export function useCreateGameReview() {
   })
 }
 
+export function useUpdateGameReview() {
+  return useMutation({
+    mutationFn: ({ reviewId, review }: { reviewId: string; review: UpdateReviewRequest }) => 
+      updateGameReview(reviewId, review),
+  })
+}
+
+export function useAllGames() {
+  return useQuery({
+    queryKey: ['allGames'],
+    queryFn: () => getAllGames(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
 export function useSearchGames(
   searchText: string,
   filters?: {
@@ -262,7 +301,7 @@ export function useSearchGames(
   return useQuery({
     queryKey: ['searchGames', searchText, filters],
     queryFn: () => searchGames(searchText, filters),
-    enabled: enabled && searchText.length > 0,
+    enabled: enabled,
     staleTime: 1000 * 60 * 1, // 1 minute
     retry: 2,
     refetchOnWindowFocus: false,

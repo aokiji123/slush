@@ -1,8 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { Search, SidebarFilter } from '@/components'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
+import { Search, SidebarFilter, Pagination } from '@/components'
 import { GridIcon, GridRowIcon } from '@/icons'
 import { Product } from '@/components/Product'
+import { useSearchGames } from '@/api/queries/useGame'
+import type { CatalogFilters, CatalogSearchParams } from '@/types/catalog'
+import type { GameData } from '@/api/types/game'
 
 const glowCoords = [
   {
@@ -29,19 +32,104 @@ const glowCoords = [
 ]
 
 export const Route = createFileRoute('/catalog')({
-  validateSearch: (search: Record<string, unknown>): { title?: string } => {
-    return typeof search.title === 'string' ? { title: search.title } : {}
+  validateSearch: (search: Record<string, unknown>): CatalogSearchParams => {
+    return {
+      title: typeof search.title === 'string' ? search.title : undefined,
+      search: typeof search.search === 'string' ? search.search : undefined,
+      genres: typeof search.genres === 'string' ? search.genres : undefined,
+      platforms: typeof search.platforms === 'string' ? search.platforms : undefined,
+      minPrice: typeof search.minPrice === 'string' ? search.minPrice : undefined,
+      maxPrice: typeof search.maxPrice === 'string' ? search.maxPrice : undefined,
+      onSale: typeof search.onSale === 'string' ? search.onSale : undefined,
+      isDlc: typeof search.isDlc === 'string' ? search.isDlc : undefined,
+      page: typeof search.page === 'string' ? search.page : undefined,
+      limit: typeof search.limit === 'string' ? search.limit : undefined,
+      sortBy: typeof search.sortBy === 'string' ? search.sortBy : undefined,
+    }
   },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { title } = Route.useSearch()
-  return <Catalog title={title} />
+  const searchParams = Route.useSearch()
+  return <Catalog searchParams={searchParams} />
 }
 
-const Catalog = ({ title }: { title?: string }) => {
+const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
+  const navigate = useNavigate()
   const [linear, setLinear] = useState(false)
+  
+  // Convert URL search params to filter state
+  const filters = useMemo((): CatalogFilters => {
+    return {
+      search: searchParams.search,
+      genres: searchParams.genres?.split(',').filter(Boolean),
+      platforms: searchParams.platforms?.split(',').filter(Boolean),
+      minPrice: searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined,
+      maxPrice: searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined,
+      onSale: searchParams.onSale === 'true',
+      isDlc: searchParams.isDlc === 'true',
+      page: searchParams.page ? parseInt(searchParams.page) : 1,
+      limit: searchParams.limit ? parseInt(searchParams.limit) : 20,
+      sortBy: searchParams.sortBy,
+    }
+  }, [searchParams])
+
+  // Always use the search games hook - it can handle both filtered and unfiltered requests
+  const { data: gamesResponse, isLoading, error, refetch } = useSearchGames(
+    filters.search || '',
+    {
+      genres: filters.genres,
+      platforms: filters.platforms,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      onSale: filters.onSale,
+      isDlc: filters.isDlc,
+      page: filters.page,
+      limit: filters.limit,
+      sortBy: filters.sortBy,
+    }
+  )
+
+  const games: GameData[] = gamesResponse?.data?.items || []
+  const totalPages = gamesResponse?.data?.totalPages || 1
+  const currentPage = filters.page || 1
+
+  // Update URL when filters change
+  const updateFilters = (newFilters: CatalogFilters) => {
+    const urlParams: Record<string, string> = {}
+    
+    if (newFilters.search) urlParams.search = newFilters.search
+    if (newFilters.genres?.length) urlParams.genres = newFilters.genres.join(',')
+    if (newFilters.platforms?.length) urlParams.platforms = newFilters.platforms.join(',')
+    if (newFilters.minPrice !== undefined) urlParams.minPrice = newFilters.minPrice.toString()
+    if (newFilters.maxPrice !== undefined) urlParams.maxPrice = newFilters.maxPrice.toString()
+    if (newFilters.onSale) urlParams.onSale = 'true'
+    if (newFilters.isDlc) urlParams.isDlc = 'true'
+    if (newFilters.page && newFilters.page > 1) urlParams.page = newFilters.page.toString()
+    if (newFilters.limit && newFilters.limit !== 20) urlParams.limit = newFilters.limit.toString()
+    if (newFilters.sortBy) urlParams.sortBy = newFilters.sortBy
+
+    navigate({
+      to: '/catalog',
+      search: urlParams,
+    })
+  }
+
+  const handleSortChange = (sortBy: string) => {
+    updateFilters({
+      ...filters,
+      sortBy: sortBy || undefined,
+      page: 1,
+    })
+  }
+
+  const handlePageChange = (page: number) => {
+    updateFilters({
+      ...filters,
+      page,
+    })
+  }
 
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
@@ -50,15 +138,19 @@ const Catalog = ({ title }: { title?: string }) => {
           <Search className="my-[16px] w-full" />
         </div>
 
-        {title && (
+        {searchParams.title && (
           <h2 className="text-[48px] font-bold text-[var(--color-background)] mt-[32px]">
-            {title}
+            {searchParams.title}
           </h2>
         )}
 
         <div className="w-full flex gap-[24px] mt-[16px]">
           <div className="w-[25%]">
-            <SidebarFilter />
+            <SidebarFilter 
+              filters={filters}
+              onFiltersChange={updateFilters}
+              onSortChange={handleSortChange}
+            />
           </div>
           <div className="w-[75%] pb-[256px]">
             <div className="flex items-center justify-end text-[var(--color-background)]">
@@ -81,18 +173,80 @@ const Catalog = ({ title }: { title?: string }) => {
               </div>
             </div>
 
-            {linear ? (
-              <div className="flex flex-col gap-[12px] mt-[16px]">
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <Product key={index} linear={linear} />
-                ))}
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-[64px]">
+                <div className="text-[var(--color-background)] text-[18px]">
+                  Завантаження...
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-[24px] mt-[16px]">
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <Product key={index} linear={linear} />
-                ))}
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="flex flex-col items-center justify-center py-[64px] gap-[16px]">
+                <div className="text-[var(--color-background)] text-[18px]">
+                  Помилка завантаження ігор
+                </div>
+                <button
+                  onClick={() => refetch()}
+                  className="px-[24px] py-[12px] bg-[var(--color-background-21)] text-white rounded-[8px] hover:bg-[var(--color-background-23)] transition-colors"
+                >
+                  Спробувати знову
+                </button>
               </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && !error && games.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-[64px] gap-[16px]">
+                <div className="text-[var(--color-background)] text-[18px]">
+                  Ігри не знайдено
+                </div>
+                <div className="text-[var(--color-background-25)] text-[14px]">
+                  Спробуйте змінити фільтри або пошуковий запит
+                </div>
+              </div>
+            )}
+
+            {/* Games Grid/List */}
+            {!isLoading && !error && games.length > 0 && (
+              <>
+                {/* Results info */}
+                <div className="mt-[16px] mb-[8px]">
+                  <p className="text-[var(--color-background-25)] text-[14px]">
+                    {games.length > 0 
+                      ? `Знайдено ${games.length} ігор${totalPages > 1 ? ` (сторінка ${currentPage} з ${totalPages})` : ''}`
+                      : 'Ігри не знайдено'
+                    }
+                  </p>
+                </div>
+
+                {linear ? (
+                  <div className="flex flex-col gap-[12px]">
+                    {games.map((game) => (
+                      <Product key={game.id} game={game} linear={linear} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-[24px]">
+                    {games.map((game) => (
+                      <Product key={game.id} game={game} linear={linear} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-[32px]">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

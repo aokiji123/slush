@@ -39,6 +39,7 @@
     "addToCart": "Add to Cart",
     "free": "Free",
     "writeReview": "Write a review",
+    "editReview": "Edit Review",
     "buy": "Buy",
     "repost": "Repost",
     "report": "Report"
@@ -67,6 +68,8 @@
   },
   "review": {
     "writeReview": "Write a Review",
+    "editReview": "Edit Review",
+    "yourReview": "Your Review",
     "noReviews": "No reviews yet",
     "rating": "Rating",
     "content": "Review",
