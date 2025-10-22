@@ -3,6 +3,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaChevronUp,
+  FaCheck,
 } from 'react-icons/fa'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -13,6 +14,7 @@ import { useGameById, useGameDlcs, useGameReviews } from '@/api/queries/useGame'
 import { useAuthState } from '@/api/queries/useAuth'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
+import { useCartStore } from '@/lib/cartStore'
 import type { Review } from '@/api/types/game'
 
 export const Route = createFileRoute('/$slug/')({
@@ -43,11 +45,30 @@ function RouteComponent() {
   const { data: authenticatedUser } = useAuthenticatedUser()
   const translateGenre = useGenreTranslation()
   const sortOptions = getSortOptions(t)
+  const { addToCart, isInCart } = useCartStore()
+  
+  const gameInCart = game?.data ? isInCart(game.data.id) : false
 
   // Find user's existing review
   // Try to get user ID from authenticated user first, then fallback to auth state
   const userId = authenticatedUser?.id || (authUser as any)?.id
   const userReview = reviews?.data?.find((review: Review) => review.userId === userId)
+
+  const handleAddToCart = () => {
+    if (game?.data && !gameInCart) {
+      addToCart(game.data)
+    }
+  }
+
+  const handleAddAllDlcsToCart = () => {
+    if (gameDlcs?.data) {
+      gameDlcs.data.forEach((dlc) => {
+        if (!isInCart(dlc.id)) {
+          addToCart(dlc)
+        }
+      })
+    }
+  }
 
   const handleSortSelect = (sortValue: string) => {
     // Map frontend sort options to backend values
@@ -189,9 +210,24 @@ function RouteComponent() {
                   {game.data.price ? `${game.data.price}₴` : t('game:actions.free')}
                 </p>
               )}
-              <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
-                <p>{t('game:actions.addToCart')}</p>
-              </div>
+              <button
+                onClick={handleAddToCart}
+                disabled={gameInCart}
+                className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
+                  gameInCart
+                    ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
+                    : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
+                }`}
+              >
+                {gameInCart ? (
+                  <div className="flex items-center gap-[8px]">
+                    <FaCheck size={16} />
+                    <p>{t('game:actions.inCart')}</p>
+                  </div>
+                ) : (
+                  <p>{t('game:actions.addToCart')}</p>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -225,9 +261,12 @@ function RouteComponent() {
                 <p className="text-[20px] font-normal text-[var(--color-background)] font-manrope">
                   {gameDlcs.data.reduce((total, dlc) => total + dlc.price, 0)}₴
                 </p>
-                <div className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]">
+                <button
+                  onClick={handleAddAllDlcsToCart}
+                  className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] transition-colors cursor-pointer"
+                >
                   <p>{t('game:dlc.addAllDlcToCart')}</p>
-                </div>
+                </button>
               </div>
             </div>
           </div>

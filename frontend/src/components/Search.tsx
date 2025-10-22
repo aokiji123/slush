@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from '@tanstack/react-router'
 import { IoFilter } from 'react-icons/io5'
 import {
   CartIcon,
+  CartFilledIcon,
   FavoriteIcon,
   FavoriteFilledIcon,
   GridIcon,
@@ -12,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SearchModal } from './SearchModal'
+import { useCartStore } from '@/lib/cartStore'
 
 type SearchProps = {
   className?: string
@@ -33,6 +35,7 @@ export const Search = ({
   const { t } = useTranslation('common')
   const [internalSearchText, setInternalSearchText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const cartCount = useCartStore((state) => state.getCartCount())
   
   // Use external search text if provided, otherwise use internal state
   const searchText = externalSearchText !== undefined ? externalSearchText : internalSearchText
@@ -149,7 +152,7 @@ export const Search = ({
             )}
           </div>
           <div
-            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer ${
+            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer relative ${
               location.pathname === '/cart'
                 ? 'bg-white'
                 : 'bg-[var(--color-background-16)]'
@@ -158,13 +161,16 @@ export const Search = ({
               navigate({ to: '/cart' })
             }}
           >
-            <CartIcon
-              className={`w-[24px] h-[24px] ${
-                location.pathname === '/cart'
-                  ? 'text-[var(--color-background-24)]'
-                  : 'text-white'
-              }`}
-            />
+            {location.pathname === '/cart' ? (
+              <CartFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+            ) : (
+              <CartIcon className="w-[24px] h-[24px] text-white" />
+            )}
+            {cartCount > 0 && (
+              <div className="absolute -top-1 -right-1 bg-[var(--color-background-21)] text-[var(--color-night-background)] rounded-full w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold">
+                {cartCount > 99 ? '99+' : cartCount}
+              </div>
+            )}
           </div>
         </div>
       )}

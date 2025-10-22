@@ -37,6 +37,7 @@
   },
   "actions": {
     "addToCart": "Add to Cart",
+    "inCart": "In Cart",
     "free": "Free",
     "writeReview": "Write a review",
     "editReview": "Edit Review",

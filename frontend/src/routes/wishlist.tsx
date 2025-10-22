@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { FaChevronDown, FaChevronUp, FaStar } from 'react-icons/fa'
+import { FaChevronDown, FaChevronUp, FaStar, FaCheck } from 'react-icons/fa'
 import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { Search, SidebarFilter, SortDropdown } from '@/components'
 import { useGenreTranslation } from '@/utils/translateGenre'
 import { useWishlistQuery, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import { useCartStore } from '@/lib/cartStore'
 import type { WishlistQueryParams } from '@/api/types/wishlist'
 import type { CatalogFilters } from '@/types/catalog'
 
@@ -64,6 +65,7 @@ function RouteComponent() {
   ]
 
   const removeFromWishlistMutation = useRemoveFromWishlist()
+  const { addToCart, isInCart } = useCartStore()
 
   // Query params for backend (no search - handled client-side)
   const queryParams: WishlistQueryParams = {
@@ -105,9 +107,10 @@ function RouteComponent() {
     removeFromWishlistMutation.mutate({ gameId })
   }
 
-  function handleAddToCart(gameId: string) {
-    // TODO: Implement add to cart functionality
-    console.log('Add to cart:', gameId)
+  function handleAddToCart(game: any) {
+    if (!isInCart(game.id)) {
+      addToCart(game)
+    }
   }
 
   return (
@@ -257,10 +260,22 @@ function RouteComponent() {
                                 )}
                               </div>
                               <button 
-                                className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] transition-colors cursor-pointer"
-                                onClick={() => handleAddToCart(game.id)}
+                                className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
+                                  isInCart(game.id)
+                                    ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
+                                    : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
+                                }`}
+                                onClick={() => handleAddToCart(game)}
+                                disabled={isInCart(game.id)}
                               >
-                                <p>{t('wishlist.addToCart')}</p>
+                                {isInCart(game.id) ? (
+                                  <div className="flex items-center gap-[8px]">
+                                    <FaCheck size={16} />
+                                    <p>{t('wishlist.inCart')}</p>
+                                  </div>
+                                ) : (
+                                  <p>{t('wishlist.addToCart')}</p>
+                                )}
                               </button>
                             </div>
                           </div>

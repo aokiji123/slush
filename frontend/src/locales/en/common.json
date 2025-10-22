@@ -35,6 +35,7 @@
     "sorting": "Sorting",
     "buy": "Buy",
     "addToCart": "Add to Cart",
+    "inCart": "In Cart",
     "addToWishlist": "Add to Wishlist",
     "removeFromWishlist": "Remove from Wishlist",
     "viewDetails": "View Details",
@@ -151,5 +152,9 @@
       "contentTooShort": "Review must be at least 10 characters long",
       "ratingRequired": "Please select a rating"
     }
+  },
+  "product": {
+    "addToCart": "Add to Cart",
+    "inCart": "In Cart"
   }
 }
