@@ -80,6 +80,32 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Searches for users by nickname.
+    /// </summary>
+    [HttpGet("search")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDto>>>> SearchUsersAsync([FromQuery] string nickname)
+    {
+        if (string.IsNullOrWhiteSpace(nickname))
+        {
+            return BadRequest(new ApiResponse<IReadOnlyList<UserDto>>("Search query cannot be empty."));
+        }
+
+        try
+        {
+            var users = await _userService.SearchUsersByNicknameAsync(nickname);
+            return Ok(new ApiResponse<IReadOnlyList<UserDto>>(users));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching users with query {Query}", nickname);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<IReadOnlyList<UserDto>>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
     /// Gets a user profile by identifier.
     /// </summary>
     [HttpGet("{id:guid}")]

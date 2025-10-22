@@ -28,6 +28,7 @@ import { Route as SettingsWalletRouteImport } from './routes/settings/wallet'
 import { Route as SettingsPasswordRouteImport } from './routes/settings/password'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsDeleteAccountRouteImport } from './routes/settings/delete-account'
+import { Route as FriendsAllRouteRouteImport } from './routes/friends/all/route'
 import { Route as SlugDlcRouteRouteImport } from './routes/$slug/dlc/route'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
@@ -129,6 +130,11 @@ const SettingsDeleteAccountRoute = SettingsDeleteAccountRouteImport.update({
   path: '/delete-account',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
+const FriendsAllRouteRoute = FriendsAllRouteRouteImport.update({
+  id: '/friends/all',
+  path: '/friends/all',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SlugDlcRouteRoute = SlugDlcRouteRouteImport.update({
   id: '/dlc',
   path: '/dlc',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
+  '/friends/all': typeof FriendsAllRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
+  '/friends/all': typeof FriendsAllRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
+  '/friends/all': typeof FriendsAllRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug/dlc'
+    | '/friends/all'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug/dlc'
+    | '/friends/all'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/$slug/characteristics'
     | '/$slug/community'
     | '/$slug/dlc'
+    | '/friends/all'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -328,6 +340,7 @@ export interface RootRouteChildren {
   NewRoute: typeof NewRoute
   SignUpRoute: typeof SignUpRoute
   WishlistRoute: typeof WishlistRoute
+  FriendsAllRouteRoute: typeof FriendsAllRouteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsDeleteAccountRouteImport
       parentRoute: typeof SettingsRouteRoute
     }
+    '/friends/all': {
+      id: '/friends/all'
+      path: '/friends/all'
+      fullPath: '/friends/all'
+      preLoaderRoute: typeof FriendsAllRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$slug/dlc': {
       id: '/$slug/dlc'
       path: '/dlc'
@@ -568,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewRoute: NewRoute,
   SignUpRoute: SignUpRoute,
   WishlistRoute: WishlistRoute,
+  FriendsAllRouteRoute: FriendsAllRouteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

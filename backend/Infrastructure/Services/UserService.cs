@@ -302,6 +302,35 @@ public class UserService : IUserService
 
         return onlineFriends;
     }
+
+    public async Task<IReadOnlyList<UserDto>> SearchUsersByNicknameAsync(string query, int limit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<UserDto>();
+        }
+
+        var users = await _db.Set<User>()
+            .Where(u => (u.Nickname != null && u.Nickname.ToLower().Contains(query.ToLower())) ||
+                       (u.UserName != null && u.UserName.ToLower().Contains(query.ToLower())))
+            .Take(limit)
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                Nickname = !string.IsNullOrEmpty(u.Nickname) ? u.Nickname : (u.UserName ?? string.Empty),
+                Email = u.Email ?? string.Empty,
+                Bio = u.Bio,
+                Lang = u.Lang,
+                Avatar = u.Avatar,
+                Banner = u.Banner,
+                Balance = (double)u.Balance,
+                LastSeenAt = u.LastSeenAt,
+                IsOnline = u.IsOnline
+            })
+            .ToListAsync();
+
+        return users;
+    }
 }
 
 

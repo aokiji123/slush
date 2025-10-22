@@ -21,4 +21,7 @@ public interface IUserService
     Task UpdateOnlineStatusAsync(Guid userId, bool isOnline);
     Task UpdateLastSeenAsync(Guid userId);
     Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId);
+    
+    // Search methods
+    Task<IReadOnlyList<UserDto>> SearchUsersByNicknameAsync(string query, int limit = 20);
 }

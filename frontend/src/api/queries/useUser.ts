@@ -134,3 +134,15 @@ export function useUpdateNotifications() {
     },
   })
 }
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: ['searchUsers', query],
+    queryFn: async () => {
+      const { searchUsers } = await import('../userAPI')
+      return searchUsers(query)
+    },
+    enabled: query.length >= 2,
+    staleTime: 1000 * 30, // 30 seconds
+  })
+}

@@ -435,3 +435,42 @@ export const WalletIcon = ({ className }: { className?: string }) => {
     </svg>
   )
 }
+
+export const BackArrowIcon = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M15 18L9 12L15 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export const DropdownArrowIcon = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      width="12"
+      height="7"
+      viewBox="0 0 12 7"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M6.01384 6.65464C5.81384 6.65464 5.51384 6.55464 5.31384 6.35464L0.313844 1.75464C-0.0861559 1.35464 -0.0861563 0.75464 0.213844 0.35464C0.613844 -0.04536 1.21384 -0.0453604 1.61384 0.25464L5.91384 4.25464L10.2138 0.25464C10.6138 -0.14536 11.2138 -0.04536 11.6138 0.35464C12.0138 0.75464 11.9138 1.35464 11.5138 1.75464L6.51384 6.35464C6.51384 6.55464 6.21384 6.65464 6.01384 6.65464Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
