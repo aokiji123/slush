@@ -1,14 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
 import { FiPlusCircle } from 'react-icons/fi'
-import { Search } from '@/components'
+import { Search, LibraryPostCard, LibraryNewsCard } from '@/components'
 import { BsThreeDots } from 'react-icons/bs'
 import { FaChevronLeft, FaChevronRight, FaRegStar } from 'react-icons/fa'
-import { CommentsIcon, FavoriteIcon } from '@/icons'
 import { useMyLibraryQuery } from '@/api/queries/useLibrary'
+import { useLibraryPosts } from '@/api/queries/useCommunity'
 import { useDebounce } from '@/hooks/useDebounce'
+import { PostType } from '@/types/community'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation } from 'swiper/modules'
+
+// @ts-expect-error - Swiper CSS imports are valid
+import 'swiper/css'
+// @ts-expect-error - Swiper CSS imports are valid
+import 'swiper/css/navigation'
 
 export const Route = createFileRoute('/library')({
   component: RouteComponent,
@@ -41,25 +49,57 @@ const glowCoords = [
 
 function RouteComponent() {
   const { t } = useTranslation('cart')
+  const navigate = useNavigate()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
   const [searchText, setSearchText] = useState('')
   const [currentPage] = useState(1)
   const debouncedSearchText = useDebounce(searchText, 300)
 
+  // Swiper refs
+  const newsSwiperRef = useRef<any>(null)
+  const communitySwiperRef = useRef<any>(null)
+
   const { data: libraryData, isLoading, isError } = useMyLibraryQuery({
     page: currentPage,
     limit: 20,
+  })
+
+  // Fetch news posts from user's library
+  const { data: newsPosts, isLoading: newsLoading, isError: newsError } = useLibraryPosts({
+    type: PostType.News,
+    sortBy: 'recent',
+    limit: 10,
+  })
+
+  // Fetch popular posts (excluding news) from user's library
+  const { data: communityPosts, isLoading: communityLoading, isError: communityError } = useLibraryPosts({
+    sortBy: 'popular',
+    limit: 10,
   })
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed)
   }
 
+  // Filter out news posts from community highlights
+  const filteredCommunityPosts = communityPosts?.filter(post => post.type !== PostType.News) || []
+
   // Filter games based on search text
   const filteredGames = libraryData?.data?.items?.filter(game => 
     game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
   ) || []
+
+  // Navigation handlers
+  const handlePostClick = (postId: string, gameId: string) => {
+    navigate({ to: '/$slug/community/post/$id', params: { slug: gameId, id: postId } })
+  }
+
+  const handleGameClick = (gameSlug: string) => {
+    navigate({ to: '/$slug', params: { slug: gameSlug } })
+  }
+
+
 
   return (
     <div className="bg-[var(--color-night-background)] min-h-screen flex flex-col">
@@ -100,7 +140,11 @@ function RouteComponent() {
                 </div>
               ) : (
                 filteredGames.map((game) => (
-                  <div key={game.id} className="flex items-center gap-[16px]">
+                  <div 
+                    key={game.id} 
+                    className="flex items-center gap-[16px] cursor-pointer hover:bg-[var(--color-background-15)] transition-colors p-2 rounded-[8px]"
+                    onClick={() => handleGameClick(game.slug)}
+                  >
                     <img
                       src={game.mainImage}
                       alt={game.name}
@@ -135,69 +179,55 @@ function RouteComponent() {
             <h3 className="text-[24px] font-bold text-white">{t('library.news')}</h3>
 
             <div className="relative">
-              <div className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+              <Swiper
+                modules={[Navigation]}
+                spaceBetween={24}
+                slidesPerView="auto"
+                onSwiper={(swiper) => {
+                  newsSwiperRef.current = swiper
+                }}
+                className="w-full"
+              >
+                {newsLoading ? (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[450px]">
+                      <p className="text-[var(--color-background-25)]">Loading news...</p>
+                    </div>
+                  </SwiperSlide>
+                ) : newsError ? (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[450px]">
+                      <p className="text-red-400">Error loading news</p>
+                    </div>
+                  </SwiperSlide>
+                ) : newsPosts && newsPosts.length > 0 ? (
+                  newsPosts.map((post) => (
+                    <SwiperSlide key={post.id} className="w-[475px]">
+                      <LibraryNewsCard 
+                        post={post}
+                        onClick={() => handlePostClick(post.id, post.gameId)}
+                      />
+                    </SwiperSlide>
+                  ))
+                ) : (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[450px]">
+                      <p className="text-[var(--color-background-25)]">No news posts found</p>
+                    </div>
+                  </SwiperSlide>
+                )}
+              </Swiper>
+              <div 
+                className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                onClick={() => newsSwiperRef.current?.slidePrev()}
+              >
                 <FaChevronLeft className="size-[12px]" />
               </div>
-              <div className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+              <div 
+                className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                onClick={() => newsSwiperRef.current?.slideNext()}
+              >
                 <FaChevronRight className="size-[12px]" />
-              </div>
-              <div className="flex gap-[24px] overflow-x-auto">
-                {[1, 2, 3].map((_, index) => (
-                  <div key={index} className="flex items-center gap-[24px]">
-                    <div className="w-[475px] min-h-[450px] rounded-[20px] overflow-hidden">
-                      <img
-                        src="/cyberpunk-image.png"
-                        alt="cyberpunk"
-                        className="w-full h-[180px] rounded-none object-cover"
-                      />
-                      <div className="bg-[var(--color-background-15)] p-[24px] flex flex-col gap-[16px] rounded-[0px_0px_20px_20px]">
-                        <div className="flex items-center justify-between">
-                          <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer text-white">
-                            <img
-                              src="/avatar.png"
-                              alt="avatar"
-                              className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-                              loading="lazy"
-                            />
-                            <p className="text-right text-[16px] font-medium">
-                              Юзернейм
-                            </p>
-                          </div>
-                          <BsThreeDots
-                            size={24}
-                            className="cursor-pointer text-white"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-[8px]">
-                          <p className="text-[20px] font-bold text-white">
-                            Интересный заголовок новости
-                          </p>
-                          <p className="text-[16px] font-light text-white line-clamp-3">
-                            Lorem ipsum dolor sit amet consectetur. Amet nulla
-                            in risus commodo in in. Massa risus aliquet ut justo
-                            mauris blandit massa dolor vulputate. Pretium sit
-                            ullamcorper cursus
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-[16px]">
-                            <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
-                              <FavoriteIcon className="text-[var(--color-background-10)]" />
-                              <p>2.5k</p>
-                            </div>
-                            <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
-                              <CommentsIcon />
-                              <p>2.5k</p>
-                            </div>
-                          </div>
-                          <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-                            21.02.2023
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -208,69 +238,55 @@ function RouteComponent() {
             </h3>
 
             <div className="relative">
-              <div className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+              <Swiper
+                modules={[Navigation]}
+                spaceBetween={24}
+                slidesPerView="auto"
+                onSwiper={(swiper) => {
+                  communitySwiperRef.current = swiper
+                }}
+                className="w-full"
+              >
+                {communityLoading ? (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[400px]">
+                      <p className="text-[var(--color-background-25)]">Loading community highlights...</p>
+                    </div>
+                  </SwiperSlide>
+                ) : communityError ? (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[400px]">
+                      <p className="text-red-400">Error loading community highlights</p>
+                    </div>
+                  </SwiperSlide>
+                ) : filteredCommunityPosts && filteredCommunityPosts.length > 0 ? (
+                  filteredCommunityPosts.map((post) => (
+                    <SwiperSlide key={post.id} className="w-[475px]">
+                      <LibraryPostCard 
+                        post={post}
+                        onClick={() => handlePostClick(post.id, post.gameId)}
+                      />
+                    </SwiperSlide>
+                  ))
+                ) : (
+                  <SwiperSlide className="w-full">
+                    <div className="flex items-center justify-center h-[400px]">
+                      <p className="text-[var(--color-background-25)]">No community highlights found</p>
+                    </div>
+                  </SwiperSlide>
+                )}
+              </Swiper>
+              <div 
+                className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                onClick={() => communitySwiperRef.current?.slidePrev()}
+              >
                 <FaChevronLeft className="size-[12px]" />
               </div>
-              <div className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer">
+              <div 
+                className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                onClick={() => communitySwiperRef.current?.slideNext()}
+              >
                 <FaChevronRight className="size-[12px]" />
-              </div>
-              <div className="flex gap-[24px] overflow-x-auto">
-                {[1, 2, 3].map((_, index) => (
-                  <div key={index} className="flex items-center gap-[24px]">
-                    <div className="w-[475px] min-h-[400px] flex flex-col gap-[16px] rounded-[20px] overflow-hidden bg-[var(--color-background-15)] p-[20px]">
-                      <div className="flex items-center justify-between">
-                        <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer text-white">
-                          <img
-                            src="/avatar.png"
-                            alt="avatar"
-                            className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-                            loading="lazy"
-                          />
-                          <p className="text-right text-[16px] font-medium">
-                            Юзернейм
-                          </p>
-                        </div>
-                        <BsThreeDots
-                          size={24}
-                          className="cursor-pointer text-white"
-                        />
-                      </div>
-                      <img
-                        src="/cyberpunk-image.png"
-                        alt="cyberpunk"
-                        className="w-full h-[180px] rounded-[20px]"
-                      />
-                      <div className="flex flex-col gap-[16px] rounded-[0px_0px_20px_20px]">
-                        <div className="flex flex-col gap-[8px]">
-                          <p className="text-[20px] font-bold text-white">
-                            Интересный заголовок новости
-                          </p>
-                          <p className="text-[16px] font-light text-white line-clamp-3">
-                            Lorem ipsum dolor sit amet consectetur. Amet nulla
-                            in risus commodo in in. Massa risus aliquet ut justo
-                            mauris blandit massa dolor vulputate. Pretium sit
-                            ullamcorper cursus
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-[16px]">
-                            <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
-                              <FavoriteIcon className="text-[var(--color-background-10)]" />
-                              <p>2.5k</p>
-                            </div>
-                            <div className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px]">
-                              <CommentsIcon />
-                              <p>2.5k</p>
-                            </div>
-                          </div>
-                          <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-                            21.02.2023
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -317,7 +333,8 @@ function RouteComponent() {
                   viewMode === 'grid' ? (
                     <div
                       key={game.id}
-                      className="w-[225px] h-[300px] rounded-[20px]"
+                      className="w-[225px] h-[300px] rounded-[20px] cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => handleGameClick(game.slug)}
                     >
                       <img
                         src={game.mainImage}
@@ -328,7 +345,8 @@ function RouteComponent() {
                   ) : (
                     <div
                       key={game.id}
-                      className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden"
+                      className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden cursor-pointer hover:bg-[var(--color-background-17)]"
+                      onClick={() => handleGameClick(game.slug)}
                     >
                       <img
                         src={game.mainImage}

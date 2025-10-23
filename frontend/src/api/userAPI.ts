@@ -18,3 +18,9 @@ export async function getUserById(userId: string): Promise<User> {
   return data.data
 }
 
+// Get user by nickname
+export async function getUserByNickname(nickname: string): Promise<User> {
+  const { data } = await axiosInstance.get(`/user/nickname/${nickname}`)
+  return data.data
+}
+

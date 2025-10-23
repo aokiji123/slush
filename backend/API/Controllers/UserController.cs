@@ -125,6 +125,38 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Gets a user profile by nickname.
+    /// </summary>
+    [HttpGet("nickname/{nickname}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserByNicknameAsync(string nickname)
+    {
+        if (string.IsNullOrWhiteSpace(nickname))
+        {
+            return BadRequest(new ApiResponse<UserDto>("Nickname cannot be empty."));
+        }
+
+        try
+        {
+            var user = await _userService.GetUserByNicknameAsync(nickname);
+            if (user is null)
+            {
+                return NotFound(new ApiResponse<UserDto>($"User with nickname '{nickname}' was not found."));
+            }
+
+            return Ok(new ApiResponse<UserDto>(user));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user with nickname {Nickname}", nickname);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<UserDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
     /// Updates the current user's profile information.
     /// </summary>
     [Authorize]
@@ -392,6 +424,85 @@ public class UserController : ControllerBase
         {
             _logger.LogError(ex, "Error uploading banner for user {UserId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<FileUploadDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Gets user profile statistics including games, friends, reviews, etc.
+    /// </summary>
+    [HttpGet("{id:guid}/statistics")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<ProfileStatisticsDto>>> GetUserStatisticsAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<ProfileStatisticsDto>("User identifier cannot be empty."));
+        }
+
+        try
+        {
+            var statistics = await _userService.GetUserStatisticsAsync(id);
+            return Ok(new ApiResponse<ProfileStatisticsDto>(statistics));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving statistics for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<ProfileStatisticsDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Gets user's reviews
+    /// </summary>
+    [HttpGet("{id:guid}/reviews")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ReviewDto>>>> GetUserReviewsAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<ReviewDto>>("User identifier cannot be empty."));
+        }
+
+        try
+        {
+            var reviews = await _userService.GetUserReviewsAsync(id);
+            return Ok(new ApiResponse<IEnumerable<ReviewDto>>(reviews));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving reviews for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<ReviewDto>>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Gets user's community posts
+    /// </summary>
+    [HttpGet("{id:guid}/posts")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<PostDto>>>> GetUserPostsAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<PostDto>>("User identifier cannot be empty."));
+        }
+
+        try
+        {
+            var posts = await _userService.GetUserPostsAsync(id);
+            return Ok(new ApiResponse<IEnumerable<PostDto>>(posts));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving posts for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<PostDto>>(UnexpectedErrorMessage));
         }
     }
 

@@ -15,20 +15,17 @@ public class FriendshipService : IFriendshipService
 {
     private readonly IFriendRequestRepository _friendRequestRepository;
     private readonly IFriendshipRepository _friendshipRepository;
-    private readonly IUserService _userService;
     private readonly IUserBlockRepository _userBlockRepository;
     private readonly AppDbContext _context;
 
     public FriendshipService(
         IFriendRequestRepository friendRequestRepository,
         IFriendshipRepository friendshipRepository,
-        IUserService userService,
         IUserBlockRepository userBlockRepository,
         AppDbContext context)
     {
         _friendRequestRepository = friendRequestRepository;
         _friendshipRepository = friendshipRepository;
-        _userService = userService;
         _userBlockRepository = userBlockRepository;
         _context = context;
     }
@@ -45,14 +42,14 @@ public class FriendshipService : IFriendshipService
         }
 
         // Validate that both users exist
-        var sender = await _userService.GetUserAsync(senderId);
-        if (sender == null)
+        var senderExists = await _context.Set<User>().AnyAsync(u => u.Id == senderId);
+        if (!senderExists)
         {
             throw new ArgumentException("Sender user not found.");
         }
 
-        var receiver = await _userService.GetUserAsync(receiverId);
-        if (receiver == null)
+        var receiverExists = await _context.Set<User>().AnyAsync(u => u.Id == receiverId);
+        if (!receiverExists)
         {
             throw new ArgumentException("Receiver user not found.");
         }
@@ -188,7 +185,16 @@ public class FriendshipService : IFriendshipService
 
     public async Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId)
     {
-        return await _userService.GetOnlineFriendIdsAsync(userId);
+        // Get online friend IDs directly from database
+        var friendships = await _friendshipRepository.GetForUserAsync(userId);
+        var friendIds = friendships.Select(f => f.User1Id == userId ? f.User2Id : f.User1Id).ToList();
+        
+        var onlineFriendIds = await _context.Set<User>()
+            .Where(u => friendIds.Contains(u.Id) && u.IsOnline)
+            .Select(u => u.Id)
+            .ToListAsync();
+            
+        return onlineFriendIds;
     }
 
     public async Task<IReadOnlyList<Guid>> GetFriendsWithGameAsync(Guid userId, Guid gameId)
@@ -230,6 +236,74 @@ public class FriendshipService : IFriendshipService
             .ToListAsync();
 
         return friendsWithGame;
+    }
+
+    public async Task<Friendship?> GetFriendshipBetweenUsersAsync(Guid userId1, Guid userId2)
+    {
+        if (userId1 == userId2)
+        {
+            return null;
+        }
+
+        var friendship = await _friendshipRepository.GetForPairAsync(userId1, userId2);
+        return friendship;
+    }
+
+    public async Task<IReadOnlyList<FriendDetailsDto>> GetFriendsWithDetailsAsync(Guid userId)
+    {
+        var friendships = await _friendshipRepository.GetForUserAsync(userId);
+        var friendIds = friendships.Select(f => f.User1Id == userId ? f.User2Id : f.User1Id).ToList();
+        
+        var friends = await _context.Set<User>()
+            .Where(u => friendIds.Contains(u.Id))
+            .Select(u => new FriendDetailsDto
+            {
+                Id = u.Id,
+                Nickname = u.Nickname ?? string.Empty,
+                Avatar = u.Avatar,
+                IsOnline = u.IsOnline,
+                Level = 1, // Will be calculated by UserService
+                LastSeenAt = u.LastSeenAt
+            })
+            .ToListAsync();
+
+        // Get friendship creation dates
+        var friendshipMap = friendships.ToDictionary(
+            f => f.User1Id == userId ? f.User2Id : f.User1Id,
+            f => f.CreatedAt
+        );
+
+        // Set friendship creation dates
+        foreach (var friend in friends)
+        {
+            if (friendshipMap.TryGetValue(friend.Id, out var createdAt))
+            {
+                friend.FriendshipCreatedAt = createdAt;
+            }
+        }
+
+            // Calculate levels for each friend (simplified calculation to avoid circular dependency)
+            foreach (var friend in friends)
+            {
+                // Simple level calculation based on basic activity
+                var gamesCount = await _context.Set<Library>().CountAsync(l => l.UserId == friend.Id);
+                var reviewsCount = await _context.Set<Review>().CountAsync(r => r.UserId == friend.Id);
+                var postsCount = await _context.Set<Post>().CountAsync(p => p.AuthorId == friend.Id);
+                
+                var points = gamesCount + (reviewsCount * 2) + (friends.Count * 3) + (postsCount * 2);
+                friend.Level = points switch
+                {
+                    < 10 => 1,
+                    < 25 => 2,
+                    < 50 => 3,
+                    < 100 => 4,
+                    _ => Math.Min(5 + (points - 100) / 50, 50)
+                };
+            }
+
+        return friends.OrderByDescending(f => f.IsOnline)
+                     .ThenByDescending(f => f.FriendshipCreatedAt)
+                     .ToList();
     }
 
     private static void ValidateNotSelf(Guid senderId, Guid receiverId)

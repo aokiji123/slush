@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
@@ -37,7 +39,8 @@ public class StorageService : IStorageService
         try
         {
             _supabaseClient = new Supabase.Client(supabaseUrl, supabaseKey);
-            _logger.LogInformation("Supabase client initialized successfully with URL: {Url}", supabaseUrl);
+            _logger.LogInformation("Supabase client initialized successfully with URL: {Url}, Bucket: {BucketName}", supabaseUrl, _bucketName);
+            _logger.LogInformation("Supabase key type: {KeyType} (should be service_role for uploads)", supabaseKey.StartsWith("eyJ") ? "JWT Token" : "Unknown");
         }
         catch (Exception ex)
         {
@@ -64,16 +67,31 @@ public class StorageService : IStorageService
             await stream.CopyToAsync(memoryStream);
             var fileBytes = memoryStream.ToArray();
             
-            _logger.LogInformation("File size: {FileSize} bytes, attempting upload to bucket: {BucketName}", fileBytes.Length, _bucketName);
+            _logger.LogInformation("File size: {FileSize} bytes, attempting upload to bucket: {BucketName}, path: {FilePath}", fileBytes.Length, _bucketName, filePath);
+            _logger.LogInformation("File details - Name: {FileName}, Type: {ContentType}, Extension: {Extension}", 
+                file.FileName, file.ContentType, Path.GetExtension(file.FileName));
             
-            var result = await _supabaseClient.Storage
-                .From(_bucketName)
-                .Upload(fileBytes, filePath);
-
-            if (result == null)
+            try
             {
-                _logger.LogError("Upload result is null for file: {FilePath}", filePath);
-                throw new InvalidOperationException("Failed to upload file to Supabase Storage - result is null");
+                _logger.LogInformation("Attempting Supabase upload with bucket: {BucketName}, path: {FilePath}", _bucketName, filePath);
+                
+                var result = await _supabaseClient.Storage
+                    .From(_bucketName)
+                    .Upload(fileBytes, filePath);
+
+                if (result == null)
+                {
+                    _logger.LogError("Upload result is null for file: {FilePath}", filePath);
+                    throw new InvalidOperationException("Failed to upload file to Supabase Storage - result is null");
+                }
+                
+                _logger.LogInformation("Supabase upload successful. Result: {Result}", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Supabase upload failed. Bucket: {BucketName}, Path: {FilePath}, Size: {Size}, Exception Type: {ExceptionType}, Message: {Message}, StackTrace: {StackTrace}", 
+                    _bucketName, filePath, fileBytes.Length, ex.GetType().Name, ex.Message, ex.StackTrace);
+                throw new InvalidOperationException($"Supabase storage upload failed: {ex.Message}", ex);
             }
 
             _logger.LogInformation("File uploaded successfully, getting public URL");
@@ -264,66 +282,42 @@ public class StorageService : IStorageService
 
     private static string SanitizeFileName(string fileName)
     {
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrWhiteSpace(fileName))
             return "file";
-
-        var sanitized = fileName;
-
-        // Handle Unicode dashes and other problematic characters first
-        sanitized = sanitized.Replace("—", "_")  // em dash
-                           .Replace("–", "_")   // en dash
-                           .Replace("−", "_")   // minus sign
-                           .Replace("‐", "_")   // hyphen
-                           .Replace("‑", "_");  // non-breaking hyphen
-
-        // Check for problematic starting characters (including Unicode variants)
-        if (sanitized.StartsWith("-") || sanitized.StartsWith(".") || 
-            sanitized.StartsWith("—") || sanitized.StartsWith("–") ||
-            sanitized.StartsWith("−") || sanitized.StartsWith("‐") ||
-            sanitized.StartsWith("‑"))
+        
+        // Remove or replace non-ASCII characters
+        var normalized = fileName.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+        
+        foreach (var c in normalized)
         {
-            sanitized = "file_" + sanitized;
+            // Keep only ASCII letters, digits, hyphens, and underscores
+            if ((c >= 'a' && c <= 'z') || 
+                (c >= 'A' && c <= 'Z') || 
+                (c >= '0' && c <= '9') || 
+                c == '-' || c == '_')
+            {
+                stringBuilder.Append(c);
+            }
+            else if (c == ' ')
+            {
+                stringBuilder.Append('_');
+            }
+            // Skip all other characters (including accents, Cyrillic, etc.)
         }
-
-        // Replace invalid characters with underscores
-        var invalidChars = new char[] { '/', '\\', ':', '*', '?', '"', '<', '>', '|', '-', ' ' };
-        foreach (var invalidChar in invalidChars)
-        {
-            sanitized = sanitized.Replace(invalidChar, '_');
-        }
-
-        // Remove any remaining Unicode characters that might be problematic
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"[^\w\-_\.]", "_");
-
-        // Remove multiple consecutive underscores
-        while (sanitized.Contains("__"))
-        {
-            sanitized = sanitized.Replace("__", "_");
-        }
-
-        // Remove leading/trailing underscores (but preserve the "file_" prefix if it was added)
-        if (sanitized.StartsWith("file_"))
-        {
-            var rest = sanitized.Substring(5).Trim('_');
-            sanitized = "file_" + rest;
-        }
-        else
-        {
-            sanitized = sanitized.Trim('_');
-        }
-
-        // Ensure we still have a valid name after all processing
+        
+        var sanitized = stringBuilder.ToString();
+        
+        // If nothing remains after sanitization, use a default
         if (string.IsNullOrWhiteSpace(sanitized) || sanitized.Length < 3)
         {
-            sanitized = "file";
+            return $"file_{Guid.NewGuid():N}";
         }
-
-        // Limit length to prevent issues
-        if (sanitized.Length > 50)
-        {
-            sanitized = sanitized.Substring(0, 50);
-        }
-
+        
+        // Limit length and remove trailing underscores/hyphens
+        sanitized = sanitized.Substring(0, Math.Min(sanitized.Length, 50))
+            .TrimEnd('_', '-');
+        
         return sanitized;
     }
 }

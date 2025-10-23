@@ -5,8 +5,11 @@ interface FilePoleI {
   classTitle?: string
   title: string
   value: string
-  onChange: (a: string) => void
+  onChange?: (a: string) => void
+  onFileChange?: (file: File) => void
   classContainer?: string
+  accept?: string
+  fileType?: string
 }
 
 export const FilePole = ({
@@ -14,20 +17,32 @@ export const FilePole = ({
   title,
   value,
   onChange,
+  onFileChange,
   classContainer = '',
+  accept,
+  fileType,
 }: FilePoleI) => {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      // console.log(reader.result);
-      if (typeof reader.result === 'string') {
-        onChange(reader.result)
-      }
+    // If onFileChange is provided, call it with the File object
+    if (onFileChange) {
+      onFileChange(file)
+      return
     }
-    reader.readAsDataURL(file)
+
+    // Otherwise, convert to base64 string (original behavior)
+    if (onChange) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        // console.log(reader.result);
+        if (typeof reader.result === 'string') {
+          onChange(reader.result)
+        }
+      }
+      reader.readAsDataURL(file)
+    }
   }
   return (
     <div className={'w-full flex flex-col gap-[8px] ' + classContainer}>
@@ -55,12 +70,17 @@ export const FilePole = ({
           </>
         )}
         {value ? (
-          <img src={value} alt="" className="absolute h-full opacity-100" />
+          fileType?.startsWith('video/') ? (
+            <video src={value} className="absolute h-full w-full object-cover opacity-100" controls />
+          ) : (
+            <img src={value} alt="" className="absolute h-full w-full object-cover opacity-100" />
+          )
         ) : (
           <input
             onChange={handleFileChange}
             type="file"
             className="w-full absolute h-full opacity-0"
+            accept={accept}
           />
         )}
       </div>

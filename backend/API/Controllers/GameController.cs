@@ -248,7 +248,7 @@ public class GameController : ControllerBase
     }
 
     /// <summary>
-    /// Get recommended games with rating >= 4 and price < 1000
+    /// Get recommended games with rating &gt;= 4 and price &lt; 1000
     /// </summary>
     /// <returns>List of recommended games</returns>
     [HttpGet("recommended")]
@@ -689,5 +689,18 @@ public class GameController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new ApiResponse<PagedResult<GameDto>>($"An error occurred while filtering games: {ex.Message}"));
         }
+    }
+
+    /// <summary>
+    /// Handle community requests - redirects to community controller
+    /// This endpoint exists to handle cases where the frontend calls /game/community
+    /// </summary>
+    /// <returns>BadRequest indicating the correct endpoint to use</returns>
+    [HttpGet("community")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<ApiResponse<object>> GetCommunity()
+    {
+        _logger.LogWarning("Received request to /game/community - this should be handled by /community controller");
+        return BadRequest(new ApiResponse<object>("Community requests should be made to /api/community endpoints. Please use the correct community API endpoints."));
     }
 }

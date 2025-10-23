@@ -17,12 +17,21 @@ public class UserService : IUserService
     private readonly AppDbContext _db;
     private readonly IStorageService _storageService;
     private readonly IFriendshipRepository _friendshipRepository;
+    private readonly ILibraryService _libraryService;
+    private readonly IWishlistService _wishlistService;
+    private readonly IReviewService _reviewService;
+    private readonly ICommunityService _communityService;
 
-    public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository)
+    public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository, 
+        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService)
     {
         _db = db;
         _storageService = storageService;
         _friendshipRepository = friendshipRepository;
+        _libraryService = libraryService;
+        _wishlistService = wishlistService;
+        _reviewService = reviewService;
+        _communityService = communityService;
     }
 
     public async Task<UserDto?> GetUserAsync(Guid id)
@@ -30,6 +39,9 @@ public class UserService : IUserService
         var user = await _db.Set<User>().FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return null;
 
+        // Calculate level for this user
+        var statistics = await GetUserStatisticsAsync(id);
+        
         return new UserDto
         {
             Id = user.Id,
@@ -41,7 +53,8 @@ public class UserService : IUserService
             Banner = user.Banner,
             Balance = (double)user.Balance,
             LastSeenAt = user.LastSeenAt,
-            IsOnline = user.IsOnline
+            IsOnline = user.IsOnline,
+            Level = statistics.Level
         };
     }
 
@@ -330,6 +343,161 @@ public class UserService : IUserService
             .ToListAsync();
 
         return users;
+    }
+
+    public async Task<UserDto?> GetUserByNicknameAsync(string nickname)
+    {
+        if (string.IsNullOrWhiteSpace(nickname))
+        {
+            return null;
+        }
+
+        var user = await _db.Set<User>()
+            .FirstOrDefaultAsync(u => u.Nickname != null && u.Nickname.ToLower() == nickname.ToLower());
+
+        if (user == null) return null;
+
+        // Calculate level for this user
+        var statistics = await GetUserStatisticsAsync(user.Id);
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Nickname = user.Nickname ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Bio = user.Bio,
+            Lang = user.Lang,
+            Avatar = user.Avatar,
+            Banner = user.Banner,
+            Balance = (double)user.Balance,
+            LastSeenAt = user.LastSeenAt,
+            IsOnline = user.IsOnline,
+            Level = statistics.Level
+        };
+    }
+
+    public async Task<ProfileStatisticsDto> GetUserStatisticsAsync(Guid userId)
+    {
+        // Get games count (including DLC)
+        var libraryGames = await _libraryService.GetLibraryGamesAsync(userId);
+        var gamesCount = libraryGames.Count();
+        var dlcCount = libraryGames.Count(g => g.IsDlc);
+
+        // Get wishlist count
+        var wishlistGames = await _wishlistService.GetWishlistGamesAsync(userId);
+        var wishlistCount = wishlistGames.Count();
+
+        // Get friends count
+        var friendIds = await _friendshipRepository.GetForUserAsync(userId);
+        var friendsCount = friendIds.Count;
+
+        // Get reviews count
+        var reviewsCount = await _db.Set<Review>()
+            .CountAsync(r => r.UserId == userId);
+
+        // Get posts count (community posts)
+        var postsCount = await _db.Set<Post>()
+            .CountAsync(p => p.AuthorId == userId);
+
+        // Get badges count (will be calculated separately to avoid circular dependency)
+        var badgesCount = 0;
+
+        // Calculate level based on activity
+        var level = CalculateUserLevel(gamesCount, reviewsCount, friendsCount, postsCount);
+
+        return new ProfileStatisticsDto
+        {
+            GamesCount = gamesCount,
+            DlcCount = dlcCount,
+            WishlistCount = wishlistCount,
+            ReviewsCount = reviewsCount,
+            FriendsCount = friendsCount,
+            BadgesCount = badgesCount,
+            PostsCount = postsCount,
+            Level = level
+        };
+    }
+
+    private static int CalculateUserLevel(int gamesCount, int reviewsCount, int friendsCount, int postsCount)
+    {
+        // Simple level calculation based on activity
+        // Level 1: 0-9 points
+        // Level 2: 10-24 points
+        // Level 3: 25-49 points
+        // Level 4: 50-99 points
+        // Level 5: 100+ points
+        
+        var points = gamesCount + (reviewsCount * 2) + (friendsCount * 3) + (postsCount * 2);
+        
+        return points switch
+        {
+            < 10 => 1,
+            < 25 => 2,
+            < 50 => 3,
+            < 100 => 4,
+            _ => Math.Min(5 + (points - 100) / 50, 50) // Cap at level 50
+        };
+    }
+
+    public async Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId)
+    {
+        var reviews = await _db.Set<Review>()
+            .Include(r => r.Game)
+            .Include(r => r.User)
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new ReviewDto
+            {
+                Id = r.Id,
+                GameId = r.GameId,
+                UserId = r.UserId,
+                Content = r.Content,
+                Rating = r.Rating,
+                Username = r.User.Nickname ?? string.Empty,
+                UserAvatar = r.User.Avatar ?? string.Empty,
+                Likes = r.Likes,
+                IsLikedByCurrentUser = false, // Will be set by the calling code if needed
+                CreatedAt = r.CreatedAt
+            })
+            .ToListAsync();
+
+        return reviews;
+    }
+
+    public async Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId)
+    {
+        var posts = await _db.Set<Post>()
+            .Include(p => p.Author)
+            .Include(p => p.Media)
+            .Include(p => p.Likes)
+            .Include(p => p.Comments)
+            .Where(p => p.AuthorId == userId)
+            .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new PostDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Content = p.Content,
+                Type = p.Type,
+                AuthorId = p.AuthorId,
+                AuthorUsername = p.Author.Nickname ?? string.Empty,
+                AuthorAvatar = p.Author.Avatar ?? string.Empty,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                GameId = p.GameId,
+                LikesCount = p.Likes.Count,
+                CommentsCount = p.Comments.Count,
+                Media = p.Media.Select(m => new MediaDto
+                {
+                    Id = m.Id,
+                    File = m.File,
+                    IsCover = m.IsCover,
+                    Type = m.Type
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return posts;
     }
 }
 

@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { DescriptionPole } from '@/components/poleInput/DescriptionPole'
 import { FilePole } from '@/components/poleInput/FilePole'
 import { TextPole } from '@/components/poleInput/TextPole'
 import { TitlePole } from '@/components/poleInput/TitlePole'
+import { useCreatePost, useUploadMedia } from '@/api/queries/useCommunity'
+import { useGameById } from '@/api/queries/useGame'
+import { PostType, type CreatePostDto } from '@/types/community'
 
 export const Route = createFileRoute('/$slug/community/createPost')({
   component: RouteComponent,
@@ -12,6 +15,7 @@ export const Route = createFileRoute('/$slug/community/createPost')({
 const typePosts = [
   {
     type: 'Обговорення',
+    postType: PostType.Discussion,
     title: {
       placeholder: 'Тема вашого обговорення...',
       title: 'Заголовок',
@@ -22,6 +26,7 @@ const typePosts = [
   },
   {
     type: 'Скріншот',
+    postType: PostType.Screenshot,
     title: {
       placeholder: 'Ваш коментар до скріншота...',
       title: 'Підпис',
@@ -31,6 +36,7 @@ const typePosts = [
   },
   {
     type: 'Відео',
+    postType: PostType.Video,
     title: {
       placeholder: 'Ваш коментар до відео...',
       title: 'Підпис',
@@ -40,6 +46,7 @@ const typePosts = [
   },
   {
     type: 'Гайд',
+    postType: PostType.Guide,
     title: {
       placeholder: 'Про що ваш гайд?',
       title: 'Заголовок',
@@ -52,6 +59,17 @@ const typePosts = [
     },
     text: { placeholder: 'Текст вашого гайду...', title: 'Текст' },
     file: { placeholder: null, title: 'Обкладинка' },
+  },
+  {
+    type: 'Новини',
+    postType: PostType.News,
+    title: {
+      placeholder: 'Заголовок новини...',
+      title: 'Заголовок',
+      limitSymbol: 160,
+    },
+    text: { placeholder: 'Опишіть новину...', title: 'Текст' },
+    file: { placeholder: null, title: 'Зображення' },
   },
 ]
 
@@ -69,8 +87,20 @@ function RouteComponent() {
   const { slug } = useParams({ from: '/$slug/community' })
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
-  const [file, setFile] = useState('')
+  const [description, setDescription] = useState('')
+  const [file, setFile] = useState<File | null>(null)
+  const [filePreview, setFilePreview] = useState<string | null>(null)
+  const [fileType, setFileType] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+
+  // Get game data
+  const { data: game, isLoading: gameLoading } = useGameById(slug)
+  
+  // Mutations
+  const createPostMutation = useCreatePost()
+  const uploadMediaMutation = useUploadMedia()
 
   const onCancel = () => {
     navigate({
@@ -79,16 +109,126 @@ function RouteComponent() {
     })
     setTitle('')
     setText('')
-    setFile('')
+    setDescription('')
+    setFile(null)
+    setFilePreview(null)
+    setFileType(null)
+    setError(null)
   }
-  const onPublick = () => {
-    navigate({
-      to: '/$slug/community',
-      params: { slug },
-    })
-    setTitle('')
-    setText('')
-    setFile('')
+
+  const handleFileChange = (file: File) => {
+    setFile(file)
+    setFileType(file.type)
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file)
+    setFilePreview(previewUrl)
+  }
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (filePreview) {
+        URL.revokeObjectURL(filePreview)
+      }
+    }
+  }, [filePreview])
+
+  const onPublish = async () => {
+    if (!game?.data?.id) {
+      setError('Гра не знайдена')
+      return
+    }
+
+    if (!title.trim() && !text.trim() && !description.trim()) {
+      setError('Заповніть хоча б одне поле')
+      return
+    }
+
+    // Validate file if provided
+    if (file) {
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+      const allowedVideoTypes = ['video/mp4', 'video/webm']
+      const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes]
+      
+      if (file.size > maxSize) {
+        setError('Розмір файлу не повинен перевищувати 10MB')
+        return
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        setError('Дозволені типи файлів: JPG, PNG, GIF, WEBP, MP4, WEBM')
+        return
+      }
+    }
+
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      // Prepare post data
+      const postData: CreatePostDto = {
+        title: title.trim(),
+        content: typePost.postType === PostType.Guide 
+          ? `${description.trim()}\n\n${text.trim()}`.trim()
+          : text.trim(),
+        type: typePost.postType,
+      }
+
+      // Create the post first
+      const createdPost = await createPostMutation.mutateAsync({
+        gameId: game.data.id,
+        dto: postData,
+      })
+
+      console.log('Created post response:', createdPost)
+
+      // Check if createdPost has the expected structure
+      if (!createdPost || !createdPost.id) {
+        throw new Error('Invalid response from server: missing post ID')
+      }
+
+      // Upload media if provided
+      if (file) {
+        try {
+          console.log('Uploading file:', {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified
+          })
+          
+          await uploadMediaMutation.mutateAsync({
+            postId: createdPost.id,
+            file: file,
+          })
+          
+          console.log('Media uploaded successfully')
+        } catch (uploadError: any) {
+          console.error('Failed to upload media:', uploadError)
+          console.error('Upload error details:', {
+            status: uploadError?.response?.status,
+            data: uploadError?.response?.data,
+            message: uploadError?.message
+          })
+          
+          // Don't fail the entire operation if media upload fails
+          setError(`Пост створено, але не вдалося завантажити медіа: ${uploadError?.response?.data?.message || uploadError?.message || 'Невідома помилка'}`)
+        }
+      }
+
+      // Navigate back to community
+      navigate({
+        to: '/$slug/community',
+        params: { slug },
+      })
+    } catch (error: any) {
+      console.error('Failed to create post:', error)
+      setError(error?.message || error?.response?.data?.message || 'Помилка створення поста')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const momeComponents = useMemo(() => {
@@ -117,9 +257,12 @@ function RouteComponent() {
             <FilePole
               classContainer="mt-[12px]"
               classTitle=""
-              onChange={setFile}
-              title={typePost.file.title || ''}
-              value={file}
+              onFileChange={handleFileChange}
+              onChange={() => {}} // Dummy function for compatibility
+              title={`${typePost.file.title || ''} (JPG, PNG, GIF, WEBP, MP4, WEBM, макс. 10MB)`}
+              value={filePreview || ''}
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+              fileType={fileType || undefined}
             />
           </>
         )
@@ -129,9 +272,12 @@ function RouteComponent() {
             <FilePole
               classContainer="mt-[12px]"
               classTitle=""
-              onChange={setFile}
-              title={typePost.file.title || ''}
-              value={file}
+              onFileChange={handleFileChange}
+              onChange={() => {}} // Dummy function for compatibility
+              title={`${typePost.file.title || ''} (JPG, PNG, GIF, WEBP, MP4, WEBM, макс. 10MB)`}
+              value={filePreview || ''}
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+              fileType={fileType || undefined}
             />
             <TitlePole
               classTitle="mt-[12px]"
@@ -150,9 +296,12 @@ function RouteComponent() {
             <FilePole
               classContainer="mt-[12px]"
               classTitle=""
-              onChange={setFile}
-              title={typePost.file.title || ''}
-              value={file}
+              onFileChange={handleFileChange}
+              onChange={() => {}} // Dummy function for compatibility
+              title={`${typePost.file.title || ''} (JPG, PNG, GIF, WEBP, MP4, WEBM, макс. 10MB)`}
+              value={filePreview || ''}
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+              fileType={fileType || undefined}
             />
             <TitlePole
               classTitle="mt-[12px]"
@@ -171,11 +320,13 @@ function RouteComponent() {
             <div className="w-full flex flex-row gap-[12px]">
               <div className="w-[50%] flex flex-col gap-[8px]">
                 <FilePole
-                  // classContainer='mt-[12px]'
+                  classContainer=""
                   classTitle=""
-                  onChange={setFile}
-                  title={typePost.file.title || ''}
-                  value={file}
+                  onFileChange={handleFileChange}
+                  onChange={() => {}} // Dummy function for compatibility
+                  title={`${typePost.file.title || ''} (JPG, PNG, GIF, WEBP, MP4, WEBM, макс. 10MB)`}
+                  value={filePreview || ''}
+                  accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
                 />
               </div>
               <div className="w-[50%] flex flex-col gap-[12px]">
@@ -192,11 +343,11 @@ function RouteComponent() {
                   classContainer=""
                   classTitle=""
                   classInput="h-[188px] p-[12px] rounded-[12px] bg-[var(--color-background-15)] text-[var(--color-background)]"
-                  onChange={setText}
+                  onChange={setDescription}
                   placeholder={typePost.description?.placeholder || ''}
                   title={typePost.description?.title || ''}
-                  value={text}
-                  limitSymbol={typePost.description?.limitSymbol || null}
+                  value={description}
+                  limitSymbol={typePost.description?.limitSymbol}
                 />
               </div>
             </div>
@@ -214,7 +365,7 @@ function RouteComponent() {
       default:
         return null
     }
-  }, [typePost, title, text, file])
+  }, [typePost, title, text, description, file])
 
   return (
     <div className="w-full items-start flex flex-row gap-[24px]">
@@ -238,36 +389,54 @@ function RouteComponent() {
             ))}
           </div>
           {momeComponents}
-          <div className="w-full flex justify-end mt-[20px] ">
+          {error && (
+            <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-[12px] text-red-300 text-[14px]">
+              {error}
+            </div>
+          )}
+          
+          <div className="w-full flex justify-end mt-[20px] gap-3">
             <button
               onClick={onCancel}
-              className="px-[24px] py-[8px]  rounded-[20px] text-[16px] font-bold text-[var(--color-background-19)] cursor-not-allowed"
+              disabled={isSubmitting}
+              className="px-[24px] py-[8px] rounded-[20px] text-[16px] font-bold text-[#f1fdff] hover:text-[#24e5c2] transition-colors disabled:opacity-50"
             >
               Відхилити
             </button>
             <button
-              onClick={onPublick}
-              className="px-[24px] py-[8px] bg-[var(--color-background-21)] rounded-[20px] text-[16px] font-bold text-[var(--color-night-background)] cursor-not-allowed"
+              onClick={onPublish}
+              disabled={isSubmitting || (!title.trim() && !text.trim())}
+              className="px-[24px] py-[8px] bg-[#24e5c2] rounded-[20px] text-[16px] font-bold text-[#00141f] hover:bg-[#1fd1a8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="mt-[2px] flex">Опублікувати</span>
+              <span className="mt-[2px] flex">
+                {isSubmitting ? 'Публікація...' : 'Опублікувати'}
+              </span>
             </button>
           </div>
         </div>
       </div>
       <div className="w-[25%] flex flex-col min-w-[338px] mb-[256px]">
-        <h2 className="mt-[6px] text-[16px] font-bold text-[var(--color-background)] mb-[6px]">
-          Якась гра, яка дуже всім сподобається
-        </h2>
-        <div className="w-full flex items-center justify-start mb-[20px]">
-          <span className="text-[var(--color-background)] mr-[8px]">
-            10 000
-          </span>
-          <span className="text-[var(--color-background)] opacity-60 mr-[32px]">
-            підписників
-          </span>
-          <span className="text-[var(--color-background)] mr-[6px]">5 267</span>
-          <div className="w-[8px] h-[8px] bg-[var(--color-background-10)] rounded-[100px]"></div>
-        </div>
+        {gameLoading ? (
+          <div className="text-[#f1fdff]">Завантаження...</div>
+        ) : game?.data ? (
+          <>
+            <h2 className="mt-[6px] text-[16px] font-bold text-[#f1fdff] mb-[6px]">
+              {game.data.name}
+            </h2>
+            <div className="w-full flex items-center justify-start mb-[20px]">
+              <span className="text-[#f1fdff] mr-[8px]">
+                10 000
+              </span>
+              <span className="text-[#f1fdff] opacity-60 mr-[32px]">
+                підписників
+              </span>
+              <span className="text-[#f1fdff] mr-[6px]">5 267</span>
+              <div className="w-[8px] h-[8px] bg-[#24e5c2] rounded-[100px]"></div>
+            </div>
+          </>
+        ) : (
+          <div className="text-[#f1fdff] opacity-60">Гра не знайдена</div>
+        )}
         <h1 className="text-[20px] font-bold text-[var(--color-background)] mb-[14px]">
           Правила спільноти
         </h1>

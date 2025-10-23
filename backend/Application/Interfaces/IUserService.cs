@@ -24,4 +24,12 @@ public interface IUserService
     
     // Search methods
     Task<IReadOnlyList<UserDto>> SearchUsersByNicknameAsync(string query, int limit = 20);
+    Task<UserDto?> GetUserByNicknameAsync(string nickname);
+    
+    // Statistics methods
+    Task<ProfileStatisticsDto> GetUserStatisticsAsync(Guid userId);
+    
+    // User content methods
+    Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId);
+    Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId);
 }

@@ -107,3 +107,9 @@ export async function getFriendsWhoWishlistGame(gameId: string): Promise<FriendW
   return data.data
 }
 
+// Get friendship between two users
+export async function getFriendshipBetweenUsers(userId1: string, userId2: string): Promise<Friendship | null> {
+  const { data } = await axiosInstance.get(`/friendship/between/${userId1}/${userId2}`)
+  return data.data
+}
+

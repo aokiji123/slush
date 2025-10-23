@@ -20,4 +20,6 @@ public interface IFriendshipService
     Task<IReadOnlyList<Guid>> GetOnlineFriendIdsAsync(Guid userId);
     Task<IReadOnlyList<Guid>> GetFriendsWithGameAsync(Guid userId, Guid gameId);
     Task<IReadOnlyList<FriendWithGameDto>> GetFriendsWithGameDetailsAsync(Guid userId, Guid gameId);
+    Task<Friendship?> GetFriendshipBetweenUsersAsync(Guid userId1, Guid userId2);
+    Task<IReadOnlyList<FriendDetailsDto>> GetFriendsWithDetailsAsync(Guid userId);
 }

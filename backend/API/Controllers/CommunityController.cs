@@ -3,9 +3,11 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Controllers;
 
@@ -23,9 +25,13 @@ public class CommunityController : ControllerBase
 
 	[HttpGet("posts/{gameId:guid}")]
 	[AllowAnonymous]
-	public async Task<IActionResult> GetPosts(Guid gameId)
+	public async Task<IActionResult> GetPosts(
+		Guid gameId,
+		[FromQuery] PostType? type = null,
+		[FromQuery] string? sortBy = null,
+		[FromQuery] string? search = null)
 	{
-		var items = await _communityService.GetPostsByGameAsync(gameId);
+		var items = await _communityService.GetPostsByGameAsync(gameId, type, sortBy, search);
 		return Ok(items);
 	}
 
@@ -34,6 +40,15 @@ public class CommunityController : ControllerBase
 	public async Task<IActionResult> GetPost(Guid gameId, Guid postId)
 	{
 		var post = await _communityService.GetPostAsync(gameId, postId);
+		if (post == null) return NotFound();
+		return Ok(post);
+	}
+
+	[HttpGet("post/{postId:guid}")]
+	[AllowAnonymous]
+	public async Task<IActionResult> GetPostById(Guid postId)
+	{
+		var post = await _communityService.GetPostByIdAsync(postId);
 		if (post == null) return NotFound();
 		return Ok(post);
 	}
@@ -136,6 +151,44 @@ public class CommunityController : ControllerBase
 
 		var media = await _communityService.UploadMediaAsync(postId, file);
 		return Ok(media);
+	}
+
+	[HttpGet("test-storage")]
+	[AllowAnonymous]
+	public async Task<IActionResult> TestStorage()
+	{
+		try
+		{
+			// This will test if Supabase storage is accessible
+			var storageService = HttpContext.RequestServices.GetRequiredService<IStorageService>();
+			var isAccessible = await storageService.TestBucketExistsAsync();
+			
+			return Ok(new { 
+				success = isAccessible, 
+				message = isAccessible ? "Storage is accessible" : "Storage is not accessible",
+				timestamp = DateTime.UtcNow
+			});
+		}
+		catch (Exception ex)
+		{
+			return StatusCode(500, new { 
+				success = false, 
+				message = "Storage test failed", 
+				error = ex.Message,
+				timestamp = DateTime.UtcNow
+			});
+		}
+	}
+
+	[HttpGet("library-posts")]
+	public async Task<IActionResult> GetLibraryPosts(
+		[FromQuery] PostType? type = null,
+		[FromQuery] string? sortBy = null,
+		[FromQuery] int? limit = null)
+	{
+		var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+		var posts = await _communityService.GetPostsByUserLibraryAsync(userId, type, sortBy, limit);
+		return Ok(posts);
 	}
 }
 

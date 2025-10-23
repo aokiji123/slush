@@ -146,3 +146,14 @@ export function useSearchUsers(query: string) {
     staleTime: 1000 * 30, // 30 seconds
   })
 }
+
+export function useUserByNickname(nickname: string) {
+  return useQuery({
+    queryKey: ['user', 'nickname', nickname],
+    queryFn: async () => {
+      const { getUserByNickname } = await import('../userAPI')
+      return getUserByNickname(nickname)
+    },
+    enabled: !!nickname,
+  })
+}

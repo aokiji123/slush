@@ -23,13 +23,38 @@ public class CommunityService : ICommunityService
 		_storageService = storageService;
 	}
 
-	public async Task<IReadOnlyList<PostDto>> GetPostsByGameAsync(Guid gameId)
+	public async Task<IReadOnlyList<PostDto>> GetPostsByGameAsync(Guid gameId, PostType? type = null, string? sortBy = null, string? search = null)
 	{
-		return await _db.Posts
+		var query = _db.Posts
 			.AsNoTracking()
-			.Where(p => p.GameId == gameId)
-			.OrderByDescending(p => p.CreatedAt)
-			.Select(p => new PostDto
+			.Include(p => p.Author)
+			.Include(p => p.Likes)
+			.Include(p => p.Comments)
+			.Where(p => p.GameId == gameId);
+
+		// Apply type filter
+		if (type.HasValue)
+		{
+			query = query.Where(p => p.Type == type.Value);
+		}
+
+		// Apply search filter
+		if (!string.IsNullOrEmpty(search))
+		{
+			query = query.Where(p => p.Title.Contains(search) || p.Content.Contains(search));
+		}
+
+		// Apply sorting
+		query = sortBy?.ToLower() switch
+		{
+			"newest" => query.OrderByDescending(p => p.CreatedAt),
+			"oldest" => query.OrderBy(p => p.CreatedAt),
+			"popular" => query.OrderByDescending(p => p.Likes.Count),
+			"comments" => query.OrderByDescending(p => p.Comments.Count),
+			_ => query.OrderByDescending(p => p.CreatedAt) // Default to newest
+		};
+
+		return await query.Select(p => new PostDto
 			{
 				Id = p.Id,
 				Title = p.Title,
@@ -45,7 +70,11 @@ public class CommunityService : ICommunityService
 					File = m.File,
 					IsCover = m.IsCover,
 					Type = m.Type
-				}).ToList()
+				}).ToList(),
+				AuthorUsername = p.Author.Nickname,
+				AuthorAvatar = p.Author.Avatar ?? string.Empty,
+				LikesCount = p.Likes.Count,
+				CommentsCount = p.Comments.Count
 			}).ToListAsync();
 	}
 
@@ -53,6 +82,9 @@ public class CommunityService : ICommunityService
 	{
 		return await _db.Posts
 			.AsNoTracking()
+			.Include(p => p.Author)
+			.Include(p => p.Likes)
+			.Include(p => p.Comments)
 			.Where(p => p.Id == postId && p.GameId == gameId)
 			.Select(p => new PostDto
 			{
@@ -70,7 +102,43 @@ public class CommunityService : ICommunityService
 					File = m.File,
 					IsCover = m.IsCover,
 					Type = m.Type
-				}).ToList()
+				}).ToList(),
+				AuthorUsername = p.Author.Nickname,
+				AuthorAvatar = p.Author.Avatar ?? string.Empty,
+				LikesCount = p.Likes.Count,
+				CommentsCount = p.Comments.Count
+			}).FirstOrDefaultAsync();
+	}
+
+	public async Task<PostDto?> GetPostByIdAsync(Guid postId)
+	{
+		return await _db.Posts
+			.AsNoTracking()
+			.Include(p => p.Author)
+			.Include(p => p.Likes)
+			.Include(p => p.Comments)
+			.Where(p => p.Id == postId)
+			.Select(p => new PostDto
+			{
+				Id = p.Id,
+				Title = p.Title,
+				Content = p.Content,
+				Type = p.Type,
+				CreatedAt = p.CreatedAt,
+				UpdatedAt = p.UpdatedAt,
+				AuthorId = p.AuthorId,
+				GameId = p.GameId,
+				Media = p.Media.Select(m => new MediaDto
+				{
+					Id = m.Id,
+					File = m.File,
+					IsCover = m.IsCover,
+					Type = m.Type
+				}).ToList(),
+				AuthorUsername = p.Author.Nickname,
+				AuthorAvatar = p.Author.Avatar ?? string.Empty,
+				LikesCount = p.Likes.Count,
+				CommentsCount = p.Comments.Count
 			}).FirstOrDefaultAsync();
 	}
 
@@ -147,6 +215,8 @@ public class CommunityService : ICommunityService
 	{
 		return await _db.Comments
 			.AsNoTracking()
+			.Include(c => c.Author)
+			.Include(c => c.Likes)
 			.Where(c => c.PostId == postId)
 			.OrderBy(c => c.CreatedAt)
 			.Select(c => new CommentDto
@@ -156,7 +226,10 @@ public class CommunityService : ICommunityService
 				CreatedAt = c.CreatedAt,
 				AuthorId = c.AuthorId,
 				PostId = c.PostId,
-				ParentCommentId = c.ParentCommentId
+				ParentCommentId = c.ParentCommentId,
+				AuthorUsername = c.Author.Nickname,
+				AuthorAvatar = c.Author.Avatar ?? string.Empty,
+				LikesCount = c.Likes.Count
 			}).ToListAsync();
 	}
 
@@ -254,12 +327,15 @@ public class CommunityService : ICommunityService
 		var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 		var mediaType = IsVideoExtension(extension) ? MediaType.Video : MediaType.Image;
 
+		// Check if this is the first media for this post
+		var existingMediaCount = await _db.Media.CountAsync(m => m.PostId == postId);
+		
 		// Save media record to database
 		var media = new Media
 		{
 			Id = Guid.NewGuid(),
 			File = result.Url,
-			IsCover = false, // Default to false, can be updated later
+			IsCover = existingMediaCount == 0, // Set as cover if it's the first media
 			Type = mediaType,
 			PostId = postId
 		};
@@ -305,6 +381,65 @@ public class CommunityService : ICommunityService
 		}
 		
 		return null;
+	}
+
+	public async Task<IReadOnlyList<PostDto>> GetPostsByUserLibraryAsync(Guid userId, PostType? type = null, string? sortBy = null, int? limit = null)
+	{
+		var query = _db.Posts
+			.AsNoTracking()
+			.Include(p => p.Author)
+			.Include(p => p.Likes)
+			.Include(p => p.Comments)
+			.Include(p => p.Media)
+			.Join(_db.Libraries, p => p.GameId, l => l.GameId, (p, l) => new { Post = p, Library = l })
+			.Join(_db.Games, j => j.Post.GameId, g => g.Id, (j, g) => new { Post = j.Post, Library = j.Library, Game = g })
+			.Where(j => j.Library.UserId == userId);
+
+		// Apply type filter
+		if (type.HasValue)
+		{
+			query = query.Where(j => j.Post.Type == type.Value);
+		}
+
+		// Apply sorting
+		query = sortBy?.ToLower() switch
+		{
+			"recent" => query.OrderByDescending(j => j.Post.CreatedAt),
+			"popular" => query.OrderByDescending(j => j.Post.Likes.Count + j.Post.Comments.Count),
+			"comments" => query.OrderByDescending(j => j.Post.Comments.Count),
+			"likes" => query.OrderByDescending(j => j.Post.Likes.Count),
+			_ => query.OrderByDescending(j => j.Post.CreatedAt) // Default to recent
+		};
+
+		// Apply limit
+		if (limit.HasValue)
+		{
+			query = query.Take(limit.Value);
+		}
+
+		return await query.Select(j => new PostDto
+		{
+			Id = j.Post.Id,
+			Title = j.Post.Title,
+			Content = j.Post.Content,
+			Type = j.Post.Type,
+			CreatedAt = j.Post.CreatedAt,
+			UpdatedAt = j.Post.UpdatedAt,
+			AuthorId = j.Post.AuthorId,
+			GameId = j.Post.GameId,
+			Media = j.Post.Media.Select(m => new MediaDto
+			{
+				Id = m.Id,
+				File = m.File,
+				IsCover = m.IsCover,
+				Type = m.Type
+			}).ToList(),
+			AuthorUsername = j.Post.Author.Nickname,
+			AuthorAvatar = j.Post.Author.Avatar ?? string.Empty,
+			LikesCount = j.Post.Likes.Count,
+			CommentsCount = j.Post.Comments.Count,
+			GameMainImage = j.Game.MainImage
+		}).ToListAsync();
 	}
 }
 

@@ -239,3 +239,17 @@ export function useFriendsWhoWishlistGame(gameId: string) {
   })
 }
 
+// Query: Get friendship status between two users
+export function useFriendshipStatus(userId: string, otherUserId: string) {
+  return useQuery({
+    queryKey: ['friendshipStatus', userId, otherUserId],
+    queryFn: async () => {
+      const friendship = await friendshipAPI.getFriendshipBetweenUsers(userId, otherUserId)
+      if (!friendship) return 'none'
+      // If friendship exists, it means they are friends
+      return 'friends'
+    },
+    enabled: !!userId && !!otherUserId && userId !== otherUserId,
+  })
+}
+
