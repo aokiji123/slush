@@ -343,6 +343,28 @@ public class FriendshipController : ControllerBase
     }
 
     /// <summary>
+    /// Get friends list with full user details (nickname, avatar, level, online status)
+    /// </summary>
+    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <returns>List of friend details</returns>
+    /// <response code="200">Friends with details retrieved successfully</response>
+    /// <response code="403">Access denied - can only view own friends</response>
+    [HttpGet("friends/{id:guid}/details")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<FriendDetailsDto>>>> GetFriendsWithDetails(Guid id)
+    {
+        var userId = GetAuthenticatedUserId();
+        if (id != userId)
+        {
+            return Forbid();
+        }
+
+        var friends = await _friendshipService.GetFriendsWithDetailsAsync(id);
+        return Ok(new ApiResponse<IEnumerable<FriendDetailsDto>>(friends));
+    }
+
+    /// <summary>
     /// Block a user (automatically removes friendship if exists)
     /// </summary>
     /// <param name="dto">Contains the BlockedUserId to block</param>
@@ -487,6 +509,38 @@ public class FriendshipController : ControllerBase
         {
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 new ApiResponse<IEnumerable<FriendWithGameDto>>("Unable to retrieve friends with game."));
+        }
+    }
+
+    /// <summary>
+    /// Get friendship status between two users
+    /// </summary>
+    /// <param name="userId1">First user ID</param>
+    /// <param name="userId2">Second user ID</param>
+    /// <returns>Friendship status between the two users</returns>
+    /// <response code="200">Friendship status retrieved successfully</response>
+    /// <response code="400">Invalid user IDs</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("between/{userId1:guid}/{userId2:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<Friendship?>>> GetFriendshipBetweenUsers(Guid userId1, Guid userId2)
+    {
+        if (userId1 == Guid.Empty || userId2 == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<Friendship?>("User IDs cannot be empty."));
+        }
+
+        try
+        {
+            var friendship = await _friendshipService.GetFriendshipBetweenUsersAsync(userId1, userId2);
+            return Ok(new ApiResponse<Friendship?>(friendship));
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ApiResponse<Friendship?>("Unable to retrieve friendship status."));
         }
     }
 

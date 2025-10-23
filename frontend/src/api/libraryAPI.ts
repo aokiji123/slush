@@ -1,7 +1,6 @@
 import axiosInstance from '.'
-import type { GameDto } from './types/game'
+import type { GameData } from './types/game'
 import type {
-  LibraryDto,
   AddToLibraryRequest,
   PagedResult,
   OwnedGameDto,
@@ -9,14 +8,14 @@ import type {
   ApiResponse,
 } from './types/library'
 
-export async function getMyLibrary(): Promise<ApiResponse<GameDto[]>> {
+export async function getMyLibrary(): Promise<ApiResponse<GameData[]>> {
   const { data } = await axiosInstance.get('/library/me')
   return data
 }
 
 export async function getMyLibraryWithQuery(
   params: LibraryQueryParams
-): Promise<ApiResponse<PagedResult<GameDto>>> {
+): Promise<ApiResponse<PagedResult<GameData>>> {
   const searchParams = new URLSearchParams()
   
   if (params.page) searchParams.append('page', params.page.toString())

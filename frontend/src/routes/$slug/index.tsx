@@ -17,6 +17,14 @@ import { useGenreTranslation } from '@/utils/translateGenre'
 import { useCartStore } from '@/lib/cartStore'
 import { useGameOwnership } from '@/api/queries/useLibrary'
 import type { Review } from '@/api/types/game'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation } from 'swiper/modules'
+import type { Swiper as SwiperType } from 'swiper'
+
+// @ts-expect-error - Swiper CSS imports are valid
+import 'swiper/css'
+// @ts-expect-error - Swiper CSS imports are valid
+import 'swiper/css/navigation'
 
 export const Route = createFileRoute('/$slug/')({
   component: RouteComponent,
@@ -48,11 +56,8 @@ function RouteComponent() {
   const sortOptions = getSortOptions(t)
   const { addToCart, isInCart } = useCartStore()
   const { data: isOwned } = useGameOwnership(game?.data?.id || '')
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const swiperRef = useRef<SwiperType | null>(null)
   const [selectedImage, setSelectedImage] = useState<string>('')
-  const [scrollPosition, setScrollPosition] = useState(0)
-  const [containerWidth, setContainerWidth] = useState(0)
-  const [scrollWidth, setScrollWidth] = useState(0)
   
   const gameInCart = game?.data ? isInCart(game.data.id) : false
 
@@ -69,26 +74,6 @@ function RouteComponent() {
       setSelectedImage(game.data.mainImage)
     }
   }, [game?.data])
-
-  // Initialize scroll state and add scroll listener
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (container) {
-      updateScrollState()
-      container.addEventListener('scroll', handleScroll)
-      
-      // Add resize observer to handle window resizing
-      const resizeObserver = new ResizeObserver(() => {
-        updateScrollState()
-      })
-      resizeObserver.observe(container)
-      
-      return () => {
-        container.removeEventListener('scroll', handleScroll)
-        resizeObserver.disconnect()
-      }
-    }
-  }, [allImages.length])
 
   // Find user's existing review
   // Try to get user ID from authenticated user first, then fallback to auth state
@@ -111,49 +96,18 @@ function RouteComponent() {
     }
   }
 
-  const handleScrollLeft = () => {
-    if (allImages.length > 0) {
-      const currentIndex = allImages.findIndex(img => img === selectedImage)
-      const newIndex = currentIndex > 0 ? currentIndex - 1 : allImages.length - 1
-      setSelectedImage(allImages[newIndex])
-      
-      // Scroll to show the selected image
-      if (scrollContainerRef.current) {
-        const itemWidth = 180 + 16 // 180px width + 16px gap
-        const scrollPosition = newIndex * itemWidth
-        scrollContainerRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' })
-      }
+  const handleSlideChange = (swiper: SwiperType) => {
+    const activeIndex = swiper.activeIndex
+    if (allImages[activeIndex]) {
+      setSelectedImage(allImages[activeIndex])
     }
   }
 
-  const handleScrollRight = () => {
-    if (allImages.length > 0) {
-      const currentIndex = allImages.findIndex(img => img === selectedImage)
-      const newIndex = currentIndex < allImages.length - 1 ? currentIndex + 1 : 0
-      setSelectedImage(allImages[newIndex])
-      
-      // Scroll to show the selected image
-      if (scrollContainerRef.current) {
-        const itemWidth = 180 + 16 // 180px width + 16px gap
-        const scrollPosition = newIndex * itemWidth
-        scrollContainerRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' })
-      }
+  const handleSlideClick = (index: number) => {
+    setSelectedImage(allImages[index])
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(index)
     }
-  }
-
-
-  const updateScrollState = () => {
-    const container = scrollContainerRef.current
-    if (container) {
-      const { scrollLeft, scrollWidth, clientWidth } = container
-      setScrollPosition(scrollLeft)
-      setContainerWidth(clientWidth)
-      setScrollWidth(scrollWidth)
-    }
-  }
-
-  const handleScroll = () => {
-    updateScrollState()
   }
 
   const handleSortSelect = (sortValue: string) => {
@@ -202,6 +156,14 @@ function RouteComponent() {
 
   return (
     <>
+      <style>
+        {`
+          .swiper-button-disabled {
+            opacity: 0.3 !important;
+            cursor: not-allowed !important;
+          }
+        `}
+      </style>
       <img
         src={selectedImage || game.data.mainImage}
         alt={game.data.name}
@@ -209,17 +171,28 @@ function RouteComponent() {
         loading="lazy"
       />
       <div className="w-full relative mb-[24px]">
-        <div ref={scrollContainerRef} className="overflow-x-auto w-full pt-[4px] pb-[16px] scroll-smooth">
-          <div className="flex gap-[16px] w-max relative">
-            {allImages.map((image, index) => {
-              const isSelected = selectedImage === image
-              return (
+        <Swiper
+          modules={[Navigation]}
+          spaceBetween={16}
+          slidesPerView="auto"
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper
+          }}
+          onSlideChange={handleSlideChange}
+          className="w-full"
+        >
+          {allImages.map((image, index) => {
+            const isSelected = selectedImage === image
+            return (
+              <SwiperSlide
+                key={index}
+                className="w-[180px] p-1"
+              >
                 <div 
-                  key={index} 
                   className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
-                    isSelected ? 'ring-2 ring-[#F1FDFF]' : 'hover:opacity-80'
+                    isSelected ? 'ring-2 ring-[#0d8a6b]' : 'hover:opacity-80'
                   }`}
-                  onClick={() => setSelectedImage(image)}
+                  onClick={() => handleSlideClick(index)}
                 >
                   <img
                     src={image}
@@ -230,33 +203,27 @@ function RouteComponent() {
                     loading="lazy"
                   />
                 </div>
-              )
-            })}
-          </div>
-          <div 
-            className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -left-3 top-[35px] z-10 shadow-lg cursor-pointer"
-            onClick={handleScrollLeft}
-          >
-            <FaChevronLeft size={16} />
-          </div>
-          <div 
-            className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -right-3 top-[35px] z-10 shadow-lg cursor-pointer"
-            onClick={handleScrollRight}
-          >
-            <FaChevronRight size={16} />
-          </div>
-          {allImages.length > 3 && scrollWidth > containerWidth && (
-            <div className="h-[8px] w-full bg-[var(--sky-25)] absolute bottom-0 left-0 rounded-[20px] flex items-center px-[2px]">
-              <div 
-                className="h-[4px] bg-[var(--color-night-background)] rounded-[20px] transition-all duration-300"
-                style={{
-                  width: `${Math.min(160, (160 * containerWidth) / scrollWidth)}px`,
-                  transform: `translateX(${scrollPosition * (160 / scrollWidth)}px)`
-                }}
-              />
+              </SwiperSlide>
+            )
+          })}
+        </Swiper>
+        
+        {allImages.length > 1 && (
+          <>
+            <div 
+              className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -left-3 top-[35px] z-10 shadow-lg cursor-pointer"
+              onClick={() => swiperRef.current?.slidePrev()}
+            >
+              <FaChevronLeft size={16} />
             </div>
-          )}
-        </div>
+            <div 
+              className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -right-3 top-[35px] z-10 shadow-lg cursor-pointer"
+              onClick={() => swiperRef.current?.slideNext()}
+            >
+              <FaChevronRight size={16} />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex items-center gap-[8px] mb-[24px]">

@@ -22,4 +22,9 @@ public class UserDto
     /// Whether the user is currently online
     /// </summary>
     public bool IsOnline { get; set; }
+    
+    /// <summary>
+    /// User's level based on activity
+    /// </summary>
+    public int Level { get; set; } = 1;
 }

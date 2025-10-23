@@ -30,6 +30,11 @@ public class PostDto
 	public Guid AuthorId { get; set; }
 	public Guid GameId { get; set; }
 	public List<MediaDto> Media { get; set; } = new();
+	public string AuthorUsername { get; set; } = string.Empty;
+	public string AuthorAvatar { get; set; } = string.Empty;
+	public int LikesCount { get; set; }
+	public int CommentsCount { get; set; }
+	public string GameMainImage { get; set; } = string.Empty;
 }
 
 public class CreatePostDto
@@ -55,6 +60,9 @@ public class CommentDto
 	public Guid AuthorId { get; set; }
 	public Guid PostId { get; set; }
 	public Guid? ParentCommentId { get; set; }
+	public string AuthorUsername { get; set; } = string.Empty;
+	public string AuthorAvatar { get; set; } = string.Empty;
+	public int LikesCount { get; set; }
 }
 
 public class CreateCommentDto

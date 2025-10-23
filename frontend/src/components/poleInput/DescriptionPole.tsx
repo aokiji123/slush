@@ -9,7 +9,7 @@ interface DescriptionPoleI {
   value: string
   onChange: (a: string) => void
   classContainer?: string
-  limitSymbol: number | null
+  limitSymbol?: number | null
 }
 
 export const DescriptionPole = ({

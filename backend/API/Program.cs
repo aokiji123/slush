@@ -96,6 +96,8 @@ builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
 builder.Services.AddScoped<ReviewRepository>();
 builder.Services.AddScoped<ReviewLikeRepository>();
+builder.Services.AddScoped<IProfileCommentRepository, ProfileCommentRepository>();
+builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -112,6 +114,8 @@ builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IProfileCommentService, ProfileCommentService>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
 
 // TODO: Register AWS S3 client for R2 when packages are available
 

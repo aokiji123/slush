@@ -25,6 +25,9 @@ public class AppDbContext : DbContext
     public DbSet<PostLike> PostLikes { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<Notifications> Notifications { get; set; }
+    public DbSet<ProfileComment> ProfileComments { get; set; }
+    public DbSet<Badge> Badges { get; set; }
+    public DbSet<UserBadge> UserBadges { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -237,6 +240,11 @@ public class AppDbContext : DbContext
             .WithOne(l => l.Post!)
             .HasForeignKey(l => l.PostId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Author)
+            .WithMany()
+            .HasForeignKey(p => p.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Community: Media
         modelBuilder.Entity<Media>()
@@ -250,11 +258,84 @@ public class AppDbContext : DbContext
             .WithMany(c => c.Replies)
             .HasForeignKey(c => c.ParentCommentId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Author)
+            .WithMany()
+            .HasForeignKey(c => c.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Community: Likes composite keys
         modelBuilder.Entity<PostLike>()
             .HasKey(l => new { l.UserId, l.PostId });
         modelBuilder.Entity<CommentLike>()
             .HasKey(l => new { l.UserId, l.CommentId });
+
+        // ProfileComment configuration
+        modelBuilder.Entity<ProfileComment>()
+            .HasKey(pc => pc.Id);
+        
+        modelBuilder.Entity<ProfileComment>()
+            .HasOne(pc => pc.ProfileUser)
+            .WithMany()
+            .HasForeignKey(pc => pc.ProfileUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<ProfileComment>()
+            .HasOne(pc => pc.Author)
+            .WithMany()
+            .HasForeignKey(pc => pc.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        modelBuilder.Entity<ProfileComment>()
+            .HasIndex(pc => pc.ProfileUserId);
+            
+        modelBuilder.Entity<ProfileComment>()
+            .Property(pc => pc.Content)
+            .HasMaxLength(1000);
+
+        // Badge configuration
+        modelBuilder.Entity<Badge>()
+            .HasKey(b => b.Id);
+            
+        modelBuilder.Entity<Badge>()
+            .Property(b => b.Name)
+            .HasMaxLength(100)
+            .IsRequired();
+            
+        modelBuilder.Entity<Badge>()
+            .Property(b => b.Description)
+            .HasMaxLength(500)
+            .IsRequired();
+            
+        modelBuilder.Entity<Badge>()
+            .Property(b => b.Icon)
+            .HasMaxLength(200)
+            .IsRequired();
+            
+        modelBuilder.Entity<Badge>()
+            .Property(b => b.RequirementType)
+            .HasMaxLength(50)
+            .IsRequired();
+
+        // UserBadge configuration
+        modelBuilder.Entity<UserBadge>()
+            .HasKey(ub => ub.Id);
+            
+        modelBuilder.Entity<UserBadge>()
+            .HasOne(ub => ub.User)
+            .WithMany()
+            .HasForeignKey(ub => ub.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<UserBadge>()
+            .HasOne(ub => ub.Badge)
+            .WithMany()
+            .HasForeignKey(ub => ub.BadgeId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        // Prevent duplicate user badges
+        modelBuilder.Entity<UserBadge>()
+            .HasIndex(ub => new { ub.UserId, ub.BadgeId })
+            .IsUnique();
     }
 }

@@ -1,4 +1,4 @@
-import type { GameDto } from './game'
+import type { GameData } from './game'
 
 export type LibraryDto = {
   id: string
@@ -51,7 +51,7 @@ export type LibraryQueryParams = {
 export type LibraryResponse = {
   success: boolean
   message: string
-  data: GameDto[]
+  data: GameData[]
 }
 
 export type ApiResponse<T> = {

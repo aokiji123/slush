@@ -23,6 +23,7 @@ public class Post
 	public Guid AuthorId { get; set; }
 	public Guid GameId { get; set; }
 
+	public User? Author { get; set; }
 	public List<Media> Media { get; set; } = new();
 	public List<Comment> Comments { get; set; } = new();
 	public List<PostLike> Likes { get; set; } = new();
@@ -53,6 +54,7 @@ public class Comment
 	public Guid PostId { get; set; }
 	public Guid? ParentCommentId { get; set; }
 
+	public User? Author { get; set; }
 	public Post? Post { get; set; }
 	public Comment? ParentComment { get; set; }
 	public List<Comment> Replies { get; set; } = new();
