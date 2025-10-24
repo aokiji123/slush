@@ -9,6 +9,7 @@ using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Infrastructure.Services;
 
@@ -21,9 +22,10 @@ public class UserService : IUserService
     private readonly IWishlistService _wishlistService;
     private readonly IReviewService _reviewService;
     private readonly ICommunityService _communityService;
+    private readonly IMapper _mapper;
 
     public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository, 
-        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService)
+        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService, IMapper mapper)
     {
         _db = db;
         _storageService = storageService;
@@ -32,6 +34,7 @@ public class UserService : IUserService
         _wishlistService = wishlistService;
         _reviewService = reviewService;
         _communityService = communityService;
+        _mapper = mapper;
     }
 
     public async Task<UserDto?> GetUserAsync(Guid id)
@@ -42,20 +45,9 @@ public class UserService : IUserService
         // Calculate level for this user
         var statistics = await GetUserStatisticsAsync(id);
         
-        return new UserDto
-        {
-            Id = user.Id,
-            Nickname = user.Nickname ?? string.Empty,
-            Email = user.Email ?? string.Empty,
-            Bio = user.Bio,
-            Lang = user.Lang,
-            Avatar = user.Avatar,
-            Banner = user.Banner,
-            Balance = (double)user.Balance,
-            LastSeenAt = user.LastSeenAt,
-            IsOnline = user.IsOnline,
-            Level = statistics.Level
-        };
+        var userDto = _mapper.Map<UserDto>(user);
+        userDto.Level = statistics.Level;
+        return userDto;
     }
 
     public async Task<UserDto?> UpdateUserAsync(Guid id, UserUpdateDto dto)
@@ -74,12 +66,7 @@ public class UserService : IUserService
             }
         }
 
-        user.Nickname = dto.Nickname;
-        user.Email = dto.Email;
-        user.Bio = dto.Bio;
-        user.Avatar = dto.Avatar;
-        user.Banner = dto.Banner;
-        user.Lang = dto.Lang;
+        _mapper.Map(dto, user);
 
         await _db.SaveChangesAsync();
         return await GetUserAsync(id);
@@ -144,14 +131,7 @@ public class UserService : IUserService
         user.Avatar = result.Url;
         await _db.SaveChangesAsync();
 
-        return new FileUploadDto
-        {
-            Url = result.Url,
-            FileName = result.FileName,
-            FileSize = result.FileSize,
-            ContentType = result.ContentType,
-            FilePath = result.FilePath
-        };
+        return _mapper.Map<FileUploadDto>(result);
     }
 
     public async Task<FileUploadDto> UploadBannerAsync(Guid userId, IFormFile file)
@@ -188,14 +168,7 @@ public class UserService : IUserService
         user.Banner = result.Url;
         await _db.SaveChangesAsync();
 
-        return new FileUploadDto
-        {
-            Url = result.Url,
-            FileName = result.FileName,
-            FileSize = result.FileSize,
-            ContentType = result.ContentType,
-            FilePath = result.FilePath
-        };
+        return _mapper.Map<FileUploadDto>(result);
     }
 
     private static string? ExtractFilePathFromUrl(string url)

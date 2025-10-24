@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.Routing;
 using Infrastructure.Configuration;
 using API.Middleware;
 using DotNetEnv;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 // Load environment variables from .env file if it exists
 var currentDir = Directory.GetCurrentDirectory();
@@ -116,6 +118,14 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IProfileCommentService, ProfileCommentService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Application.Common.Mappings.GameProfile).Assembly);
+
+// Add FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Application.Common.Validation.CreateGameDtoValidator>();
 
 // TODO: Register AWS S3 client for R2 when packages are available
 
