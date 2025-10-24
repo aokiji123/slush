@@ -86,3 +86,35 @@ export interface CommunityStats {
   subscribers: number
   online: number
 }
+
+export interface ICommunityComment {
+  id: string
+  content: string
+  createdAt: string
+  authorId: string
+  postId: string
+  parentCommentId?: string
+  authorUsername: string
+  authorAvatar: string
+  likesCount: number
+}
+
+export interface ICommentOne {
+  _id: string
+  name: string
+  date: string
+  title?: string | null
+  text: string | null
+  like: string
+  comment: number
+  avatar: string
+  imageTop?: string | null
+  imageBottom?: string | null
+  imageLeft?: string | null
+  imageBotto2?: string | null
+  isNext?: boolean
+  isHidUser?: boolean
+  isComment?: boolean
+  type?: string
+  comments?: ICommentOne[]
+}

@@ -7,10 +7,12 @@ import {
   NotificationsIcon,
   SettingsIcon,
 } from '@/icons'
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { HiMenuAlt3 } from 'react-icons/hi'
 import { IoClose } from 'react-icons/io5'
 import { useAuthState } from '@/api/queries/useAuth'
+import { OptimizedImage } from './OptimizedImage'
+import { IconButton } from './IconButton'
 
 export const Header = () => {
   const navigate = useNavigate()
@@ -19,7 +21,7 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user, isAuth } = useAuthState()
 
-  const tabs = [
+  const tabs = useMemo(() => [
     {
       name: t('header.store'),
       href: '/',
@@ -32,17 +34,17 @@ export const Header = () => {
     //   name: 'Чат',
     //   href: '/',
     // },
-  ]
+  ], [t])
 
   const isShopActive =
     location.pathname === '/' ||
     (location.pathname !== '/library' && location.pathname !== '/chat')
   const isLibraryActive = location.pathname === '/library'
 
-  const handleNavigation = (to: string) => {
+  const handleNavigation = useCallback((to: string) => {
     navigate({ to })
     setIsMobileMenuOpen(false)
-  }
+  }, [navigate])
 
   return (
     <>
@@ -106,51 +108,44 @@ export const Header = () => {
           ) : (
             <div className="hidden md:block">
               <div className="flex items-center gap-[8px]">
-                <div
-                  className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer
-                    ${
-                      location.pathname === '/settings'
-                        ? 'bg-white text-[var(--color-background-16)]'
-                        : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
-                    }`}
+                <IconButton
+                  icon={<SettingsIcon className="w-[24px] h-[24px]" />}
+                  label="Settings"
+                  variant={location.pathname === '/settings' ? 'primary' : 'secondary'}
+                  size="lg"
                   onClick={() => {
                     navigate({
                       to: '/settings',
                     })
                   }}
-                >
-                  <SettingsIcon className="w-[24px] h-[24px]" />
-                </div>
-                <div
-                  className={`w-[52px] h-[52px] flex items-center justify-center bg-[var(--color-background-17)] text-[var(--color-background)] rounded-[20px] cursor-pointer
-                    ${
-                      location.pathname === '/settings/notifications'
-                        ? 'bg-white text-[var(--color-background-16)]'
-                        : 'bg-[var(--color-background-17)] text-[var(--color-background)]'
-                    }`}
+                />
+                <IconButton
+                  icon={<NotificationsIcon className="w-[24px] h-[24px]" />}
+                  label="Notifications"
+                  variant={location.pathname === '/settings/notifications' ? 'primary' : 'secondary'}
+                  size="lg"
                   onClick={() => {
                     navigate({
                       to: '/settings/notifications',
                     })
                   }}
-                >
-                  <NotificationsIcon className="w-[24px] h-[24px]" />
-                </div>
-                <div
+                />
+                <button
                   className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer"
                   onClick={() => {
                     navigate({
                       to: '/settings',
                     })
                   }}
+                  aria-label="User profile"
                 >
-                  <img
+                  <OptimizedImage
                     src={user?.avatar || '/avatar.png'}
-                    alt="avatar"
+                    alt={`${user?.username || 'User'}'s avatar`}
                     className="w-[52px] h-[52px] rounded-full object-cover"
                     loading="lazy"
                   />
-                </div>
+                </button>
               </div>
             </div>
           )}
@@ -160,6 +155,7 @@ export const Header = () => {
             className="md:hidden w-[40px] h-[40px] flex items-center justify-center text-white cursor-pointer"
             onClick={() => setIsMobileMenuOpen(true)}
             aria-label="Open menu"
+            aria-expanded={isMobileMenuOpen}
           >
             <HiMenuAlt3 size={32} />
           </button>

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, memo } from 'react'
 import { LevelBadge } from './LevelBadge'
 import { FriendActionsMenu } from './FriendActionsMenu'
 
@@ -12,7 +12,7 @@ interface FriendCardProps {
   currentUserId: string
 }
 
-export const FriendCard = ({
+export const FriendCard = memo(({
   userId,
   username,
   avatar,
@@ -21,7 +21,7 @@ export const FriendCard = ({
   currentUserId,
 }: FriendCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
 
   return (
     <div className="bg-[var(--color-background-15)] rounded-[12px] p-[16px] flex items-center justify-between">
@@ -90,5 +90,5 @@ export const FriendCard = ({
       />
     </div>
   )
-}
+})
 

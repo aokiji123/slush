@@ -73,7 +73,7 @@ export const FilePole = ({
           fileType?.startsWith('video/') ? (
             <video src={value} className="absolute h-full w-full object-cover opacity-100" controls />
           ) : (
-            <img src={value} alt="" className="absolute h-full w-full object-cover opacity-100" />
+            <img src={value} alt="Uploaded file preview" className="absolute h-full w-full object-cover opacity-100" />
           )
         ) : (
           <input

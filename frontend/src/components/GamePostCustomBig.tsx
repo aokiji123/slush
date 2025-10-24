@@ -36,7 +36,7 @@ export const GamePostCustomBig = ({
           <div className="w-full flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-[12px]">
               <div className="flex bg-[var(--color-background-8)] rounded-[20px] items-center gap-[12px] pr-[16px]">
-                <img src={avatar} className="h-[36px]" alt="" />
+                <img src={avatar} className="h-[36px]" alt={`${name}'s avatar`} />
                 <p className="text-[var(--color-background)] text-[16px]">
                   {name}
                 </p>

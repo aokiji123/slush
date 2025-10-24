@@ -12,6 +12,9 @@ import { queryClient } from './lib/query-client'
 // Import i18n configuration
 import './lib/i18n'
 
+// Import ErrorBoundary
+import { ErrorBoundary } from './components/ErrorBoundary'
+
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
@@ -38,11 +41,13 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <Suspense fallback={<div>Loading...</div>}>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<div>Loading...</div>}>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </Suspense>
+      </ErrorBoundary>
     </StrictMode>,
   )
 }

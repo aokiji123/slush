@@ -57,7 +57,7 @@ export function Select({
           {selectedOption?.icon && (
             <img
               src={selectedOption.icon}
-              alt=""
+              alt={`${selectedOption.label} icon`}
               className="w-[20px] h-[15px] object-cover rounded-sm"
             />
           )}
@@ -99,7 +99,7 @@ export function Select({
               {option.icon && (
                 <img
                   src={option.icon}
-                  alt=""
+                  alt={`${option.label} icon`}
                   className="w-[20px] h-[15px] object-cover rounded-sm"
                 />
               )}

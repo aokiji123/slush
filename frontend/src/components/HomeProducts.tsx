@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation } from 'swiper/modules'
 import type { GameData } from '@/api/types/game'
+import { OptimizedImage } from './OptimizedImage'
 
 // @ts-expect-error - Swiper CSS imports are valid
 import 'swiper/css'
@@ -67,7 +68,7 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
                 })
               }}
             >
-              <img
+              <OptimizedImage
                 src={game.mainImage}
                 alt={game.name}
                 loading="lazy"

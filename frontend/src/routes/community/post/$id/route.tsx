@@ -17,10 +17,10 @@ function RouteComponent() {
   useEffect(() => {
     if (post && post.gameId) {
       navigate({
-        to: '/$slug/community/post/$postId',
+        to: '/$slug/community/post/$id',
         params: {
           slug: post.gameId,
-          postId: id,
+          id: id,
         },
         replace: true,
       })

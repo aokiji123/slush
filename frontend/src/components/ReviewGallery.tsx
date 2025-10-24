@@ -2,7 +2,7 @@ interface ReviewGalleryProps {
   reviews?: any[] // Mock data for now
 }
 
-export const ReviewGallery = ({ reviews = [] }: ReviewGalleryProps) => {
+export const ReviewGallery = ({ reviews: _reviews = [] }: ReviewGalleryProps) => {
   // Mock review data matching Figma design
   const mockReviews = [
     {
@@ -93,7 +93,7 @@ export const ReviewGallery = ({ reviews = [] }: ReviewGalleryProps) => {
 
       <div className="space-y-[24px]">
         {/* Display first 2 reviews */}
-        {displayReviews.map((review, index) => (
+        {displayReviews.map((review) => (
           <div key={review.id} className="bg-[#002f3d] rounded-[20px] p-[24px]">
             <div className="flex flex-col gap-[16px]">
               {/* Game Image and Title */}
