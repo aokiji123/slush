@@ -6,6 +6,7 @@ import {
   addToMyLibrary,
   checkGameOwnership,
   getOwnedGames,
+  getSharedGames,
 } from '../libraryAPI'
 
 // Hook for simple library list (no filtering)
@@ -65,5 +66,17 @@ export function useAddToLibrary() {
       queryClient.invalidateQueries({ queryKey: ['ownedGames'] })
       queryClient.invalidateQueries({ queryKey: ['gameOwnership'] })
     },
+  })
+}
+
+// Hook for getting shared games between two users
+export function useSharedGames(userId1: string, userId2: string) {
+  return useQuery({
+    queryKey: ['sharedGames', userId1, userId2],
+    queryFn: () => getSharedGames(userId1, userId2),
+    enabled: !!userId1 && !!userId2 && userId1 !== userId2,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
   })
 }

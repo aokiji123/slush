@@ -34,6 +34,15 @@ import { Route as FriendsAllRouteRouteImport } from './routes/friends/all/route'
 import { Route as SlugDlcRouteRouteImport } from './routes/$slug/dlc/route'
 import { Route as SlugCommunityRouteRouteImport } from './routes/$slug/community/route'
 import { Route as SlugCharacteristicsRouteRouteImport } from './routes/$slug/characteristics/route'
+import { Route as ProfileNicknameIndexRouteImport } from './routes/profile/$nickname/index'
+import { Route as ProfileNicknameWishlistRouteRouteImport } from './routes/profile/$nickname/wishlist/route'
+import { Route as ProfileNicknameVideosRouteRouteImport } from './routes/profile/$nickname/videos/route'
+import { Route as ProfileNicknameScreenshotsRouteRouteImport } from './routes/profile/$nickname/screenshots/route'
+import { Route as ProfileNicknameReviewsRouteRouteImport } from './routes/profile/$nickname/reviews/route'
+import { Route as ProfileNicknameGuidesRouteRouteImport } from './routes/profile/$nickname/guides/route'
+import { Route as ProfileNicknameGamesRouteRouteImport } from './routes/profile/$nickname/games/route'
+import { Route as ProfileNicknameDiscussionsRouteRouteImport } from './routes/profile/$nickname/discussions/route'
+import { Route as ProfileNicknameBadgesRouteRouteImport } from './routes/profile/$nickname/badges/route'
 import { Route as CommunityPostIdRouteRouteImport } from './routes/community/post/$id/route'
 import { Route as SlugCommunityCreatePostRouteRouteImport } from './routes/$slug/community/createPost/route'
 import { Route as SlugCommunityPostIdRouteRouteImport } from './routes/$slug/community/post/$id/route'
@@ -165,6 +174,59 @@ const SlugCharacteristicsRouteRoute =
     path: '/characteristics',
     getParentRoute: () => SlugRouteRoute,
   } as any)
+const ProfileNicknameIndexRoute = ProfileNicknameIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProfileNicknameRouteRoute,
+} as any)
+const ProfileNicknameWishlistRouteRoute =
+  ProfileNicknameWishlistRouteRouteImport.update({
+    id: '/wishlist',
+    path: '/wishlist',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameVideosRouteRoute =
+  ProfileNicknameVideosRouteRouteImport.update({
+    id: '/videos',
+    path: '/videos',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameScreenshotsRouteRoute =
+  ProfileNicknameScreenshotsRouteRouteImport.update({
+    id: '/screenshots',
+    path: '/screenshots',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameReviewsRouteRoute =
+  ProfileNicknameReviewsRouteRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameGuidesRouteRoute =
+  ProfileNicknameGuidesRouteRouteImport.update({
+    id: '/guides',
+    path: '/guides',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameGamesRouteRoute =
+  ProfileNicknameGamesRouteRouteImport.update({
+    id: '/games',
+    path: '/games',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameDiscussionsRouteRoute =
+  ProfileNicknameDiscussionsRouteRouteImport.update({
+    id: '/discussions',
+    path: '/discussions',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
+const ProfileNicknameBadgesRouteRoute =
+  ProfileNicknameBadgesRouteRouteImport.update({
+    id: '/badges',
+    path: '/badges',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
 const CommunityPostIdRouteRoute = CommunityPostIdRouteRouteImport.update({
   id: '/post/$id',
   path: '/post/$id',
@@ -208,7 +270,7 @@ export interface FileRoutesByFullPath {
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
   '/friends/all': typeof FriendsAllRouteRoute
-  '/profile/$nickname': typeof ProfileNicknameRouteRoute
+  '/profile/$nickname': typeof ProfileNicknameRouteRouteWithChildren
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -217,6 +279,15 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof SettingsIndexRoute
   '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
   '/community/post/$id': typeof CommunityPostIdRouteRoute
+  '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
+  '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
+  '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
+  '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
+  '/profile/$nickname/screenshots': typeof ProfileNicknameScreenshotsRouteRoute
+  '/profile/$nickname/videos': typeof ProfileNicknameVideosRouteRoute
+  '/profile/$nickname/wishlist': typeof ProfileNicknameWishlistRouteRoute
+  '/profile/$nickname/': typeof ProfileNicknameIndexRoute
   '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
   '/$slug/community/post/$id': typeof SlugCommunityPostIdRouteRoute
 }
@@ -237,7 +308,6 @@ export interface FileRoutesByTo {
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
   '/friends/all': typeof FriendsAllRouteRoute
-  '/profile/$nickname': typeof ProfileNicknameRouteRoute
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -246,6 +316,15 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsIndexRoute
   '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
   '/community/post/$id': typeof CommunityPostIdRouteRoute
+  '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
+  '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
+  '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
+  '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
+  '/profile/$nickname/screenshots': typeof ProfileNicknameScreenshotsRouteRoute
+  '/profile/$nickname/videos': typeof ProfileNicknameVideosRouteRoute
+  '/profile/$nickname/wishlist': typeof ProfileNicknameWishlistRouteRoute
+  '/profile/$nickname': typeof ProfileNicknameIndexRoute
   '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
   '/$slug/community/post/$id': typeof SlugCommunityPostIdRouteRoute
 }
@@ -269,7 +348,7 @@ export interface FileRoutesById {
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
   '/$slug/dlc': typeof SlugDlcRouteRoute
   '/friends/all': typeof FriendsAllRouteRoute
-  '/profile/$nickname': typeof ProfileNicknameRouteRoute
+  '/profile/$nickname': typeof ProfileNicknameRouteRouteWithChildren
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
@@ -278,6 +357,15 @@ export interface FileRoutesById {
   '/settings/': typeof SettingsIndexRoute
   '/$slug/community/createPost': typeof SlugCommunityCreatePostRouteRoute
   '/community/post/$id': typeof CommunityPostIdRouteRoute
+  '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
+  '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
+  '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
+  '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
+  '/profile/$nickname/screenshots': typeof ProfileNicknameScreenshotsRouteRoute
+  '/profile/$nickname/videos': typeof ProfileNicknameVideosRouteRoute
+  '/profile/$nickname/wishlist': typeof ProfileNicknameWishlistRouteRoute
+  '/profile/$nickname/': typeof ProfileNicknameIndexRoute
   '/$slug/community/currentPost/$id': typeof SlugCommunityCurrentPostIdRouteRoute
   '/$slug/community/post/$id': typeof SlugCommunityPostIdRouteRoute
 }
@@ -311,6 +399,15 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/$slug/community/createPost'
     | '/community/post/$id'
+    | '/profile/$nickname/badges'
+    | '/profile/$nickname/discussions'
+    | '/profile/$nickname/games'
+    | '/profile/$nickname/guides'
+    | '/profile/$nickname/reviews'
+    | '/profile/$nickname/screenshots'
+    | '/profile/$nickname/videos'
+    | '/profile/$nickname/wishlist'
+    | '/profile/$nickname/'
     | '/$slug/community/currentPost/$id'
     | '/$slug/community/post/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -331,7 +428,6 @@ export interface FileRouteTypes {
     | '/$slug/community'
     | '/$slug/dlc'
     | '/friends/all'
-    | '/profile/$nickname'
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
@@ -340,6 +436,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/$slug/community/createPost'
     | '/community/post/$id'
+    | '/profile/$nickname/badges'
+    | '/profile/$nickname/discussions'
+    | '/profile/$nickname/games'
+    | '/profile/$nickname/guides'
+    | '/profile/$nickname/reviews'
+    | '/profile/$nickname/screenshots'
+    | '/profile/$nickname/videos'
+    | '/profile/$nickname/wishlist'
+    | '/profile/$nickname'
     | '/$slug/community/currentPost/$id'
     | '/$slug/community/post/$id'
   id:
@@ -371,6 +476,15 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/$slug/community/createPost'
     | '/community/post/$id'
+    | '/profile/$nickname/badges'
+    | '/profile/$nickname/discussions'
+    | '/profile/$nickname/games'
+    | '/profile/$nickname/guides'
+    | '/profile/$nickname/reviews'
+    | '/profile/$nickname/screenshots'
+    | '/profile/$nickname/videos'
+    | '/profile/$nickname/wishlist'
+    | '/profile/$nickname/'
     | '/$slug/community/currentPost/$id'
     | '/$slug/community/post/$id'
   fileRoutesById: FileRoutesById
@@ -391,7 +505,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   WishlistRoute: typeof WishlistRoute
   FriendsAllRouteRoute: typeof FriendsAllRouteRoute
-  ProfileNicknameRouteRoute: typeof ProfileNicknameRouteRoute
+  ProfileNicknameRouteRoute: typeof ProfileNicknameRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -571,6 +685,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugCharacteristicsRouteRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/profile/$nickname/': {
+      id: '/profile/$nickname/'
+      path: '/'
+      fullPath: '/profile/$nickname/'
+      preLoaderRoute: typeof ProfileNicknameIndexRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/wishlist': {
+      id: '/profile/$nickname/wishlist'
+      path: '/wishlist'
+      fullPath: '/profile/$nickname/wishlist'
+      preLoaderRoute: typeof ProfileNicknameWishlistRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/videos': {
+      id: '/profile/$nickname/videos'
+      path: '/videos'
+      fullPath: '/profile/$nickname/videos'
+      preLoaderRoute: typeof ProfileNicknameVideosRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/screenshots': {
+      id: '/profile/$nickname/screenshots'
+      path: '/screenshots'
+      fullPath: '/profile/$nickname/screenshots'
+      preLoaderRoute: typeof ProfileNicknameScreenshotsRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/reviews': {
+      id: '/profile/$nickname/reviews'
+      path: '/reviews'
+      fullPath: '/profile/$nickname/reviews'
+      preLoaderRoute: typeof ProfileNicknameReviewsRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/guides': {
+      id: '/profile/$nickname/guides'
+      path: '/guides'
+      fullPath: '/profile/$nickname/guides'
+      preLoaderRoute: typeof ProfileNicknameGuidesRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/games': {
+      id: '/profile/$nickname/games'
+      path: '/games'
+      fullPath: '/profile/$nickname/games'
+      preLoaderRoute: typeof ProfileNicknameGamesRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/discussions': {
+      id: '/profile/$nickname/discussions'
+      path: '/discussions'
+      fullPath: '/profile/$nickname/discussions'
+      preLoaderRoute: typeof ProfileNicknameDiscussionsRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
+    '/profile/$nickname/badges': {
+      id: '/profile/$nickname/badges'
+      path: '/badges'
+      fullPath: '/profile/$nickname/badges'
+      preLoaderRoute: typeof ProfileNicknameBadgesRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
     '/community/post/$id': {
       id: '/community/post/$id'
       path: '/post/$id'
@@ -667,6 +844,33 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
   SettingsRouteRouteChildren,
 )
 
+interface ProfileNicknameRouteRouteChildren {
+  ProfileNicknameBadgesRouteRoute: typeof ProfileNicknameBadgesRouteRoute
+  ProfileNicknameDiscussionsRouteRoute: typeof ProfileNicknameDiscussionsRouteRoute
+  ProfileNicknameGamesRouteRoute: typeof ProfileNicknameGamesRouteRoute
+  ProfileNicknameGuidesRouteRoute: typeof ProfileNicknameGuidesRouteRoute
+  ProfileNicknameReviewsRouteRoute: typeof ProfileNicknameReviewsRouteRoute
+  ProfileNicknameScreenshotsRouteRoute: typeof ProfileNicknameScreenshotsRouteRoute
+  ProfileNicknameVideosRouteRoute: typeof ProfileNicknameVideosRouteRoute
+  ProfileNicknameWishlistRouteRoute: typeof ProfileNicknameWishlistRouteRoute
+  ProfileNicknameIndexRoute: typeof ProfileNicknameIndexRoute
+}
+
+const ProfileNicknameRouteRouteChildren: ProfileNicknameRouteRouteChildren = {
+  ProfileNicknameBadgesRouteRoute: ProfileNicknameBadgesRouteRoute,
+  ProfileNicknameDiscussionsRouteRoute: ProfileNicknameDiscussionsRouteRoute,
+  ProfileNicknameGamesRouteRoute: ProfileNicknameGamesRouteRoute,
+  ProfileNicknameGuidesRouteRoute: ProfileNicknameGuidesRouteRoute,
+  ProfileNicknameReviewsRouteRoute: ProfileNicknameReviewsRouteRoute,
+  ProfileNicknameScreenshotsRouteRoute: ProfileNicknameScreenshotsRouteRoute,
+  ProfileNicknameVideosRouteRoute: ProfileNicknameVideosRouteRoute,
+  ProfileNicknameWishlistRouteRoute: ProfileNicknameWishlistRouteRoute,
+  ProfileNicknameIndexRoute: ProfileNicknameIndexRoute,
+}
+
+const ProfileNicknameRouteRouteWithChildren =
+  ProfileNicknameRouteRoute._addFileChildren(ProfileNicknameRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRouteRoute: SlugRouteRouteWithChildren,
@@ -683,7 +887,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   WishlistRoute: WishlistRoute,
   FriendsAllRouteRoute: FriendsAllRouteRoute,
-  ProfileNicknameRouteRoute: ProfileNicknameRouteRoute,
+  ProfileNicknameRouteRoute: ProfileNicknameRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

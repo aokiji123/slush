@@ -75,7 +75,7 @@ export const Modal = ({
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )
       const firstElement = focusableElements[0] as HTMLElement
-      firstElement?.focus()
+      firstElement.focus()
     }
   }, [isOpen])
 

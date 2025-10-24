@@ -251,4 +251,41 @@ public class LibraryService : ILibraryService
     {
         return await _libraryRepository.ExistsAsync(userId, gameId);
     }
+
+    public async Task<IEnumerable<GameDto>> GetSharedGamesAsync(Guid userId1, Guid userId2)
+    {
+        // Get game IDs from both users' libraries
+        var user1GameIds = await _context.Libraries
+            .AsNoTracking()
+            .Where(l => l.UserId == userId1)
+            .Select(l => l.GameId)
+            .ToListAsync();
+
+        var user2GameIds = await _context.Libraries
+            .AsNoTracking()
+            .Where(l => l.UserId == userId2)
+            .Select(l => l.GameId)
+            .ToListAsync();
+
+        // Find intersection of game IDs
+        var sharedGameIds = user1GameIds.Intersect(user2GameIds).ToList();
+
+        if (!sharedGameIds.Any())
+        {
+            return new List<GameDto>();
+        }
+
+        // Get full game details for shared games
+        var sharedGames = await _context.Games
+            .AsNoTracking()
+            .Where(g => sharedGameIds.Contains(g.Id))
+            .ToListAsync();
+
+        // Convert to DTOs with default language (Ukrainian)
+        return sharedGames
+            .Select(g => GameDto.FromEntity(g, "uk"))
+            .Where(dto => dto != null)
+            .Cast<GameDto>()
+            .ToList();
+    }
 }

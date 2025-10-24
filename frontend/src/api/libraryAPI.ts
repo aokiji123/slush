@@ -53,3 +53,8 @@ export async function getOwnedGames(page: number = 1, limit: number = 20): Promi
   const { data } = await axiosInstance.get(`/library/owned?page=${page}&limit=${limit}`)
   return data
 }
+
+export async function getSharedGames(userId1: string, userId2: string): Promise<ApiResponse<GameData[]>> {
+  const { data } = await axiosInstance.get(`/library/shared/${userId1}/${userId2}`)
+  return data
+}

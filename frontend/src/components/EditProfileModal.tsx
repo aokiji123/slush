@@ -36,7 +36,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
     if (file) {
       setAvatarFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => setAvatarPreview(e.target?.result as string)
+      reader.onload = (event) => setAvatarPreview(event.target?.result as string)
       reader.readAsDataURL(file)
     }
   }
@@ -46,7 +46,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
     if (file) {
       setBannerFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => setBannerPreview(e.target?.result as string)
+      reader.onload = (event) => setBannerPreview(event.target?.result as string)
       reader.readAsDataURL(file)
     }
   }

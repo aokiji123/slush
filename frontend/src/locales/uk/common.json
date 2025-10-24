@@ -156,5 +156,76 @@
   "product": {
     "addToCart": "Додати в кошик",
     "inCart": "У кошику"
+  },
+  "badges": {
+    "title": "Значки",
+    "gallery": "Галерея значків",
+    "badgesCount": "Значків",
+    "noBadges": "Поки що немає значків",
+    "points": "очок",
+    "earnedOn": "отримано",
+    "sorting": {
+      "byDate": "За датою отримання",
+      "byPoints": "За кількістю очок",
+      "byNameAsc": "А - Я",
+      "byNameDesc": "Я - А"
+    }
+  },
+  "games": {
+    "title": "Ігри",
+    "searchPlaceholder": "Пошук за назвою гри...",
+    "filters": "Фільтри",
+    "sorting": "Сортування",
+    "sortByName": "За назвою",
+    "sortByRating": "За рейтингом",
+    "sortByPrice": "За ціною",
+    "sortByDate": "За датою",
+    "shared": "Спільні",
+    "inLibrary": "У Бібліотеці",
+    "inCart": "У кошику",
+    "addToCart": "У кошик",
+    "discountValidUntil": "Знижка діє до {date}",
+    "noGamesFound": "Ігор не знайдено",
+    "noGamesMessage": "Спробуйте змінити пошуковий запит або фільтри",
+    "errorLoading": "Помилка завантаження ігор"
+  },
+  "profile": {
+    "level": "Рівень",
+    "tabs": {
+      "home": "Головна",
+      "badges": "Значки",
+      "games": "Ігри",
+      "wishlist": "Бажане",
+      "discussions": "Обговорення",
+      "screenshots": "Скріншоти",
+      "videos": "Відео",
+      "guides": "Гайди",
+      "reviews": "Рецензії"
+    },
+    "searchPlaceholders": {
+      "games": "Пошук ігор...",
+      "wishlist": "Пошук у списку бажань...",
+      "discussions": "Пошук обговорень...",
+      "screenshots": "Пошук скріншотів...",
+      "videos": "Пошук відео...",
+      "guides": "Пошук гайдів...",
+      "reviews": "Пошук рецензій..."
+    },
+    "categories": {
+      "shared": "Спільні",
+      "all": "Всі"
+    },
+    "status": {
+      "inLibrary": "У Бібліотеці",
+      "inWishlist": "У Списку бажань",
+      "shared": "Спільна"
+    },
+    "actions": {
+      "share": "Поділитися",
+      "like": "Подобається",
+      "comment": "Коментувати",
+      "filters": "Фільтри",
+      "sorting": "Сортування"
+    }
   }
 }

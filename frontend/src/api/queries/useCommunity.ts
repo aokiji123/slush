@@ -43,7 +43,7 @@ export function useGamePosts(gameId: string, filters?: PostFilters) {
     queryFn: async () => {
       try {
         const result = await getPostsByGame(gameId, filters)
-        return result || []
+        return result ?? []
       } catch (error) {
         console.error('Error fetching posts:', error)
         return []
@@ -279,7 +279,7 @@ export function useLibraryPosts(filters?: {
     queryFn: async () => {
       try {
         const result = await getLibraryPosts(filters)
-        return result || []
+        return result ?? []
       } catch (error) {
         console.error('Error fetching library posts:', error)
         return []

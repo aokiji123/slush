@@ -69,7 +69,7 @@ export const ReviewModal = ({ isOpen, onClose, gameId, onReviewCreated, existing
     }
 
     try {
-      if (isEditMode && existingReview) {
+      if (isEditMode) {
         const updateData: UpdateReviewRequest = {
           Content: content.trim(),
           Rating: rating

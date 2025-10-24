@@ -240,7 +240,7 @@ function RouteComponent() {
                           Insufficient funds
                         </p>
                         <p className="text-[14px] font-bold text-red-400">
-                          Need {(totalPrice - walletBalance!.amount).toFixed(2)}₴ more
+                          Need {(totalPrice - walletBalance.amount).toFixed(2)}₴ more
                         </p>
                       </div>
                     )}
