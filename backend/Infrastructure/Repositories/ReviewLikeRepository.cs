@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Data;
 
 namespace Infrastructure.Repositories
 {
-    public class ReviewLikeRepository
+    public class ReviewLikeRepository : IReviewLikeRepository
     {
         private readonly AppDbContext _db;
         public ReviewLikeRepository(AppDbContext db)

@@ -37,9 +37,10 @@ public class LibraryService : ILibraryService
         }
 
         baseQuery = baseQuery.ApplySearch(parameters,
-            l => l.Game.Name,
-            l => l.Game.Developer,
-            l => l.Game.Publisher);
+            l => l.Game.NameTranslations,
+            l => l.Game.DeveloperTranslations,
+            l => l.Game.PublisherTranslations,
+            l => l.Game.DescriptionTranslations);
 
         var total = await baseQuery.CountAsync();
 
@@ -79,35 +80,17 @@ public class LibraryService : ILibraryService
 
     public async Task<IEnumerable<GameDto>> GetLibraryGamesAsync(Guid userId)
     {
-        return await _context.Libraries
+        var games = await _context.Libraries
             .AsNoTracking()
             .Where(l => l.UserId == userId)
             .Include(l => l.Game)
             .Select(l => l.Game)
-            .Select(g => new GameDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Slug = g.Slug,
-                MainImage = g.MainImage,
-                Images = g.Images,
-                Price = (double)g.Price,
-                DiscountPercent = g.SalePrice > 0 && g.SalePrice < g.Price
-                    ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
-                    : 0,
-                SalePrice = (double)g.SalePrice,
-                SaleDate = g.SaleDate,
-                Rating = g.Rating,
-                Genre = g.Genre,
-                Description = g.Description,
-                ReleaseDate = g.ReleaseDate,
-                Developer = g.Developer,
-                Publisher = g.Publisher,
-                Platforms = g.Platforms,
-                IsDlc = g.IsDlc,
-                BaseGameId = g.BaseGameId
-            })
             .ToListAsync();
+
+        return games
+            .Select(g => GameDto.FromEntity(g, "uk"))
+            .Where(dto => dto != null)
+            .Cast<GameDto>();
     }
 
     public async Task<PagedResult<GameDto>> GetLibraryGamesAsync(Guid userId, LibraryQueryParameters parameters)
@@ -155,10 +138,10 @@ public class LibraryService : ILibraryService
 
         // Apply search
         baseQuery = baseQuery.ApplySearch(parameters,
-            l => l.Game.Name,
-            l => l.Game.Developer,
-            l => l.Game.Publisher,
-            l => l.Game.Description);
+            l => l.Game.NameTranslations,
+            l => l.Game.DeveloperTranslations,
+            l => l.Game.PublisherTranslations,
+            l => l.Game.DescriptionTranslations);
 
         // Project to games and apply sorting/pagination at Game level so Game fields are sortable
         IQueryable<Game> gameQuery;
@@ -211,6 +194,8 @@ public class LibraryService : ILibraryService
                 .Skip(skip)
                 .Take(parameters.Limit)
                 .Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk"))
+                .Where(dto => dto != null)
+                .Cast<GameDto>()
                 .ToList();
 
             return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
@@ -224,7 +209,11 @@ public class LibraryService : ILibraryService
                 .ToListAsync();
             
             // Use FromEntity to respect language parameter for localized fields
-            var items = games.Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk")).ToList();
+            var items = games
+                .Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk"))
+                .Where(dto => dto != null)
+                .Cast<GameDto>()
+                .ToList();
 
             return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
         }

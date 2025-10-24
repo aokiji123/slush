@@ -1,5 +1,5 @@
-using FluentValidation;
 using Application.DTOs;
+using FluentValidation;
 
 namespace Application.Common.Validation;
 

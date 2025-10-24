@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using API.Helpers;
 
 namespace API.Controllers;
 
@@ -37,7 +38,7 @@ public class WishlistController : ControllerBase
     {
         try
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
             var games = await _wishlistService.GetWishlistGamesAsync(userId);
             return Ok(new ApiResponse<IEnumerable<GameDto>>(games));
         }
@@ -81,7 +82,7 @@ public class WishlistController : ControllerBase
     {
         try
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
             var parameters = new WishlistQueryParameters
             {
                 Page = page,
@@ -252,7 +253,7 @@ public class WishlistController : ControllerBase
 
         try
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
             var added = await _wishlistService.AddToWishlistAsync(userId, request.GameId);
             if (!added)
             {
@@ -325,7 +326,7 @@ public class WishlistController : ControllerBase
 
         try
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
             var removed = await _wishlistService.RemoveFromWishlistAsync(userId, gameId);
             if (!removed)
             {
@@ -401,7 +402,7 @@ public class WishlistController : ControllerBase
 
         try
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
             var friendsWishlisted = await _wishlistService.GetFriendsWithGameInWishlistDetailsAsync(userId, gameId);
             return Ok(new ApiResponse<IEnumerable<FriendWithGameDto>>(friendsWishlisted));
         }

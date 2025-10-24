@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Data;
-using Application.Common.Query;
 
 namespace Infrastructure.Repositories
 {
-    public class ReviewRepository
+    public class ReviewRepository : IReviewRepository
     {
         private readonly AppDbContext _db;
         public ReviewRepository(AppDbContext db)
@@ -25,43 +25,26 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<IEnumerable<Review>> GetReviewsAsync(ReviewQueryParameters parameters)
+        public async Task<IEnumerable<Review>> GetReviewsAsync(Guid? gameId = null, Guid? userId = null, int? rating = null, int skip = 0, int take = 10)
         {
             var query = _db.Reviews
                 .Include(r => r.User)
                 .Include(r => r.Game)
                 .AsQueryable();
 
-            if (parameters.GameId.HasValue)
-                query = query.Where(r => r.GameId == parameters.GameId.Value);
+            if (gameId.HasValue)
+                query = query.Where(r => r.GameId == gameId.Value);
 
-            if (parameters.UserId.HasValue)
-                query = query.Where(r => r.UserId == parameters.UserId.Value);
+            if (userId.HasValue)
+                query = query.Where(r => r.UserId == userId.Value);
 
-            if (parameters.MinRating.HasValue)
-                query = query.Where(r => r.Rating >= parameters.MinRating.Value);
+            if (rating.HasValue)
+                query = query.Where(r => r.Rating == rating.Value);
 
-            if (parameters.MaxRating.HasValue)
-                query = query.Where(r => r.Rating <= parameters.MaxRating.Value);
-
-            // Apply sorting
-            query = parameters.SortBy?.ToLower() switch
-            {
-                "rating" => parameters.SortOrder?.ToLower() == "asc" 
-                    ? query.OrderBy(r => r.Rating) 
-                    : query.OrderByDescending(r => r.Rating),
-                "likes" => parameters.SortOrder?.ToLower() == "asc" 
-                    ? query.OrderBy(r => r.Likes) 
-                    : query.OrderByDescending(r => r.Likes),
-                "createdat" or _ => parameters.SortOrder?.ToLower() == "asc" 
-                    ? query.OrderBy(r => r.CreatedAt) 
-                    : query.OrderByDescending(r => r.CreatedAt)
-            };
-
-            // Apply pagination
             return await query
-                .Skip((parameters.Page - 1) * parameters.PageSize)
-                .Take(parameters.PageSize)
+                .OrderByDescending(r => r.CreatedAt)
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync();
         }
 

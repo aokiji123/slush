@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Infrastructure.Configuration;
 using API.Middleware;
+using API.Helpers;
+using API.Extensions;
 using DotNetEnv;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -46,22 +48,10 @@ SecretsConfiguration.ValidateRequiredSecrets();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext
-builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseNpgsql(SecretsConfiguration.BuildConnectionString()));
-
-// Add Identity
-builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
-    {
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 6;
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+// Add services using extension methods
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApiServices(builder.Configuration);
 
 // JWT
 builder.Services.AddAuthentication(options =>
@@ -86,53 +76,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Add Memory Cache
-builder.Services.AddMemoryCache();
-
-// Register repositories
-builder.Services.AddScoped<IWalletRepository, WalletRepository>();
-builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-builder.Services.AddScoped<IUserBlockRepository, UserBlockRepository>();
-builder.Services.AddScoped<ReviewRepository>();
-builder.Services.AddScoped<ReviewLikeRepository>();
-builder.Services.AddScoped<IProfileCommentRepository, ProfileCommentRepository>();
-builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
-
-// Register application services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IGameService, GameService>();
-builder.Services.AddScoped<ILibraryService, LibraryService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IPurchaseService, PurchaseService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<IFriendshipService, FriendshipService>();
-builder.Services.AddScoped<IUserBlockService, UserBlockService>();
-builder.Services.AddScoped<ICommunityService, CommunityService>();
-builder.Services.AddScoped<IStorageService, StorageService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IWishlistService, WishlistService>();
-builder.Services.AddScoped<IProfileCommentService, ProfileCommentService>();
-builder.Services.AddScoped<IBadgeService, BadgeService>();
-
-// Add AutoMapper
-builder.Services.AddAutoMapper(typeof(Application.Common.Mappings.GameProfile).Assembly);
-
-// Add FluentValidation
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddFluentValidationClientsideAdapters();
-builder.Services.AddValidatorsFromAssemblyContaining<Application.Common.Validation.CreateGameDtoValidator>();
-
 // TODO: Register AWS S3 client for R2 when packages are available
-
-// Add BaseUrl configuration
-builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
-var baseUrl = SecretsConfiguration.GetOptionalSecret("BASE_URL", "https://localhost:5088");
-builder.Services.AddHttpContextAccessor();
 // SWAGGER
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -219,6 +163,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<OnlineStatusMiddleware>();
 
 app.UseAuthentication();

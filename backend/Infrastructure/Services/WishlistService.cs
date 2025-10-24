@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Application.Common.Query;
 using Application.DTOs;
@@ -34,13 +33,18 @@ public class WishlistService : IWishlistService
 
     public async Task<IEnumerable<GameDto>> GetWishlistGamesAsync(Guid userId)
     {
-        return await _db.Wishlists
+        var games = await _db.Wishlists
             .AsNoTracking()
             .Where(w => w.UserId == userId)
             .Include(w => w.Game)
             .Select(w => w.Game)
-            .Select(SelectGameDto())
             .ToListAsync();
+
+        return games
+            .Where(g => g != null)
+            .Select(g => GameDto.FromEntity(g!, "uk"))
+            .Where(dto => dto != null)
+            .Cast<GameDto>();
     }
 
     public async Task<PagedResult<GameDto>> GetWishlistGamesAsync(Guid userId, WishlistQueryParameters parameters)
@@ -61,37 +65,37 @@ public class WishlistService : IWishlistService
         // Apply server-side filters (price, sale, DLC)
         if (parameters.MinPrice.HasValue)
         {
-            baseQuery = baseQuery.Where(w => w.Game.Price >= parameters.MinPrice.Value);
+            baseQuery = baseQuery.Where(w => w.Game != null && w.Game.Price >= parameters.MinPrice.Value);
         }
 
         if (parameters.MaxPrice.HasValue)
         {
-            baseQuery = baseQuery.Where(w => w.Game.Price <= parameters.MaxPrice.Value);
+            baseQuery = baseQuery.Where(w => w.Game != null && w.Game.Price <= parameters.MaxPrice.Value);
         }
 
         if (parameters.OnSale.HasValue)
         {
             if (parameters.OnSale.Value)
             {
-                baseQuery = baseQuery.Where(w => w.Game.DiscountPercent > 0 || (w.Game.SalePrice > 0 && w.Game.SalePrice < w.Game.Price));
+                baseQuery = baseQuery.Where(w => w.Game != null && (w.Game.DiscountPercent > 0 || (w.Game.SalePrice > 0 && w.Game.SalePrice < w.Game.Price)));
             }
             else
             {
-                baseQuery = baseQuery.Where(w => w.Game.DiscountPercent == 0 && (w.Game.SalePrice == 0 || w.Game.SalePrice >= w.Game.Price));
+                baseQuery = baseQuery.Where(w => w.Game != null && w.Game.DiscountPercent == 0 && (w.Game.SalePrice == 0 || w.Game.SalePrice >= w.Game.Price));
             }
         }
 
         if (parameters.IsDlc.HasValue)
         {
-            baseQuery = baseQuery.Where(w => w.Game.IsDlc == parameters.IsDlc.Value);
+            baseQuery = baseQuery.Where(w => w.Game != null && w.Game.IsDlc == parameters.IsDlc.Value);
         }
 
         // Apply search
         baseQuery = baseQuery.ApplySearch(parameters,
-            w => w.Game.Name,
-            w => w.Game.Developer,
-            w => w.Game.Publisher,
-            w => w.Game.Description);
+            w => w.Game != null ? w.Game.NameTranslations : string.Empty,
+            w => w.Game != null ? w.Game.DeveloperTranslations : string.Empty,
+            w => w.Game != null ? w.Game.PublisherTranslations : string.Empty,
+            w => w.Game != null ? w.Game.DescriptionTranslations : string.Empty);
 
         // Project to games and apply sorting/pagination at Game level so Game fields are sortable
         IQueryable<Game> gameQuery;
@@ -102,12 +106,15 @@ public class WishlistService : IWishlistService
         {
             // Order wishlists by AddedAtUtc, then project to games
             gameQuery = baseQuery
+                .Where(w => w.Game != null)
                 .OrderByDescending(w => w.AddedAtUtc)
-                .Select(w => w.Game);
+                .Select(w => w.Game!);
         }
         else
         {
-            gameQuery = baseQuery.Select(w => w.Game);
+            gameQuery = baseQuery
+                .Where(w => w.Game != null)
+                .Select(w => w.Game!);
             // Apply domain-aware Game sorting (Rating, ReleaseDate, Price, DiscountPercent, etc.)
             gameQuery = gameQuery.ApplySorting(parameters);
         }
@@ -147,6 +154,8 @@ public class WishlistService : IWishlistService
                 .Skip(skip)
                 .Take(parameters.Limit)
                 .Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk"))
+                .Where(dto => dto != null)
+                .Cast<GameDto>()
                 .ToList();
 
             return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
@@ -160,7 +169,11 @@ public class WishlistService : IWishlistService
                 .ToListAsync();
             
             // Use FromEntity to respect language parameter for localized fields
-            var items = games.Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk")).ToList();
+            var items = games
+                .Select(g => GameDto.FromEntity(g, parameters.Language ?? "uk"))
+                .Where(dto => dto != null)
+                .Cast<GameDto>()
+                .ToList();
 
             return new PagedResult<GameDto>(items, parameters.Page, parameters.Limit, total);
         }
@@ -242,31 +255,4 @@ public class WishlistService : IWishlistService
         return friendsWithGameInWishlist;
     }
 
-    private static Expression<Func<Game, GameDto>> SelectGameDto()
-    {
-        return g => new GameDto
-        {
-            Id = g.Id,
-            Name = g.Name,
-            Slug = g.Slug,
-            MainImage = g.MainImage,
-            Images = g.Images,
-            Price = (double)g.Price,
-            // Compute discount percent dynamically from SalePrice if valid
-            DiscountPercent = g.SalePrice > 0 && g.SalePrice < g.Price
-                ? (int)Math.Round((double)((g.Price - g.SalePrice) / g.Price * 100m))
-                : 0,
-            SalePrice = (double)g.SalePrice,
-            SaleDate = g.SaleDate,
-            Rating = g.Rating,
-            Genre = g.Genre,
-            Description = g.Description,
-            ReleaseDate = g.ReleaseDate,
-            Developer = g.Developer,
-            Publisher = g.Publisher,
-            Platforms = g.Platforms,
-            IsDlc = g.IsDlc,
-            BaseGameId = g.BaseGameId
-        };
-    }
 }

@@ -1,5 +1,5 @@
-using FluentValidation;
 using Application.DTOs;
+using FluentValidation;
 
 namespace Application.Common.Validation;
 
@@ -9,12 +9,9 @@ public class LoginDtoValidator : AbstractValidator<LoginDto>
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required")
-            .EmailAddress().WithMessage("Email must be a valid email address")
-            .MaximumLength(256).WithMessage("Email cannot exceed 256 characters");
+            .EmailAddress().WithMessage("Email must be a valid email address");
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(6).WithMessage("Password must be at least 6 characters long")
-            .MaximumLength(100).WithMessage("Password cannot exceed 100 characters");
+            .NotEmpty().WithMessage("Password is required");
     }
 }

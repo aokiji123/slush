@@ -9,6 +9,7 @@ using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using AutoMapper;
 
 namespace Infrastructure.Services;
@@ -23,9 +24,10 @@ public class UserService : IUserService
     private readonly IReviewService _reviewService;
     private readonly ICommunityService _communityService;
     private readonly IMapper _mapper;
+    private readonly UserManager<User> _userManager;
 
     public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository, 
-        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService, IMapper mapper)
+        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService, IMapper mapper, UserManager<User> userManager)
     {
         _db = db;
         _storageService = storageService;
@@ -35,6 +37,7 @@ public class UserService : IUserService
         _reviewService = reviewService;
         _communityService = communityService;
         _mapper = mapper;
+        _userManager = userManager;
     }
 
     public async Task<UserDto?> GetUserAsync(Guid id)
@@ -87,7 +90,15 @@ public class UserService : IUserService
         var user = await _db.Set<User>().FirstOrDefaultAsync(u => u.Id == dto.UserId);
         if (user == null) return false;
 
+        // Verify nickname matches
         if (!string.Equals(user.Nickname, dto.Nickname, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // Verify password is correct
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+        if (!isPasswordValid)
         {
             return false;
         }
@@ -453,8 +464,8 @@ public class UserService : IUserService
                 Content = p.Content,
                 Type = p.Type,
                 AuthorId = p.AuthorId,
-                AuthorUsername = p.Author.Nickname ?? string.Empty,
-                AuthorAvatar = p.Author.Avatar ?? string.Empty,
+                AuthorUsername = p.Author != null ? p.Author.Nickname : string.Empty,
+                AuthorAvatar = p.Author != null ? p.Author.Avatar : string.Empty,
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
                 GameId = p.GameId,

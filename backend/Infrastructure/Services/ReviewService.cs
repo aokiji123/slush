@@ -6,7 +6,7 @@ using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Repositories;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 
@@ -14,11 +14,11 @@ namespace Infrastructure.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly ReviewRepository _reviewRepository;
-        private readonly ReviewLikeRepository _reviewLikeRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IReviewLikeRepository _reviewLikeRepository;
         private readonly IMapper _mapper;
 
-        public ReviewService(ReviewRepository reviewRepository, ReviewLikeRepository reviewLikeRepository, IMapper mapper)
+        public ReviewService(IReviewRepository reviewRepository, IReviewLikeRepository reviewLikeRepository, IMapper mapper)
         {
             _reviewRepository = reviewRepository;
             _reviewLikeRepository = reviewLikeRepository;
@@ -40,7 +40,13 @@ namespace Infrastructure.Services
 
         public async Task<IEnumerable<ReviewDto>> GetReviewsAsync(ReviewQueryParameters parameters, Guid? currentUserId = null)
         {
-            var reviews = await _reviewRepository.GetReviewsAsync(parameters);
+            var reviews = await _reviewRepository.GetReviewsAsync(
+                parameters.GameId, 
+                parameters.UserId, 
+                parameters.MinRating, 
+                (parameters.Page - 1) * parameters.PageSize, 
+                parameters.PageSize);
+            
             var reviewDtos = new List<ReviewDto>();
 
             foreach (var review in reviews)

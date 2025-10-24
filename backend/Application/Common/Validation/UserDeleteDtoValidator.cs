@@ -1,5 +1,5 @@
-using FluentValidation;
 using Application.DTOs;
+using FluentValidation;
 
 namespace Application.Common.Validation;
 
@@ -16,10 +16,10 @@ public class UserDeleteDtoValidator : AbstractValidator<UserDeleteDto>
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required")
-            .MaximumLength(100).WithMessage("Password cannot exceed 100 characters");
+            .MinimumLength(6).WithMessage("Password must be at least 6 characters long");
 
         RuleFor(x => x.ConfirmPassword)
             .NotEmpty().WithMessage("Password confirmation is required")
-            .Equal(x => x.Password).WithMessage("Password confirmation must match the password");
+            .Equal(x => x.Password).WithMessage("Password and confirmation must match");
     }
 }
