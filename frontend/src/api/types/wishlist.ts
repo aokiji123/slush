@@ -1,4 +1,4 @@
-import type { Game, GameData } from './game'
+import type { GameData } from './game'
 
 export type Wishlist = {
   success: boolean

@@ -1,3 +1,5 @@
+import { Button } from './Button'
+
 interface ConfirmationModalProps {
   isOpen: boolean
   title: string
@@ -29,38 +31,43 @@ export const ConfirmationModal = ({
       <div
         className="absolute inset-0 bg-black bg-opacity-60"
         onClick={onCancel}
+        aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative bg-[var(--color-background-8)] rounded-[20px] p-[32px] w-[480px] max-w-[90vw]">
-        <h2 className="font-manrope font-bold text-[24px] text-[var(--color-background)] leading-[1.1] mb-[16px]">
+      <div 
+        className="relative bg-[var(--color-background-8)] rounded-[20px] p-[32px] w-[480px] max-w-[90vw]"
+        role="dialog"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <h2 id="modal-title" className="font-manrope font-bold text-[24px] text-[var(--color-background)] leading-[1.1] mb-[16px]">
           {title}
         </h2>
 
-        <p className="text-[16px] text-[var(--color-background-25)] opacity-65 leading-[1.25] tracking-[-0.16px] mb-[32px]">
+        <p id="modal-description" className="text-[16px] text-[var(--color-background-25)] opacity-65 leading-[1.25] tracking-[-0.16px] mb-[32px]">
           {message}
         </p>
 
         <div className="flex gap-[12px] justify-end">
-          <button
+          <Button
             onClick={onCancel}
             disabled={isLoading}
-            className="bg-[var(--color-background-18)] rounded-[20px] px-[26px] py-[12px] text-[16px] text-[var(--color-background)] font-medium leading-[1.25] hover:bg-[var(--color-background-16)] transition-colors disabled:opacity-50"
+            variant="secondary"
+            size="md"
           >
             {cancelText}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={onConfirm}
             disabled={isLoading}
-            className={`rounded-[20px] px-[26px] py-[12px] text-[16px] font-medium leading-[1.25] transition-colors disabled:opacity-50 ${
-              isDestructive
-                ? 'bg-[#FF4444] text-white hover:bg-[#FF6666]'
-                : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-23)]'
-            }`}
+            isLoading={isLoading}
+            variant={isDestructive ? 'destructive' : 'primary'}
+            size="md"
           >
-            {isLoading ? 'Завантаження...' : confirmText}
-          </button>
+            {confirmText}
+          </Button>
         </div>
       </div>
     </div>

@@ -3,6 +3,9 @@ import { useState, useMemo } from 'react'
 import { Search, SidebarFilter, Pagination } from '@/components'
 import { GridIcon, GridRowIcon } from '@/icons'
 import { Product } from '@/components/Product'
+import { ErrorState } from '@/components/ErrorState'
+import { LoadingState } from '@/components/LoadingState'
+import { EmptyState } from '@/components/EmptyState'
 import { useSearchGames } from '@/api/queries/useGame'
 import type { CatalogFilters, CatalogSearchParams } from '@/types/catalog'
 import type { GameData } from '@/api/types/game'
@@ -175,38 +178,25 @@ const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
 
             {/* Loading State */}
             {isLoading && (
-              <div className="flex items-center justify-center py-[64px]">
-                <div className="text-[var(--color-background)] text-[18px]">
-                  Завантаження...
-                </div>
-              </div>
+              <LoadingState message="Завантаження..." />
             )}
 
             {/* Error State */}
             {error && (
-              <div className="flex flex-col items-center justify-center py-[64px] gap-[16px]">
-                <div className="text-[var(--color-background)] text-[18px]">
-                  Помилка завантаження ігор
-                </div>
-                <button
-                  onClick={() => refetch()}
-                  className="px-[24px] py-[12px] bg-[var(--color-background-21)] text-white rounded-[8px] hover:bg-[var(--color-background-23)] transition-colors"
-                >
-                  Спробувати знову
-                </button>
-              </div>
+              <ErrorState
+                title="Помилка завантаження ігор"
+                message="Не вдалося завантажити список ігор. Спробуйте оновити сторінку."
+                onRetry={() => refetch()}
+                retryText="Спробувати знову"
+              />
             )}
 
             {/* Empty State */}
             {!isLoading && !error && games.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-[64px] gap-[16px]">
-                <div className="text-[var(--color-background)] text-[18px]">
-                  Ігри не знайдено
-                </div>
-                <div className="text-[var(--color-background-25)] text-[14px]">
-                  Спробуйте змінити фільтри або пошуковий запит
-                </div>
-              </div>
+              <EmptyState
+                title="Ігри не знайдено"
+                message="Спробуйте змінити фільтри або пошуковий запит"
+              />
             )}
 
             {/* Games Grid/List */}

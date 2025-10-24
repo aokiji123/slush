@@ -6,20 +6,23 @@ using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Repositories;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Infrastructure.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly ReviewRepository _reviewRepository;
-        private readonly ReviewLikeRepository _reviewLikeRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IReviewLikeRepository _reviewLikeRepository;
+        private readonly IMapper _mapper;
 
-        public ReviewService(ReviewRepository reviewRepository, ReviewLikeRepository reviewLikeRepository)
+        public ReviewService(IReviewRepository reviewRepository, IReviewLikeRepository reviewLikeRepository, IMapper mapper)
         {
             _reviewRepository = reviewRepository;
             _reviewLikeRepository = reviewLikeRepository;
+            _mapper = mapper;
         }
 
         public async Task<ReviewDto?> GetReviewByIdAsync(Guid id, Guid? currentUserId = null)
@@ -27,25 +30,33 @@ namespace Infrastructure.Services
             var review = await _reviewRepository.GetByIdAsync(id);
             if (review == null) return null;
 
-            var isLiked = currentUserId.HasValue 
-                ? await _reviewLikeRepository.IsLikedByUserAsync(currentUserId.Value, id)
-                : false;
+            var isLiked = currentUserId.HasValue && 
+                await _reviewLikeRepository.IsLikedByUserAsync(currentUserId.Value, id);
 
-            return MapToDto(review, isLiked);
+            var reviewDto = _mapper.Map<ReviewDto>(review);
+            reviewDto.IsLikedByCurrentUser = isLiked;
+            return reviewDto;
         }
 
         public async Task<IEnumerable<ReviewDto>> GetReviewsAsync(ReviewQueryParameters parameters, Guid? currentUserId = null)
         {
-            var reviews = await _reviewRepository.GetReviewsAsync(parameters);
+            var reviews = await _reviewRepository.GetReviewsAsync(
+                parameters.GameId, 
+                parameters.UserId, 
+                parameters.MinRating, 
+                (parameters.Page - 1) * parameters.PageSize, 
+                parameters.PageSize);
+            
             var reviewDtos = new List<ReviewDto>();
 
             foreach (var review in reviews)
             {
-                var isLiked = currentUserId.HasValue 
-                    ? await _reviewLikeRepository.IsLikedByUserAsync(currentUserId.Value, review.Id)
-                    : false;
+                var isLiked = currentUserId.HasValue && 
+                    await _reviewLikeRepository.IsLikedByUserAsync(currentUserId.Value, review.Id);
 
-                reviewDtos.Add(MapToDto(review, isLiked));
+                var reviewDto = _mapper.Map<ReviewDto>(review);
+                reviewDto.IsLikedByCurrentUser = isLiked;
+                reviewDtos.Add(reviewDto);
             }
 
             return reviewDtos;
@@ -59,21 +70,18 @@ namespace Infrastructure.Services
                 throw new InvalidOperationException("User has already reviewed this game");
             }
 
-            var review = new Review
-            {
-                Id = Guid.NewGuid(),
-                GameId = createReviewDto.GameId,
-                UserId = userId,
-                Content = createReviewDto.Content,
-                Rating = createReviewDto.Rating,
-                CreatedAt = DateTime.UtcNow,
-                Likes = 0
-            };
+            var review = _mapper.Map<Review>(createReviewDto);
+            review.Id = Guid.NewGuid();
+            review.UserId = userId;
+            review.CreatedAt = DateTime.UtcNow;
+            review.Likes = 0;
 
             try
             {
                 var createdReview = await _reviewRepository.AddReviewAsync(review);
-                return MapToDto(createdReview, false);
+                var reviewDto = _mapper.Map<ReviewDto>(createdReview);
+                reviewDto.IsLikedByCurrentUser = false;
+                return reviewDto;
             }
             catch (Exception ex)
             {
@@ -86,14 +94,15 @@ namespace Infrastructure.Services
             var review = await _reviewRepository.GetByIdAsync(id);
             if (review == null || review.UserId != userId) return null;
 
-            review.Content = updateReviewDto.Content;
-            review.Rating = updateReviewDto.Rating;
+            _mapper.Map(updateReviewDto, review);
 
             var updatedReview = await _reviewRepository.UpdateReviewAsync(review);
             if (updatedReview == null) return null;
 
             var isLiked = await _reviewLikeRepository.IsLikedByUserAsync(userId, id);
-            return MapToDto(updatedReview, isLiked);
+            var reviewDto = _mapper.Map<ReviewDto>(updatedReview);
+            reviewDto.IsLikedByCurrentUser = isLiked;
+            return reviewDto;
         }
 
         public async Task<bool> DeleteReviewAsync(Guid id, Guid userId)
@@ -153,21 +162,5 @@ namespace Infrastructure.Services
             return await _reviewLikeRepository.IsLikedByUserAsync(userId, reviewId);
         }
 
-        private static ReviewDto MapToDto(Review review, bool isLiked)
-        {
-            return new ReviewDto
-            {
-                Id = review.Id,
-                GameId = review.GameId,
-                UserId = review.UserId,
-                Username = review.User?.Nickname ?? review.User?.UserName ?? "Unknown",
-                UserAvatar = review.User?.Avatar ?? "https://static.vecteezy.com/system/resources/previews/060/605/418/non_2x/default-avatar-profile-icon-social-media-user-free-vector.jpg",
-                Content = review.Content,
-                Rating = review.Rating,
-                CreatedAt = review.CreatedAt,
-                Likes = review.Likes,
-                IsLikedByCurrentUser = isLiked
-            };
-        }
     }
 }

@@ -45,7 +45,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
   // Keyboard navigation for search results
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen || !searchResults?.data?.items) return
+      if (!isOpen || !searchResults?.data.items) return
       
       const itemsCount = searchResults.data.items.length
       
@@ -142,7 +142,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
             </div>
           )}
 
-          {!isLoading && !isError && searchResults?.data?.items?.length === 0 && (
+          {!isLoading && !isError && searchResults?.data.items.length === 0 && (
             <div className="flex items-center justify-center py-8">
               <p className="text-[var(--color-background-25)] text-lg">
                 {t('search.noResults')}
@@ -150,7 +150,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
             </div>
           )}
 
-          {!isLoading && !isError && searchResults?.data?.items && (
+          {!isLoading && !isError && searchResults?.data.items && (
             <>
               <div className="p-4 space-y-3">
                 {searchResults.data.items.map((game, index) => (

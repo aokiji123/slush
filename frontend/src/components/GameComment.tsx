@@ -3,7 +3,7 @@ import { FavoriteIcon, FavoriteFilledIcon } from '@/icons'
 import type { Review } from '@/api/types/game'
 import { useLikeReview, useUnlikeReview } from '@/api/queries/useGame'
 import { formatReviewDate } from '@/utils/dateFormat'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 type GameCommentProps = {
@@ -12,7 +12,7 @@ type GameCommentProps = {
   isCurrentUserReview?: boolean
 }
 
-export const GameComment = ({ review, onLikeToggle, isCurrentUserReview = false }: GameCommentProps) => {
+export const GameComment = memo(({ review, onLikeToggle, isCurrentUserReview = false }: GameCommentProps) => {
   const { t, i18n } = useTranslation(['game'])
   const [isLiked, setIsLiked] = useState(review.isLikedByCurrentUser)
   const [likeCount, setLikeCount] = useState(review.likes)
@@ -33,7 +33,9 @@ export const GameComment = ({ review, onLikeToggle, isCurrentUserReview = false 
       }
       onLikeToggle?.()
     } catch (error) {
-      console.error('Failed to toggle like:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to toggle like:', error)
+      }
     }
   }
 
@@ -113,4 +115,4 @@ export const GameComment = ({ review, onLikeToggle, isCurrentUserReview = false 
       </div>
     </div>
   )
-}
+})

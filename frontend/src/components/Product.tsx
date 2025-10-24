@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next'
 import type { GameData } from '@/api/types/game'
 import { useCartStore } from '@/lib/cartStore'
 import { FaCheck } from 'react-icons/fa'
+import { memo } from 'react'
+import { OptimizedImage } from './OptimizedImage'
 
 type ProductProps = {
   linear: boolean
   game: GameData
 }
 
-export const Product = ({ linear, game }: ProductProps) => {
+export const Product = memo(({ linear, game }: ProductProps) => {
   const navigate = useNavigate()
   const { t } = useTranslation('common')
   const { addToCart, isInCart } = useCartStore()
@@ -36,7 +38,7 @@ export const Product = ({ linear, game }: ProductProps) => {
       onClick={handleCardClick}
     >
       <div className="w-full flex">
-        <img
+        <OptimizedImage
           src={game.mainImage}
           alt={game.name}
           loading="lazy"
@@ -91,7 +93,7 @@ export const Product = ({ linear, game }: ProductProps) => {
       key={game.id}
       onClick={handleCardClick}
     >
-      <img
+      <OptimizedImage
         src={game.mainImage}
         alt={game.name}
         loading="lazy"
@@ -141,4 +143,4 @@ export const Product = ({ linear, game }: ProductProps) => {
       </div>
     </div>
   )
-}
+})

@@ -1,8 +1,8 @@
-import type { ICommunityComment } from '@/types/community'
+import type { ICommentOne } from '@/types/community'
 import type { Dispatch, SetStateAction } from 'react'
 
-interface ICommentOne extends ICommunityComment {
-  onSelected: Dispatch<SetStateAction<ICommunityComment | null>>
+interface GameCommentsProps extends ICommentOne {
+  onSelected: Dispatch<SetStateAction<ICommentOne | null>>
 }
 
 export const GameComments = ({
@@ -14,7 +14,7 @@ export const GameComments = ({
   _id,
   comments,
   onSelected,
-}: ICommentOne) => {
+}: GameCommentsProps) => {
   return (
     <div className="bg-[var(--color-background-15)] rounded-[20px] comment-one-g">
       <div
@@ -23,7 +23,7 @@ export const GameComments = ({
         <div className="w-full flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-[12px]">
             <div className="flex bg-[var(--color-background-8)] rounded-[20px] items-center gap-[12px] pr-[16px]">
-              <img src={avatar} className="h-[36px]" alt="" />
+              <img src={avatar} className="h-[36px]" alt={`${name}'s avatar`} />
               <p className="text-[var(--color-background)] text-[16px]">
                 {name}
               </p>
@@ -40,13 +40,13 @@ export const GameComments = ({
           </div>
         </div>
 
-        {comments.map((el) => (
+        {comments?.map((el: ICommentOne) => (
           <div
             key={el._id}
             className="w-full flex flex-col items-start pt-[16px] pl-[24px] pb-[12px] pr-[24px] mt-[16px] gap-[12px] border-l-8 border-l-[var(--color-background-21)] rounded-[8px] bg-[var(--color-background-17)]"
           >
             <div className="flex bg-[var(--color-background-18)] rounded-[20px] items-center gap-[12px] pr-[16px]">
-              <img src={el.avatar} className="h-[36px]" alt="" />
+              <img src={el.avatar} className="h-[36px]" alt={`${el.name}'s avatar`} />
               <p className="text-[var(--color-background)] text-[16px]">
                 {el.name}
               </p>
@@ -97,7 +97,7 @@ export const GameComments = ({
           </div>
           <div
             onClick={() =>
-              onSelected({ name, date, text, like, avatar, _id, comments })
+              onSelected({ _id, name, date, text, like, comment: 0, avatar, comments })
             }
             className="flex bg-[var(--color-background-8)] rounded-[20px] items-center gap-[10px] pr-[8px]  pl-[8px] pb-[4px] pt-[4px]"
           >

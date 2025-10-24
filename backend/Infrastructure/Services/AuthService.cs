@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Infrastructure.Configuration;
+using Infrastructure.Services;
 
 namespace Infrastructure.Services;
 
@@ -24,9 +25,8 @@ public class AuthService : IAuthService
     private readonly SignInManager<User> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
+    private readonly IRedisVerificationCodeService _verificationCodeService;
 
-    // Store: email -> (code:token, expiry)
-    private static readonly ConcurrentDictionary<string, (string Code, DateTime Expiry)> _resetCodes = new();
     private const int ResetTokenExpirationMinutes = 15;
 
     public AuthService(
@@ -34,13 +34,15 @@ public class AuthService : IAuthService
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IConfiguration configuration,
-        IEmailService emailService)
+        IEmailService emailService,
+        IRedisVerificationCodeService verificationCodeService)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+        _verificationCodeService = verificationCodeService ?? throw new ArgumentNullException(nameof(verificationCodeService));
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -129,11 +131,7 @@ public class AuthService : IAuthService
             return;
         }
 
-        var code = GenerateSecureCode();
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var expiry = DateTime.UtcNow.AddMinutes(ResetTokenExpirationMinutes);
-
-        _resetCodes[email] = ($"{code}:{token}", expiry);
+        var code = await _verificationCodeService.GenerateAndStoreCodeAsync(email, "email_verification", TimeSpan.FromMinutes(ResetTokenExpirationMinutes));
 
         _logger.LogInformation("Verification code generated for {Email}", email);
 
@@ -146,29 +144,19 @@ public class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
             return false;
 
-        if (!_resetCodes.TryGetValue(email, out var entry))
-            return false;
-
-        if (DateTime.UtcNow > entry.Expiry)
-        {
-            _resetCodes.TryRemove(email, out _);
-            _logger.LogWarning("Expired verification code for {Email}", email);
-            return false;
-        }
-
-        var parts = entry.Code.Split(':');
-        if (parts.Length != 2 || parts[0] != code)
+        var isValid = await _verificationCodeService.VerifyCodeAsync(email, code, "email_verification");
+        
+        if (!isValid)
         {
             _logger.LogWarning("Invalid verification code for {Email}", email);
             return false;
         }
 
-        var token = parts[1];
-        _resetCodes.TryRemove(email, out _);
-
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null) return false;
 
+        // Generate a new confirmation token since we verified the code
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var result = await _userManager.ConfirmEmailAsync(user, token);
         if (result.Succeeded)
         {
@@ -184,11 +172,8 @@ public class AuthService : IAuthService
         if (user == null) 
             throw new InvalidOperationException("User not found.");
 
-        // Generate code and new confirmation token, update/reset _resetCodes
-        var code = GenerateSecureCode();
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var expiry = DateTime.UtcNow.AddMinutes(ResetTokenExpirationMinutes);
-        _resetCodes[email] = ($"{code}:{token}", expiry);
+        // Generate code using Redis service
+        var code = await _verificationCodeService.GenerateAndStoreCodeAsync(email, "email_verification", TimeSpan.FromMinutes(ResetTokenExpirationMinutes));
 
         if (string.IsNullOrEmpty(user.Email))
             throw new InvalidOperationException("User email is not set.");
@@ -228,11 +213,7 @@ public class AuthService : IAuthService
             return;
         }
 
-        var code = GenerateSecureCode();
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var expiry = DateTime.UtcNow.AddMinutes(ResetTokenExpirationMinutes);
-
-        _resetCodes[email] = ($"{code}:{token}", expiry);
+        var code = await _verificationCodeService.GenerateAndStoreCodeAsync(email, "password_reset", TimeSpan.FromMinutes(ResetTokenExpirationMinutes));
 
         _logger.LogInformation("Password reset code generated for {Email}", email);
 
@@ -283,14 +264,8 @@ public class AuthService : IAuthService
     {
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
             return false;
-        if (!_resetCodes.TryGetValue(email, out var entry))
-            return false;
-        if (DateTime.UtcNow > entry.Expiry)
-            return false;
-        var parts = entry.Code.Split(':');
-        if (parts.Length != 2 || parts[0] != code)
-            return false;
-        return true; // Only verifies code, doesn't confirm email!
+        
+        return await _verificationCodeService.VerifyCodeAsync(email, code, "password_reset");
     }
 
     // In-memory verification flag store for one-time use per email
@@ -330,12 +305,4 @@ public class AuthService : IAuthService
         return Task.FromResult(tokenHandler.WriteToken(token));
     }
 
-    private static string GenerateSecureCode()
-    {
-        using var rng = RandomNumberGenerator.Create();
-        var randomNumber = new byte[4];
-        rng.GetBytes(randomNumber);
-        var code = Math.Abs(BitConverter.ToInt32(randomNumber, 0)) % 90000 + 10000;
-        return code.ToString("D5");
-    }
 }

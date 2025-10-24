@@ -51,15 +51,15 @@ export const Footer = () => {
           </div>
         </div>
         <div className="flex items-center gap-[8px]">
-          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
+          <a href="#" className="border-1 border-white text-white rounded-full p-1 cursor-pointer" aria-label="Follow us on Facebook">
             <FaFacebookF size={22} />
-          </div>
-          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
+          </a>
+          <a href="#" className="border-1 border-white text-white rounded-full p-1 cursor-pointer" aria-label="Follow us on Instagram">
             <FaInstagram size={22} />
-          </div>
-          <div className="border-1 border-white text-white rounded-full p-1 cursor-pointer">
+          </a>
+          <a href="#" className="border-1 border-white text-white rounded-full p-1 cursor-pointer" aria-label="Follow us on X (Twitter)">
             <FaXTwitter size={22} />
-          </div>
+          </a>
         </div>
       </div>
     </footer>

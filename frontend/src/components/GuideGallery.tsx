@@ -2,7 +2,7 @@ interface GuideGalleryProps {
   guides?: any[] // Mock data for now
 }
 
-export const GuideGallery = ({ guides = [] }: GuideGalleryProps) => {
+export const GuideGallery = ({ guides: _guides = [] }: GuideGalleryProps) => {
   // Mock guide data matching Figma design
   const mockGuides = [
     {
@@ -61,7 +61,7 @@ export const GuideGallery = ({ guides = [] }: GuideGalleryProps) => {
 
       <div className="space-y-[24px]">
         {/* Display first 2 guides */}
-        {displayGuides.map((guide, index) => (
+        {displayGuides.map((guide) => (
           <div key={guide.id} className="bg-[#002f3d] rounded-[20px] p-[20px]">
             <div className="flex gap-[20px]">
               {/* Guide Image */}

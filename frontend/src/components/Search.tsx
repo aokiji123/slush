@@ -10,7 +10,7 @@ import {
   SearchIcon,
 } from '@/icons'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SearchModal } from './SearchModal'
 import { useCartStore } from '@/lib/cartStore'
@@ -42,10 +42,10 @@ export const Search = ({
   const setSearchText = onSearchTextChange || setInternalSearchText
   const debouncedSearchText = useDebounce(searchText, 300)
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setSearchText('')
-  }
+  }, [setSearchText])
 
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
@@ -73,6 +73,7 @@ export const Search = ({
               }
             }}
             className="bg-transparent text-white text-[16px] h-[44px] w-full rounded-[20px] outline-none placeholder:text-[#CCF8FFA6] placeholder:text-[16px] relative z-[102]"
+            aria-label="Search games"
           />
           <SearchIcon className="sm:block hidden absolute right-[10px] top-1/2 -translate-y-1/2 w-[24px] h-[24px]" />
         </div>

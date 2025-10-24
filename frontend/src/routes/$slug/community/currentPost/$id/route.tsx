@@ -3,7 +3,7 @@ import { useMemo, useState, type ChangeEvent } from 'react'
 import posts from '../../posts.json'
 import comments from '../../comments.json'
 import '../../style.scss'
-import type { ICommunityComment } from '@/types/community'
+import type { ICommentOne } from '@/types/community'
 import { GamePost } from '@/components/GamePost'
 import { GamePostCurrent } from '@/components/GamePostCurrent'
 import { GameComments } from '@/components/GameComments'
@@ -32,10 +32,10 @@ function RouteComponent() {
   )
 
   const [currentComment, setCurrentComment] =
-    useState<null | ICommunityComment>(null)
+    useState<null | ICommentOne>(null)
 
   const [commentsList, setCommentsList] =
-    useState<Array<ICommunityComment>>(comments)
+    useState<Array<ICommentOne>>(comments)
   const [valueSearch, setValueSearch] = useState('')
   const [postTypeSort, setPostTypeSort] = useState(searchSelect[0])
 
@@ -47,12 +47,17 @@ function RouteComponent() {
     setValueSearch('')
   }
   const onPublic = () => {
-    currentComment?.comments.push({
-      name: 'NikaNii',
-      text: valueSearch,
-      avatar: '/avatar.png',
-      _id: Math.random().toString(36).substring(2, 9),
-    })
+    if (currentComment?.comments) {
+      currentComment.comments.push({
+        name: 'NikaNii',
+        date: new Date().toLocaleDateString('uk-UA'),
+        text: valueSearch,
+        like: '0',
+        comment: 0,
+        avatar: '/avatar.png',
+        _id: Math.random().toString(36).substring(2, 9),
+      })
+    }
     setValueSearch('')
     setCommentsList([...commentsList])
     setCurrentComment(null)
@@ -72,7 +77,7 @@ function RouteComponent() {
 
     return (
       <div className="w-full flex flex-col items-start pt-[12px] pl-[16px] pb-[12px] pr-[16px] mt-[10px] gap-[12px] border-1 border-[var(--color-background-16)] rounded-[22px] bg-[var(--color-background-14)]">
-        {currentComment.comments.map((el) => (
+        {currentComment.comments?.map((el: ICommentOne) => (
           <div
             key={el._id}
             className="w-full flex flex-col items-start pt-[16px] pl-[24px] pb-[12px] pr-[24px] mt-[16px] gap-[12px] border-l-8 border-l-[var(--color-background-21)] rounded-[8px] bg-[var(--color-background-17)]"

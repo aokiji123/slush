@@ -30,8 +30,8 @@ public class GameDto
     /// </summary>
     /// <param name="game">Game entity to convert</param>
     /// <param name="language">Target language for localization (default: "uk")</param>
-    /// <returns>Localized GameDto</returns>
-    public static GameDto FromEntity(Game game, string language = "uk")
+    /// <returns>Localized GameDto or null if game is null</returns>
+    public static GameDto? FromEntity(Game game, string language = "uk")
     {
         if (game == null)
             return null;

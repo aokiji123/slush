@@ -5,6 +5,7 @@ using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using API.Helpers;
 
 namespace API.Controllers;
 
@@ -23,7 +24,7 @@ public class StoreController : ControllerBase
     [HttpPost("purchase")]
     public async Task<IActionResult> Purchase([FromBody] PurchaseRequestDto dto)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = ClaimsHelper.GetUserIdOrThrow(User);
         var result = await _purchaseService.PurchaseAsync(userId, dto);
         if (!result.Success) return BadRequest(result);
         return Ok(result);

@@ -37,12 +37,16 @@ export const useLanguage = () => {
               }
             })
           } catch (error) {
-            console.warn('Failed to update user language preference:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Failed to update user language preference:', error)
+            }
             // Don't throw error - language change should still work locally
           }
         }
       } catch (error) {
-        console.error('Failed to change language:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to change language:', error)
+        }
         throw error
       }
     },

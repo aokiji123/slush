@@ -26,6 +26,11 @@ backend/.idea/
 # Visual Studio Code
 .vscode/
 
+# Documentation and scripts
+.cursor/
+docs/
+scripts/
+
 # OS generated files
 .DS_Store
 Thumbs.db

@@ -13,7 +13,9 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: 0,
       onError: (error) => {
-        console.error('Mutation error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Mutation error:', error)
+        }
       },
     },
   },
