@@ -15,7 +15,7 @@ import { OutgoingRequestCard } from '@/components/OutgoingRequestCard'
 import { BlockedUserCard } from '@/components/BlockedUserCard'
 import { GameSelector } from '@/components/GameSelector'
 import { BackArrowIcon } from '@/icons'
-import { mockActivities } from './mockActivities'
+import { mockActivities } from '../../../data/mockActivities'
 import type { GameData } from '@/api/types/game'
 
 export const Route = createFileRoute('/friends/all')({

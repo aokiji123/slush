@@ -13,10 +13,10 @@ export const DiscussionGallery = ({ posts, slug }: DiscussionGalleryProps) => {
   
   // Separate screenshot discussions from regular discussions
   const screenshotDiscussions = discussionPosts.filter(post => 
-    post.media && post.media.length > 0 && post.media.some(media => media.type === 0) // MediaType.Image
+    post.media.length > 0 && post.media.some(media => media.type === 0) // MediaType.Image
   )
   const regularDiscussions = discussionPosts.filter(post => 
-    !post.media || post.media.length === 0 || !post.media.some(media => media.type === 0)
+    post.media.length === 0 || !post.media.some(media => media.type === 0)
   )
   
   // Get first screenshot discussion and first regular discussion

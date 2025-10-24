@@ -148,4 +148,3 @@ export const mockFriends: Friend[] = [
     isOnline: false,
   },
 ]
-

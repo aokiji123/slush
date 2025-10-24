@@ -347,6 +347,45 @@ public class LibraryController : ControllerBase
     }
 
     /// <summary>
+    /// Get shared games between two users
+    /// </summary>
+    /// <param name="userId1">First user ID</param>
+    /// <param name="userId2">Second user ID</param>
+    /// <returns>List of games owned by both users</returns>
+    [HttpGet("shared/{userId1:guid}/{userId2:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<GameDto>>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameDto>>>> GetSharedGames([FromRoute, Required] Guid userId1, [FromRoute, Required] Guid userId2)
+    {
+        if (userId1 == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("First user ID cannot be empty."));
+        }
+
+        if (userId2 == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("Second user ID cannot be empty."));
+        }
+
+        if (userId1 == userId2)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<GameDto>>("User IDs must be different."));
+        }
+
+        try
+        {
+            var sharedGames = await _libraryService.GetSharedGamesAsync(userId1, userId2);
+            return Ok(new ApiResponse<IEnumerable<GameDto>>(sharedGames));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve shared games between users {UserId1} and {UserId2}", userId1, userId2);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<GameDto>>("Unable to retrieve shared games."));
+        }
+    }
+
+    /// <summary>
     /// Add game to library (admin/system endpoint)
     /// </summary>
     /// <param name="dto">Request containing user ID and game ID</param>

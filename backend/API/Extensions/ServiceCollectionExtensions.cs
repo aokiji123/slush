@@ -52,16 +52,26 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<AppDbContext>(options => 
             options.UseNpgsql(SecretsConfiguration.BuildConnectionString()));
 
-        // Add Redis distributed cache
-        services.AddStackExchangeRedisCache(options =>
+        // Add Redis distributed cache (optional for development)
+        var redisConnectionString = SecretsConfiguration.GetOptionalSecret("REDIS_CONNECTION_STRING");
+        if (!string.IsNullOrEmpty(redisConnectionString))
         {
-            var redisConnectionString = SecretsConfiguration.GetRequiredSecret("REDIS_CONNECTION_STRING", "Redis connection string");
-            options.Configuration = redisConnectionString;
-        });
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+            });
 
-        // Register Redis services
-        services.AddScoped<IRedisCacheService, RedisCacheService>();
-        services.AddScoped<IRedisVerificationCodeService, RedisVerificationCodeService>();
+            // Register Redis services
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
+            services.AddScoped<IRedisVerificationCodeService, RedisVerificationCodeService>();
+        }
+        else
+        {
+            // For development without Redis, use in-memory cache
+            services.AddMemoryCache();
+            services.AddScoped<IRedisCacheService, InMemoryCacheService>();
+            services.AddScoped<IRedisVerificationCodeService, InMemoryVerificationCodeService>();
+        }
 
         // Add Identity
         services.AddIdentity<User, IdentityRole<Guid>>(options =>

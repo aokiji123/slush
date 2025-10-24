@@ -62,5 +62,14 @@
     --cyan-20: #24e5c233;
     --overlay-dark: #00141f66;
     --overlay-light: #ffffff66;
+    
+    /* Semantic color mappings for design tokens */
+    --color-primary: var(--color-background-21);
+    --color-secondary: var(--color-background-15);
+    --color-accent: var(--color-background-10);
+    --color-surface: var(--color-background-8);
+    --color-surface-elevated: var(--color-background-15);
+    --color-text-primary: var(--color-background);
+    --color-text-secondary: var(--color-background-25);
   }
 }

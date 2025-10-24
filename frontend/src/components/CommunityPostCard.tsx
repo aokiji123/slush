@@ -5,6 +5,10 @@ import { useAuthState } from '@/api/queries/useAuth'
 import { FavoriteIcon, FavoriteFilledIcon } from '@/icons'
 import type { PostDto } from '@/types/community'
 import { PostType } from '@/types/community'
+import { ActionButton } from './ActionButton'
+import { Card } from './Card'
+import { CardHeader } from './CardHeader'
+import { CardActions } from './CardActions'
 
 interface CommunityPostCardProps {
   post: PostDto
@@ -16,15 +20,12 @@ interface CommunityPostCardProps {
 
 export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = true }: CommunityPostCardProps) => {
   const navigate = useNavigate()
-  // Try to get slug from route params, but don't rely on it since this component
-  // can be used in different contexts (profile page, community page, etc.)
-  let routeSlug: string | undefined = undefined
   const { user } = useAuthState()
   
-  // Use post's gameId if available, otherwise fallback to provided slug or route slug
-  const currentSlug = post.gameId || slug || routeSlug || 'default'
+  // Use post's gameId if available, otherwise fallback to provided slug
+  const currentSlug = post.gameId || slug || 'default'
   const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(post.likesCount ?? 0)
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0)
 
   const likePostMutation = useLikePost()
   const unlikePostMutation = useUnlikePost()
@@ -65,28 +66,9 @@ export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = tr
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('uk-UA', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
-
-  const formatCount = (count?: number) => {
-    const num = count ?? 0
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}k`
-    }
-    return num.toString()
-  }
 
   const renderMedia = () => {
-    const coverMedia = post.media.find(media => media.isCover) || post.media[0]
+    const coverMedia = post.media.find(media => media.isCover) || (post.media.length > 0 ? post.media[0] : undefined)
     
     if (!coverMedia) return null
 
@@ -205,28 +187,18 @@ export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = tr
   }
 
   return (
-    <div 
-      className="bg-[#002f3d] rounded-[20px] overflow-hidden cursor-pointer hover:bg-[#003a4a] transition-colors"
+    <Card 
+      variant="interactive" 
       onClick={handlePostClick}
+      className="p-6 space-y-6"
     >
-      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-[#004252] rounded-[20px] flex items-center gap-3 pr-4">
-              <img
-                src={post.authorAvatar ?? '/avatar.png'}
-                alt={post.authorUsername ?? 'User'}
-                className="w-9 h-9 rounded-full"
-              />
-              <span className="text-[16px] font-bold text-[#f1fdff]">
-                {post.authorUsername ?? 'Unknown User'}
-              </span>
-            </div>
-            <span className="text-[14px] text-[rgba(204,248,255,0.65)]">
-              {formatDate(post.createdAt)}
-            </span>
-          </div>
+          <CardHeader
+            avatar={post.authorAvatar}
+            username={post.authorUsername || 'Unknown User'}
+            date={post.createdAt}
+          />
           
           <div className="flex items-center gap-2">
             <button className="p-2 hover:bg-[rgba(55,195,255,0.12)] rounded-full transition-colors">
@@ -252,38 +224,43 @@ export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = tr
         {renderContent()}
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
-          <button
+        <CardActions>
+          <ActionButton
+            icon={
+              isLiked ? (
+                <FavoriteFilledIcon className="text-[var(--color-background-10)]" />
+              ) : (
+                <FavoriteIcon className="text-[var(--color-background-10)]" />
+              )
+            }
+            count={likesCount}
+            variant="like"
+            isActive={isLiked}
             onClick={handleLike}
-            className={`flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px] transition-colors ${
-              isLiked ? 'text-[var(--color-background-10)]' : ''
-            }`}
-          >
-            {isLiked ? (
-              <FavoriteFilledIcon className="text-[var(--color-background-10)]" />
-            ) : (
-              <FavoriteIcon className="text-[var(--color-background-10)]" />
-            )}
-            <p>{formatCount(likesCount ?? 0)}</p>
-          </button>
+          />
 
-          <button className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px] transition-colors">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 20C4.90566 20 4.71698 20 4.62264 19.9057C4.24528 19.717 4.0566 19.434 4.0566 19.0566V15.283H2.83019C1.22642 15.283 0 14.0566 0 12.4528V2.83019C0 1.22642 1.22642 0 2.83019 0H17.1698C18.7736 0 20 1.22642 20 2.83019V12.4528C20 14.0566 18.7736 15.283 17.1698 15.283H10.0943L5.66038 19.717C5.4717 19.9057 5.18868 20 5 20ZM2.83019 1.88679C2.26415 1.88679 1.88679 2.26415 1.88679 2.83019V12.4528C1.88679 13.0189 2.26415 13.3962 2.83019 13.3962H5C5.56604 13.3962 5.9434 13.7736 5.9434 14.3396V16.7925L9.0566 13.6792C9.24528 13.4906 9.43396 13.3962 9.71698 13.3962H17.1698C17.7358 13.3962 18.1132 13.0189 18.1132 12.4528V2.83019C18.1132 2.26415 17.7358 1.88679 17.1698 1.88679H2.83019Z" fill="#F1FDFF"/>
-            </svg>
-            <p>{formatCount(post.commentsCount ?? 0)}</p>
-          </button>
+          <ActionButton
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 20C4.90566 20 4.71698 20 4.62264 19.9057C4.24528 19.717 4.0566 19.434 4.0566 19.0566V15.283H2.83019C1.22642 15.283 0 14.0566 0 12.4528V2.83019C0 1.22642 1.22642 0 2.83019 0H17.1698C18.7736 0 20 1.22642 20 2.83019V12.4528C20 14.0566 18.7736 15.283 17.1698 15.283H10.0943L5.66038 19.717C5.4717 19.9057 5.18868 20 5 20ZM2.83019 1.88679C2.26415 1.88679 1.88679 2.26415 1.88679 2.83019V12.4528C1.88679 13.0189 2.26415 13.3962 2.83019 13.3962H5C5.56604 13.3962 5.9434 13.7736 5.9434 14.3396V16.7925L9.0566 13.6792C9.24528 13.4906 9.43396 13.3962 9.71698 13.3962H17.1698C17.7358 13.3962 18.1132 13.0189 18.1132 12.4528V2.83019C18.1132 2.26415 17.7358 1.88679 17.1698 1.88679H2.83019Z" fill="#F1FDFF"/>
+              </svg>
+            }
+            count={post.commentsCount || 0}
+            variant="comment"
+          />
 
           {showShareButton && (
-            <button className="flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer text-[var(--color-background-25)] bg-[var(--color-background-17)] rounded-[8px] transition-colors">
-              <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.7 20H3.1C2.3 20 1.5 19.7 0.9 19.1C0.3 18.5 0 17.7 0 16.9V13.2C0 12.6 0.4 12.2 1 12.2C1.6 12.2 2 12.6 2 13.2V16.9C2 17.2 2.1 17.5 2.3 17.7C2.5 17.9 2.8 18 3.1 18H15.7C16 18 16.3 17.9 16.5 17.7C16.7 17.5 16.8 17.2 16.8 16.9V13.2C16.8 12.6 17.2 12.2 17.8 12.2C18.4 12.2 18.8 12.6 18.8 13.2V16.9C18.8 17.7 18.5 18.5 17.9 19.1C17.3 19.7 16.5 20 15.7 20ZM9.4 14C8.8 14 8.4 13.6 8.4 13V3.3L5.2 6.3C4.8 6.7 4.2 6.7 3.8 6.3C3.4 5.9 3.4 5.3 3.8 4.9L8.6 0.3C8.9 0 9.2 0 9.4 0C9.5 0 9.6 0 9.8 0.1C9.9 0.1 10 0.2 10.1 0.3L14.9 4.9C15.3 5.3 15.3 5.9 14.9 6.3C14.5 6.7 13.9 6.7 13.5 6.3L10.4 3.3V13C10.4 13.5 10 14 9.4 14Z" fill="#F1FDFF"/>
-              </svg>
-              <p>Поділитись</p>
-            </button>
+            <ActionButton
+              icon={
+                <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.7 20H3.1C2.3 20 1.5 19.7 0.9 19.1C0.3 18.5 0 17.7 0 16.9V13.2C0 12.6 0.4 12.2 1 12.2C1.6 12.2 2 12.6 2 13.2V16.9C2 17.2 2.1 17.5 2.3 17.7C2.5 17.9 2.8 18 3.1 18H15.7C16 18 16.3 17.9 16.5 17.7C16.7 17.5 16.8 17.2 16.8 16.9V13.2C16.8 12.6 17.2 12.2 17.8 12.2C18.4 12.2 18.8 12.6 18.8 13.2V16.9C18.8 17.7 18.5 18.5 17.9 19.1C17.3 19.7 16.5 20 15.7 20ZM9.4 14C8.8 14 8.4 13.6 8.4 13V3.3L5.2 6.3C4.8 6.7 4.2 6.7 3.8 6.3C3.4 5.9 3.4 5.3 3.8 4.9L8.6 0.3C8.9 0 9.2 0 9.4 0C9.5 0 9.6 0 9.8 0.1C9.9 0.1 10 0.2 10.1 0.3L14.9 4.9C15.3 5.3 15.3 5.9 14.9 6.3C14.5 6.7 13.9 6.7 13.5 6.3L10.4 3.3V13C10.4 13.5 10 14 9.4 14Z" fill="#F1FDFF"/>
+                </svg>
+              }
+              label="Поділитись"
+              variant="share"
+            />
           )}
-        </div>
-      </div>
-    </div>
+        </CardActions>
+    </Card>
   )
 }

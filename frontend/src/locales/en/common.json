@@ -156,5 +156,76 @@
   "product": {
     "addToCart": "Add to Cart",
     "inCart": "In Cart"
+  },
+  "badges": {
+    "title": "Badges",
+    "gallery": "Badge Gallery",
+    "badgesCount": "Badges",
+    "noBadges": "No badges earned yet",
+    "points": "points",
+    "earnedOn": "earned on",
+    "sorting": {
+      "byDate": "By Date Earned",
+      "byPoints": "By Points",
+      "byNameAsc": "A - Z",
+      "byNameDesc": "Z - A"
+    }
+  },
+  "games": {
+    "title": "Games",
+    "searchPlaceholder": "Search by game name...",
+    "filters": "Filters",
+    "sorting": "Sorting",
+    "sortByName": "By name",
+    "sortByRating": "By rating",
+    "sortByPrice": "By price",
+    "sortByDate": "By date",
+    "shared": "Shared",
+    "inLibrary": "In Library",
+    "inCart": "In Cart",
+    "addToCart": "Add to Cart",
+    "discountValidUntil": "Discount valid until {date}",
+    "noGamesFound": "No games found",
+    "noGamesMessage": "Try changing your search query or filters",
+    "errorLoading": "Error loading games"
+  },
+  "profile": {
+    "level": "Level",
+    "tabs": {
+      "home": "Home",
+      "badges": "Badges",
+      "games": "Games",
+      "wishlist": "Wishlist",
+      "discussions": "Discussions",
+      "screenshots": "Screenshots",
+      "videos": "Videos",
+      "guides": "Guides",
+      "reviews": "Reviews"
+    },
+    "searchPlaceholders": {
+      "games": "Search games...",
+      "wishlist": "Search wishlist...",
+      "discussions": "Search discussions...",
+      "screenshots": "Search screenshots...",
+      "videos": "Search videos...",
+      "guides": "Search guides...",
+      "reviews": "Search reviews..."
+    },
+    "categories": {
+      "shared": "Shared",
+      "all": "All"
+    },
+    "status": {
+      "inLibrary": "In Library",
+      "inWishlist": "In Wishlist",
+      "shared": "Shared"
+    },
+    "actions": {
+      "share": "Share",
+      "like": "Like",
+      "comment": "Comment",
+      "filters": "Filters",
+      "sorting": "Sort by"
+    }
   }
 }

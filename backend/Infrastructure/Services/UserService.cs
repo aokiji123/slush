@@ -388,6 +388,12 @@ public class UserService : IUserService
 
         // Calculate level based on activity
         var level = CalculateUserLevel(gamesCount, reviewsCount, friendsCount, postsCount);
+        
+        // Calculate experience points
+        var experience = gamesCount + (reviewsCount * 2) + (friendsCount * 3) + (postsCount * 2);
+        
+        // Calculate next level experience requirement
+        var nextLevelExperience = CalculateNextLevelExperience(level);
 
         return new ProfileStatisticsDto
         {
@@ -398,7 +404,9 @@ public class UserService : IUserService
             FriendsCount = friendsCount,
             BadgesCount = badgesCount,
             PostsCount = postsCount,
-            Level = level
+            Level = level,
+            Experience = experience,
+            NextLevelExperience = nextLevelExperience
         };
     }
 
@@ -420,6 +428,18 @@ public class UserService : IUserService
             < 50 => 3,
             < 100 => 4,
             _ => Math.Min(5 + (points - 100) / 50, 50) // Cap at level 50
+        };
+    }
+
+    private static int CalculateNextLevelExperience(int currentLevel)
+    {
+        return currentLevel switch
+        {
+            1 => 10,
+            2 => 25,
+            3 => 50,
+            4 => 100,
+            _ => 100 + (currentLevel - 4) * 50 // For levels 5+, increase by 50 each level
         };
     }
 

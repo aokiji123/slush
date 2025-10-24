@@ -21,8 +21,8 @@ export const TextPole = ({
   classContainer = '',
 }: TextPoleI) => {
   const onHandlerInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    onChange(value)
+    const inputValue = e.target.value
+    onChange(inputValue)
   }
   return (
     <div className={'w-full flex flex-col gap-[8px] ' + classContainer}>

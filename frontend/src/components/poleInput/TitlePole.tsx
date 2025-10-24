@@ -21,9 +21,9 @@ export const TitlePole = ({
   limitSymbol,
 }: TitlePoleI) => {
   const onHandlerInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (limitSymbol && value.length > limitSymbol) return
-    onChange(value)
+    const inputValue = e.target.value
+    if (limitSymbol && inputValue.length > limitSymbol) return
+    onChange(inputValue)
   }
   return (
     <div className="w-full flex flex-col gap-[8px]">

@@ -14,7 +14,7 @@ interface LibraryPostCardProps {
 export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
   const { user } = useAuthState()
   const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(post.likesCount ?? 0)
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const likePostMutation = useLikePost()
@@ -51,7 +51,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
   }
   // Helper function to get cover image from post media or game main image
   const getCoverImage = () => {
-    if (post.media && post.media.length > 0) {
+    if (post.media.length > 0) {
       const coverMedia = post.media.find((m) => m.isCover) || post.media[0]
       return coverMedia.file
     }
@@ -71,7 +71,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
 
   // Video type: Full media with play button, no text below
   if (post.type === PostType.Video) {
-    const videoMedia = post.media?.find(m => m.type === MediaType.Video)
+    const videoMedia = post.media.find(m => m.type === MediaType.Video)
     const videoUrl = videoMedia?.file || getCoverImage()
     
     return (

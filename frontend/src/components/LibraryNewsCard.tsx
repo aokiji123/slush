@@ -13,7 +13,7 @@ interface LibraryNewsCardProps {
 export const LibraryNewsCard = ({ post, onClick }: LibraryNewsCardProps) => {
   const { user } = useAuthState()
   const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(post.likesCount ?? 0)
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0)
 
   const likePostMutation = useLikePost()
   const unlikePostMutation = useUnlikePost()
@@ -45,7 +45,7 @@ export const LibraryNewsCard = ({ post, onClick }: LibraryNewsCardProps) => {
   }
   // Helper function to get cover image from post media or game main image
   const getCoverImage = () => {
-    if (post.media && post.media.length > 0) {
+    if (post.media.length > 0) {
       const coverMedia = post.media.find((m) => m.isCover) || post.media[0]
       return coverMedia.file
     }

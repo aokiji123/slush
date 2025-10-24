@@ -5,7 +5,7 @@ interface ProfileHeaderProps {
   banner?: string
   isOnline: boolean
   isOwnProfile: boolean
-  friendshipStatus?: 'none' | 'pending-sent' | 'pending-received' | 'friends'
+  friendshipStatus?: 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'
   onEditProfile?: () => void
   onAddFriend?: () => void
   onCancelRequest?: () => void
@@ -82,7 +82,7 @@ export const ProfileHeader = ({
                     Додати до друзів
                   </button>
                 )}
-                {friendshipStatus === 'pending-sent' && (
+                {friendshipStatus === 'pending_outgoing' && (
                   <button
                     onClick={onCancelRequest}
                     className="bg-[var(--color-background-15)] text-[var(--color-background)] px-[26px] py-[12px] rounded-[20px] font-medium text-[16px] hover:bg-[var(--color-background-16)] transition-colors"
@@ -90,7 +90,7 @@ export const ProfileHeader = ({
                     Скасувати запит
                   </button>
                 )}
-                {friendshipStatus === 'pending-received' && (
+                {friendshipStatus === 'pending_incoming' && (
                   <button
                     onClick={onAcceptRequest}
                     className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[26px] py-[12px] rounded-[20px] font-medium text-[16px] hover:bg-[var(--color-background-23)] transition-colors"
