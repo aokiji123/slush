@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSearchUsers } from '@/api/queries/useUser'
+import { useSearchUsers, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useSendFriendRequest, useFriendRequests, useFriends, useBlockedUsers, useUnblockUser } from '@/api/queries/useFriendship'
-import { useAuthenticatedUser } from '@/api/queries/useUser'
 
 interface AddFriendModalProps {
   isOpen: boolean
@@ -55,7 +54,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   }
 
   const getFriendIds = () => friends?.map((f) => f.userId) ?? []
-  const getOutgoingIds = () => outgoing?.map((r) => r.userId) ?? []
+  const getOutgoingIds = () => outgoing.map((r) => r.userId)
   const getBlockedIds = () => blockedUsers?.map((b) => b.userId) ?? []
 
   const getUserStatus = (userId: string) => {

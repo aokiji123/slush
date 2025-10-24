@@ -13,8 +13,7 @@ import {
   ReviewGallery,
   GuideGallery,
 } from '@/components'
-import { useUserByNickname } from '@/api/queries/useUser'
-import { useAuthenticatedUser } from '@/api/queries/useUser'
+import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useFriendshipStatus, useSendFriendRequest, useCancelFriendRequest, useAcceptFriendRequest, useRemoveFriend } from '@/api/queries/useFriendship'
 import { 
   useUserStatistics, 
@@ -60,7 +59,9 @@ function ProfilePage() {
   const { data: userPosts } = useUserPosts(profileUser?.id || '')
   const { data: profileComments } = useProfileComments(profileUser?.id || '')
   const { data: userBadges } = useUserBadges(profileUser?.id || '')
-  const { data: friendsWithDetails } = useFriendsWithDetails(profileUser?.id || '')
+  const { data: friendsWithDetails } = useFriendsWithDetails(
+    isOwnProfile ? (profileUser?.id || '') : ''
+  )
 
   // Friendship mutations
   const sendFriendRequestMutation = useSendFriendRequest()
@@ -77,7 +78,7 @@ function ProfilePage() {
   }
 
   const handleAddFriend = () => {
-    if (profileUser) {
+    if (profileUser && friendshipStatus === 'none') {
       sendFriendRequestMutation.mutate(profileUser.id)
     }
   }
@@ -167,14 +168,14 @@ function ProfilePage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
     },
-    friends: friendsWithDetails?.map(f => ({
+    friends: isOwnProfile ? (friendsWithDetails?.map(f => ({
       id: f.id,
       userId: f.id,
       nickname: f.nickname,
       avatar: f.avatar,
       isOnline: f.isOnline,
       level: f.level,
-    })) || [],
+    })) || []) : [],
   }
 
   return (
@@ -224,7 +225,7 @@ function ProfilePage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
+            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
             onEditProfile={handleEditProfile}
             onAddFriend={handleAddFriend}
             onCancelRequest={handleCancelRequest}

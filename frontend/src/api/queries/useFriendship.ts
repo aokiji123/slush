@@ -127,6 +127,17 @@ export function useSendFriendRequest() {
     onSuccess: () => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['outgoingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['friendshipStatus'] })
+    },
+    onError: (error: any) => {
+      // Handle specific error cases
+      if (error.response?.status === 409) {
+        const errorMessage = error.response?.data?.message || 'Friend request already exists or users are already friends'
+        console.error('Friend request conflict:', errorMessage)
+        // You could show a toast notification here
+      } else {
+        console.error('Failed to send friend request:', error)
+      }
     },
   })
 }
@@ -244,10 +255,27 @@ export function useFriendshipStatus(userId: string, otherUserId: string) {
   return useQuery({
     queryKey: ['friendshipStatus', userId, otherUserId],
     queryFn: async () => {
+      // Check if they are already friends
       const friendship = await friendshipAPI.getFriendshipBetweenUsers(userId, otherUserId)
-      if (!friendship) return 'none'
-      // If friendship exists, it means they are friends
-      return 'friends'
+      if (friendship) return 'friends'
+      
+      // Check for pending requests
+      const [incomingRequests, outgoingRequests] = await Promise.all([
+        friendshipAPI.getIncomingRequests(userId),
+        friendshipAPI.getOutgoingRequests(userId)
+      ])
+      
+      // Check if there's a pending request from the other user to current user
+      if (incomingRequests.includes(otherUserId)) {
+        return 'pending_incoming'
+      }
+      
+      // Check if there's a pending request from current user to the other user
+      if (outgoingRequests.includes(otherUserId)) {
+        return 'pending_outgoing'
+      }
+      
+      return 'none'
     },
     enabled: !!userId && !!otherUserId && userId !== otherUserId,
   })

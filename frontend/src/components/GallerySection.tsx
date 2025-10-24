@@ -4,12 +4,21 @@ interface GallerySectionProps {
   title: string
   count?: number
   children: ReactNode
+  emptyState?: ReactNode
+  isLoading?: boolean
   className?: string
 }
 
-export const GallerySection = ({ title, count, children, className = '' }: GallerySectionProps) => {
+export const GallerySection = ({ 
+  title, 
+  count, 
+  children, 
+  emptyState,
+  isLoading = false,
+  className = '' 
+}: GallerySectionProps) => {
   return (
-    <div className={`bg-[var(--color-background-8)] rounded-[20px] p-[20px] ${className}`}>
+    <div className={`bg-[var(--color-background-8)] rounded-[20px] p-[20px] mb-[24px] ${className}`}>
       <div className="flex items-center justify-between mb-[20px]">
         <h2 className="text-[20px] font-bold text-[var(--color-background)] font-manrope">
           {title}
@@ -22,7 +31,15 @@ export const GallerySection = ({ title, count, children, className = '' }: Galle
           </div>
         )}
       </div>
-      {children}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-[64px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-background-21)]"></div>
+        </div>
+      ) : emptyState ? (
+        emptyState
+      ) : (
+        children
+      )}
     </div>
   )
 }
