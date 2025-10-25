@@ -81,9 +81,9 @@ function RouteComponent() {
       >
         <form
           onSubmit={handleSubmit}
-          className="w-[720px] min-h-[680px] bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col gap-[96px] sm:gap-[64px] mx-[16px]"
+          className="w-[720px] min-h-fit bg-[var(--color-background-15)] rounded-[20px] p-[40px] flex flex-col gap-[32px] sm:gap-[24px] mx-[16px]"
         >
-          <div className="flex flex-col gap-[32px] h-[460px] w-full">
+          <div className="flex flex-col gap-[32px] w-full">
             <p className="text-[24px] font-bold text-center font-manrope">
               {t('signUp.title')}
             </p>
@@ -152,26 +152,28 @@ function RouteComponent() {
                   disabled={registerMutation.isPending}
                 />
               </div>
-              <div className="flex items-center gap-[12px]">
-                <CustomCheckbox
-                  id="checkbox"
-                  checked={acceptedTerms}
-                  onChange={setAcceptedTerms}
-                />
-                <label htmlFor="checkbox">
-                  {t('signUp.agreeTerms')}
-                </label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-[12px]">
+                  <CustomCheckbox
+                    id="checkbox"
+                    checked={acceptedTerms}
+                    onChange={setAcceptedTerms}
+                  />
+                  <label htmlFor="checkbox" className="text-[14px] font-light">
+                    {t('signUp.agreeTerms')}
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  disabled={registerMutation.isPending}
+                  className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {registerMutation.isPending ? t('signUp.errors.loading') : t('signUp.submit')}
+                </button>
               </div>
             </div>
           </div>
           <div className="flex flex-col items-center gap-[8px]">
-            <button
-              type="submit"
-              disabled={registerMutation.isPending}
-              className="h-[48px] w-[200px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {registerMutation.isPending ? t('signUp.errors.loading') : t('signUp.submit')}
-            </button>
             <p className="text-[12px] font-light">
               {t('signUp.hasAccount')}{' '}
               <a href="/login" className="text-[var(--color-background-21)]">

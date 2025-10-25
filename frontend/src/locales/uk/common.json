@@ -67,6 +67,16 @@
     "error": "Помилка пошуку ігор",
     "viewAll": "Переглянути всі"
   },
+  "library": {
+    "noGamesInLibrary": "Немає ігор у бібліотеці",
+    "noCommunityHighlights": "Немає підбірок спільноти",
+    "noNewsPosts": "Немає новин",
+    "allGames": "Всі ігри",
+    "favorites": "Улюблені",
+    "myCollection": "Моя колекція",
+    "news": "Новини",
+    "communityPicks": "Підбірки спільноти"
+  },
   "filters": {
     "title": "Фільтри",
     "reset": "Скинути",

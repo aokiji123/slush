@@ -67,6 +67,16 @@
     "error": "Error searching games",
     "viewAll": "View all"
   },
+  "library": {
+    "noGamesInLibrary": "No games in your library",
+    "noCommunityHighlights": "No community highlights found",
+    "noNewsPosts": "No news posts found",
+    "allGames": "All games",
+    "favorites": "Favorites",
+    "myCollection": "My collection",
+    "news": "News",
+    "communityPicks": "Community picks"
+  },
   "filters": {
     "title": "Filters",
     "reset": "Reset",

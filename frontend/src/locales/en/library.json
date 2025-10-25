@@ -3,7 +3,13 @@
   "empty": {
     "title": "Your library is empty",
     "description": "Games you purchase will appear here",
-    "browseStore": "Browse Store"
+    "browseStore": "Browse Store",
+    "noGamesInLibrary": "No games in your library",
+    "noNewsPosts": "No news posts found",
+    "noCommunityHighlights": "No community highlights found",
+    "news": "News",
+    "communityPicks": "Community picks",
+    "myCollection": "My collection"
   },
   "filters": {
     "all": "All Games",
@@ -40,5 +46,15 @@
     "installing": "Installing...",
     "installed": "Installed",
     "notInstalled": "Not installed"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "search": {
+    "noResults": "No games found"
+  },
+  "games": {
+    "errorLoading": "Error loading games"
   }
 }

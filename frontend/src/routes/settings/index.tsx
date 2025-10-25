@@ -42,6 +42,15 @@ function RouteComponent() {
   const [isDirty, setIsDirty] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  // Map backend language codes to frontend language codes
+  const mapBackendLanguageCode = (backendLang: string): string => {
+    const mapping: Record<string, string> = {
+      'UA': 'uk',
+      'EN': 'en'
+    }
+    return mapping[backendLang] || 'uk'
+  }
+
   // Initialize form data when user data loads
   useEffect(() => {
     if (user) {
@@ -49,7 +58,7 @@ function RouteComponent() {
         nickname: user.nickname || '',
         email: user.email || '',
         bio: user.bio || '',
-        lang: user.lang || 'uk',
+        lang: mapBackendLanguageCode(user.lang || 'UA'),
       }
       setFormData(userData)
       setOriginalData(userData)
@@ -70,8 +79,10 @@ function RouteComponent() {
     try {
       await changeLanguage(value)
       setMessage({ type: 'success', text: t('general.success') })
+      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       setMessage({ type: 'error', text: t('general.error') })
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -82,8 +93,10 @@ function RouteComponent() {
     try {
       await uploadAvatarMutation.mutateAsync({ userId: user.id, file })
       setMessage({ type: 'success', text: t('general.avatarSuccess') })
+      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       setMessage({ type: 'error', text: t('general.avatarError') })
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -94,31 +107,95 @@ function RouteComponent() {
     try {
       await uploadBannerMutation.mutateAsync({ userId: user.id, file })
       setMessage({ type: 'success', text: t('general.bannerSuccess') })
+      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       setMessage({ type: 'error', text: t('general.bannerError') })
+      setTimeout(() => setMessage(null), 3000)
     }
+  }
+
+  // Map frontend language codes to backend language codes
+  const mapLanguageCode = (frontendLang: string): string => {
+    const mapping: Record<string, string> = {
+      'uk': 'UA',
+      'en': 'EN'
+    }
+    return mapping[frontendLang] || 'UA'
   }
 
   const handleSave = async () => {
     if (!user) return
 
+    // Client-side validation
+    if (!formData.nickname || formData.nickname.trim().length < 2) {
+      setMessage({ type: 'error', text: 'Nickname must be at least 2 characters long' })
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+
+    if (formData.nickname.trim().length > 50) {
+      setMessage({ type: 'error', text: 'Nickname cannot exceed 50 characters' })
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+
+    // Check nickname format (only letters, numbers, underscores, and hyphens)
+    const nicknameRegex = /^[a-zA-Z0-9_-]+$/
+    if (!nicknameRegex.test(formData.nickname.trim())) {
+      setMessage({ type: 'error', text: 'Nickname can only contain letters, numbers, underscores, and hyphens' })
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+
+    if (!formData.email || !formData.email.includes('@')) {
+      setMessage({ type: 'error', text: 'Please enter a valid email address' })
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+
+    if (formData.bio && formData.bio.length > 500) {
+      setMessage({ type: 'error', text: 'Bio cannot exceed 500 characters' })
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+
     try {
       const updateRequest: UserUpdateRequest = {
         id: user.id,
-        nickname: formData.nickname,
-        email: formData.email,
-        bio: formData.bio,
-        lang: formData.lang,
+        nickname: formData.nickname.trim(),
+        email: formData.email.trim(),
+        bio: formData.bio?.trim() || '',
+        lang: mapLanguageCode(formData.lang),
         avatar: user.avatar,
         banner: user.banner,
       }
+
+      // Debug: Log the request data
+      console.log('Sending update request:', updateRequest)
+      console.log('Form data:', formData)
+      console.log('Mapped language:', mapLanguageCode(formData.lang))
 
       await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
       setOriginalData(formData)
       setIsDirty(false)
       setMessage({ type: 'success', text: t('general.success') })
+      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
-      setMessage({ type: 'error', text: t('general.error') })
+      console.error('Update user error:', error)
+      
+      // Try to extract the actual error message from the backend
+      let errorMessage = t('general.error')
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message
+        } else if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error
+        }
+      }
+      
+      setMessage({ type: 'error', text: errorMessage })
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -181,7 +258,7 @@ function RouteComponent() {
       <div className="p-[24px] w-full flex flex-col justify-between min-h-[600px]">
         <div className="flex gap-[24px]">
           <div className="w-[20%]">
-            <div className="w-full relative">
+            <div className="w-full relative aspect-square">
               <img
                 src={user.avatar || "/avatar-settings.png"}
                 alt="Avatar"
