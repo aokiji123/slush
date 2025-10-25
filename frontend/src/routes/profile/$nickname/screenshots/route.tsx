@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileMediaCard } from '@/components'
+import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileMediaCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics, useUserPosts } from '@/api/queries/useProfile'
 import { useFriendshipStatus } from '@/api/queries/useFriendship'
@@ -206,11 +206,17 @@ function ProfileScreenshotsPage() {
             </div>
 
             {/* Sidebar */}
-            <ProfileTabs
-              nickname={profileUser.nickname}
-              level={profileData.level}
-              stats={profileData.stats}
-            />
+            <div className="flex flex-col gap-[20px]">
+              <ProfileTabs
+                nickname={profileUser.nickname}
+                level={profileData.level}
+                stats={profileData.stats}
+              />
+              <ProfileFriendsPreview
+                nickname={profileUser.nickname}
+                userId={profileUser.id}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -93,7 +93,7 @@ export const ProfileGuideCard = ({
 
   const getThumbnail = () => {
     if (post.media.length > 0) {
-      return post.media[0].file
+      return post.media[0]?.file || '/game-image.png'
     }
     return post.gameMainImage || '/game-image.png'
   }

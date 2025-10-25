@@ -143,7 +143,7 @@ export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = tr
             {post.media.length > 0 && (
               <div className="flex-shrink-0">
                 <img
-                  src={post.media[0].file}
+                  src={post.media[0]?.file || '/game-image.png'}
                   alt="Guide thumbnail"
                   className="w-[200px] h-full object-cover rounded-[20px]"
                 />
@@ -175,7 +175,7 @@ export const CommunityPostCard = ({ post, onNavigate, slug, showShareButton = tr
             {post.media.length > 0 && (
               <div className="mt-4">
                 <img
-                  src={post.media[0].file}
+                  src={post.media[0]?.file || '/game-image.png'}
                   alt="Discussion media"
                   className="w-full h-[480px] object-cover rounded-[16px]"
                 />

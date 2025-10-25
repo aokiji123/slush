@@ -1,17 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { BadgeGallery, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
-import { useUserStatistics } from '@/api/queries/useProfile'
-import { useUserBadges } from '@/api/queries/useBadges'
-import { ProfileTabs } from '@/components/ProfileTabs'
-import { ProfileHeader } from '@/components/ProfileHeader'
 import { useFriendshipStatus } from '@/api/queries/useFriendship'
+import { useUserStatistics } from '@/api/queries/useProfile'
+import { ProfileHeader } from '@/components/ProfileHeader'
+import { ProfileTabs } from '@/components/ProfileTabs'
+import { ProfileFriendsPreview } from '@/components/ProfileFriendsPreview'
+import { FriendsListSection } from '@/components/FriendsListSection'
 
-export const Route = createFileRoute('/profile/$nickname/badges')({
-  component: ProfileBadgesPage,
+export const Route = createFileRoute('/profile/$nickname/friends')({
+  component: ProfileFriendsPage,
 })
 
-function ProfileBadgesPage() {
+function ProfileFriendsPage() {
   const { nickname } = Route.useParams()
 
   // Fetch profile user data
@@ -31,43 +31,26 @@ function ProfileBadgesPage() {
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
-  const { data: userBadges } = useUserBadges(profileUser?.id || '')
 
-  // Mock data for testing
-  const mockBadges = [
-    {
-      id: '1',
-      name: 'First Steps',
-      icon: '/badge-icon.png',
-      description: 'Complete your first game',
-      requiredValue: 100,
-      earnedAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Explorer',
-      icon: '/badge-icon.png',
-      description: 'Play 10 different games',
-      requiredValue: 500,
-      earnedAt: '2024-01-20T15:30:00Z'
-    },
-    {
-      id: '3',
-      name: 'Collector',
-      icon: '/badge-icon.png',
-      description: 'Collect 50 games',
-      requiredValue: 1000,
-      earnedAt: '2024-01-25T12:00:00Z'
-    },
-    {
-      id: '4',
-      name: 'Reviewer',
-      icon: '/badge-icon.png',
-      description: 'Write 10 reviews',
-      requiredValue: 750,
-      earnedAt: '2024-01-30T14:30:00Z'
-    }
-  ]
+  const handleEditProfile = () => {
+    // TODO: Implement edit profile
+  }
+
+  const handleAddFriend = () => {
+    // TODO: Implement add friend
+  }
+
+  const handleCancelRequest = () => {
+    // TODO: Implement cancel request
+  }
+
+  const handleAcceptRequest = () => {
+    // TODO: Implement accept request
+  }
+
+  const handleRemoveFriend = () => {
+    // TODO: Implement remove friend
+  }
 
   // Loading state
   if (isLoadingProfile || isLoadingCurrentUser) {
@@ -94,18 +77,10 @@ function ProfileBadgesPage() {
     )
   }
 
-  // Prepare profile data
+  // Use real data from API calls
   const profileData = {
     ...profileUser,
     level: statistics?.level || 1,
-    badges: userBadges?.map(ub => ({
-      id: ub.badge.id,
-      name: ub.badge.name,
-      icon: ub.badge.icon,
-      description: ub.badge.description,
-      requiredValue: ub.badge.requiredValue,
-      earnedAt: ub.earnedAt
-    })) || [],
     stats: {
       badges: statistics?.badgesCount || 0,
       games: statistics?.gamesCount || 0,
@@ -167,22 +142,24 @@ function ProfileBadgesPage() {
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
             friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            onEditProfile={handleEditProfile}
+            onAddFriend={handleAddFriend}
+            onCancelRequest={handleCancelRequest}
+            onAcceptRequest={handleAcceptRequest}
+            onRemoveFriend={handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">
             {/* Main Content */}
             <div style={{ width: '1092px' }}>
-              {/* Badge Gallery */}
-              <BadgeGallery 
-                badges={profileData.badges.length > 0 ? profileData.badges : mockBadges} 
-                level={profileData.level}
-                experience={statistics?.experience || 0}
-                nextLevelExperience={statistics?.nextLevelExperience || 100}
+              <FriendsListSection
+                userId={profileUser.id}
+                currentUserId={currentUser?.id || ''}
+                showAllTab={true}
+                showOnlineTab={true}
+                showBlockedTab={false}
+                showRequestsTab={false}
+                showShared={!isOwnProfile}
               />
             </div>
 

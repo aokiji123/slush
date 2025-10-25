@@ -9,7 +9,8 @@ import {
   ReviewGallery, 
   GuideGallery,
   ProfileCommentCard,
-  ProfileTabs
+  ProfileTabs,
+  ProfileFriendsPreview
 } from '@/components'
 import { PostType } from '@/types/community'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
@@ -393,11 +394,17 @@ function ProfileHomePage() {
             </div>
 
             {/* Sidebar */}
-            <ProfileTabs
-              nickname={profileUser.nickname}
-              level={profileData.level}
-              stats={profileData.stats}
-            />
+            <div className="flex flex-col gap-[20px]">
+              <ProfileTabs
+                nickname={profileUser.nickname}
+                level={profileData.level}
+                stats={profileData.stats}
+              />
+              <ProfileFriendsPreview
+                nickname={profileUser.nickname}
+                userId={profileUser.id}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -41,6 +41,7 @@ import { Route as ProfileNicknameScreenshotsRouteRouteImport } from './routes/pr
 import { Route as ProfileNicknameReviewsRouteRouteImport } from './routes/profile/$nickname/reviews/route'
 import { Route as ProfileNicknameGuidesRouteRouteImport } from './routes/profile/$nickname/guides/route'
 import { Route as ProfileNicknameGamesRouteRouteImport } from './routes/profile/$nickname/games/route'
+import { Route as ProfileNicknameFriendsRouteRouteImport } from './routes/profile/$nickname/friends/route'
 import { Route as ProfileNicknameDiscussionsRouteRouteImport } from './routes/profile/$nickname/discussions/route'
 import { Route as ProfileNicknameBadgesRouteRouteImport } from './routes/profile/$nickname/badges/route'
 import { Route as CommunityPostIdRouteRouteImport } from './routes/community/post/$id/route'
@@ -215,6 +216,12 @@ const ProfileNicknameGamesRouteRoute =
     path: '/games',
     getParentRoute: () => ProfileNicknameRouteRoute,
   } as any)
+const ProfileNicknameFriendsRouteRoute =
+  ProfileNicknameFriendsRouteRouteImport.update({
+    id: '/friends',
+    path: '/friends',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
 const ProfileNicknameDiscussionsRouteRoute =
   ProfileNicknameDiscussionsRouteRouteImport.update({
     id: '/discussions',
@@ -281,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -318,6 +326,7 @@ export interface FileRoutesByTo {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -359,6 +368,7 @@ export interface FileRoutesById {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -478,6 +490,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -734,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileNicknameGamesRouteRouteImport
       parentRoute: typeof ProfileNicknameRouteRoute
     }
+    '/profile/$nickname/friends': {
+      id: '/profile/$nickname/friends'
+      path: '/friends'
+      fullPath: '/profile/$nickname/friends'
+      preLoaderRoute: typeof ProfileNicknameFriendsRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
     '/profile/$nickname/discussions': {
       id: '/profile/$nickname/discussions'
       path: '/discussions'
@@ -847,6 +867,7 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
 interface ProfileNicknameRouteRouteChildren {
   ProfileNicknameBadgesRouteRoute: typeof ProfileNicknameBadgesRouteRoute
   ProfileNicknameDiscussionsRouteRoute: typeof ProfileNicknameDiscussionsRouteRoute
+  ProfileNicknameFriendsRouteRoute: typeof ProfileNicknameFriendsRouteRoute
   ProfileNicknameGamesRouteRoute: typeof ProfileNicknameGamesRouteRoute
   ProfileNicknameGuidesRouteRoute: typeof ProfileNicknameGuidesRouteRoute
   ProfileNicknameReviewsRouteRoute: typeof ProfileNicknameReviewsRouteRoute
@@ -859,6 +880,7 @@ interface ProfileNicknameRouteRouteChildren {
 const ProfileNicknameRouteRouteChildren: ProfileNicknameRouteRouteChildren = {
   ProfileNicknameBadgesRouteRoute: ProfileNicknameBadgesRouteRoute,
   ProfileNicknameDiscussionsRouteRoute: ProfileNicknameDiscussionsRouteRoute,
+  ProfileNicknameFriendsRouteRoute: ProfileNicknameFriendsRouteRoute,
   ProfileNicknameGamesRouteRoute: ProfileNicknameGamesRouteRoute,
   ProfileNicknameGuidesRouteRoute: ProfileNicknameGuidesRouteRoute,
   ProfileNicknameReviewsRouteRoute: ProfileNicknameReviewsRouteRoute,
