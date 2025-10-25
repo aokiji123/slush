@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { BadgeGallery } from '@/components'
+import { BadgeGallery, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics } from '@/api/queries/useProfile'
 import { useUserBadges } from '@/api/queries/useBadges'
@@ -187,11 +187,17 @@ function ProfileBadgesPage() {
             </div>
 
             {/* Sidebar */}
-            <ProfileTabs
-              nickname={profileUser.nickname}
-              level={profileData.level}
-              stats={profileData.stats}
-            />
+            <div className="flex flex-col gap-[20px]">
+              <ProfileTabs
+                nickname={profileUser.nickname}
+                level={profileData.level}
+                stats={profileData.stats}
+              />
+              <ProfileFriendsPreview
+                nickname={profileUser.nickname}
+                userId={profileUser.id}
+              />
+            </div>
           </div>
         </div>
       </div>

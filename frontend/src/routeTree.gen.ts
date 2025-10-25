@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CartRouteImport } from './routes/cart'
@@ -41,6 +42,7 @@ import { Route as ProfileNicknameScreenshotsRouteRouteImport } from './routes/pr
 import { Route as ProfileNicknameReviewsRouteRouteImport } from './routes/profile/$nickname/reviews/route'
 import { Route as ProfileNicknameGuidesRouteRouteImport } from './routes/profile/$nickname/guides/route'
 import { Route as ProfileNicknameGamesRouteRouteImport } from './routes/profile/$nickname/games/route'
+import { Route as ProfileNicknameFriendsRouteRouteImport } from './routes/profile/$nickname/friends/route'
 import { Route as ProfileNicknameDiscussionsRouteRouteImport } from './routes/profile/$nickname/discussions/route'
 import { Route as ProfileNicknameBadgesRouteRouteImport } from './routes/profile/$nickname/badges/route'
 import { Route as CommunityPostIdRouteRouteImport } from './routes/community/post/$id/route'
@@ -81,6 +83,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const CodeAccessRoute = CodeAccessRouteImport.update({
   id: '/code-access',
   path: '/code-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
@@ -215,6 +222,12 @@ const ProfileNicknameGamesRouteRoute =
     path: '/games',
     getParentRoute: () => ProfileNicknameRouteRoute,
   } as any)
+const ProfileNicknameFriendsRouteRoute =
+  ProfileNicknameFriendsRouteRouteImport.update({
+    id: '/friends',
+    path: '/friends',
+    getParentRoute: () => ProfileNicknameRouteRoute,
+  } as any)
 const ProfileNicknameDiscussionsRouteRoute =
   ProfileNicknameDiscussionsRouteRouteImport.update({
     id: '/discussions',
@@ -259,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -281,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -297,6 +312,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -318,6 +334,7 @@ export interface FileRoutesByTo {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -337,6 +354,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -359,6 +377,7 @@ export interface FileRoutesById {
   '/community/post/$id': typeof CommunityPostIdRouteRoute
   '/profile/$nickname/badges': typeof ProfileNicknameBadgesRouteRoute
   '/profile/$nickname/discussions': typeof ProfileNicknameDiscussionsRouteRoute
+  '/profile/$nickname/friends': typeof ProfileNicknameFriendsRouteRoute
   '/profile/$nickname/games': typeof ProfileNicknameGamesRouteRoute
   '/profile/$nickname/guides': typeof ProfileNicknameGuidesRouteRoute
   '/profile/$nickname/reviews': typeof ProfileNicknameReviewsRouteRoute
@@ -379,6 +398,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -401,6 +421,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -417,6 +438,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -438,6 +460,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -456,6 +479,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -478,6 +502,7 @@ export interface FileRouteTypes {
     | '/community/post/$id'
     | '/profile/$nickname/badges'
     | '/profile/$nickname/discussions'
+    | '/profile/$nickname/friends'
     | '/profile/$nickname/games'
     | '/profile/$nickname/guides'
     | '/profile/$nickname/reviews'
@@ -497,6 +522,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
+  ChatRoute: typeof ChatRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LibraryRoute: typeof LibraryRoute
@@ -557,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/code-access'
       fullPath: '/code-access'
       preLoaderRoute: typeof CodeAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/change-password': {
@@ -734,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileNicknameGamesRouteRouteImport
       parentRoute: typeof ProfileNicknameRouteRoute
     }
+    '/profile/$nickname/friends': {
+      id: '/profile/$nickname/friends'
+      path: '/friends'
+      fullPath: '/profile/$nickname/friends'
+      preLoaderRoute: typeof ProfileNicknameFriendsRouteRouteImport
+      parentRoute: typeof ProfileNicknameRouteRoute
+    }
     '/profile/$nickname/discussions': {
       id: '/profile/$nickname/discussions'
       path: '/discussions'
@@ -847,6 +887,7 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
 interface ProfileNicknameRouteRouteChildren {
   ProfileNicknameBadgesRouteRoute: typeof ProfileNicknameBadgesRouteRoute
   ProfileNicknameDiscussionsRouteRoute: typeof ProfileNicknameDiscussionsRouteRoute
+  ProfileNicknameFriendsRouteRoute: typeof ProfileNicknameFriendsRouteRoute
   ProfileNicknameGamesRouteRoute: typeof ProfileNicknameGamesRouteRoute
   ProfileNicknameGuidesRouteRoute: typeof ProfileNicknameGuidesRouteRoute
   ProfileNicknameReviewsRouteRoute: typeof ProfileNicknameReviewsRouteRoute
@@ -859,6 +900,7 @@ interface ProfileNicknameRouteRouteChildren {
 const ProfileNicknameRouteRouteChildren: ProfileNicknameRouteRouteChildren = {
   ProfileNicknameBadgesRouteRoute: ProfileNicknameBadgesRouteRoute,
   ProfileNicknameDiscussionsRouteRoute: ProfileNicknameDiscussionsRouteRoute,
+  ProfileNicknameFriendsRouteRoute: ProfileNicknameFriendsRouteRoute,
   ProfileNicknameGamesRouteRoute: ProfileNicknameGamesRouteRoute,
   ProfileNicknameGuidesRouteRoute: ProfileNicknameGuidesRouteRoute,
   ProfileNicknameReviewsRouteRoute: ProfileNicknameReviewsRouteRoute,
@@ -879,6 +921,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   ChangePasswordRoute: ChangePasswordRoute,
+  ChatRoute: ChatRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LibraryRoute: LibraryRoute,

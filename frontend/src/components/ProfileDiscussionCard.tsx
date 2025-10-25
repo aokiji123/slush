@@ -96,12 +96,12 @@ export const ProfileDiscussionCard = ({
     if (post.media.length === 0) return null
     
     const firstMedia = post.media[0]
-    if (firstMedia.type !== MediaType.Image) return null
+    if (firstMedia?.type !== MediaType.Image) return null
 
     return (
       <div className="mt-[16px]">
         <OptimizedImage
-          src={firstMedia.file}
+          src={firstMedia?.file || '/game-image.png'}
           alt={post.title}
           className="w-full h-[480px] object-cover rounded-[16px]"
           placeholder="/game-image.png"

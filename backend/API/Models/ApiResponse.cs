@@ -39,6 +39,37 @@ public class ApiResponse<T>
         Message = errorMessage;
         Data = default;
     }
+
+    public ApiResponse(T data, string message)
+    {
+        Success = true;
+        Message = message;
+        Data = data;
+    }
+
+    /// <summary>
+    /// Creates a successful response
+    /// </summary>
+    public static ApiResponse<T> CreateSuccess(T data)
+    {
+        return new ApiResponse<T>(data);
+    }
+
+    /// <summary>
+    /// Creates a successful response with message
+    /// </summary>
+    public static ApiResponse<T> CreateSuccess(T data, string message)
+    {
+        return new ApiResponse<T>(data, message);
+    }
+
+    /// <summary>
+    /// Creates an error response
+    /// </summary>
+    public static ApiResponse<T> CreateError(string message)
+    {
+        return new ApiResponse<T>(message);
+    }
 }
 
 /// <summary>

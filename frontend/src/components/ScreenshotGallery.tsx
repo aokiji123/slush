@@ -17,7 +17,7 @@ export const ScreenshotGallery = ({ posts }: ScreenshotGalleryProps) => {
   // Helper function to get cover image from post media
   const getCoverImage = (post: PostDto) => {
     const coverMedia = post.media.find(media => media.isCover) || post.media[0]
-    return coverMedia.file || '/game-image.png'
+    return coverMedia?.file || '/game-image.png'
   }
 
   return (

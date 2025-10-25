@@ -30,16 +30,17 @@ export const Header = () => {
       name: t('header.library'),
       href: '/library',
     },
-    // {
-    //   name: 'Чат',
-    //   href: '/',
-    // },
+    {
+      name: 'Чат',
+      href: '/chat',
+    },
   ], [t])
 
   const isShopActive =
     location.pathname === '/' ||
     (location.pathname !== '/library' && location.pathname !== '/chat')
   const isLibraryActive = location.pathname === '/library'
+  const isChatActive = location.pathname === '/chat'
 
   const handleNavigation = useCallback((to: string) => {
     navigate({ to })
@@ -70,7 +71,8 @@ export const Header = () => {
             {tabs.map((tab) => {
               const isActive =
                 (tab.href === '/' && isShopActive) ||
-                (tab.href === '/library' && isLibraryActive)
+                (tab.href === '/library' && isLibraryActive) ||
+                (tab.href === '/chat' && isChatActive)
 
               return (
                 <p
@@ -199,7 +201,8 @@ export const Header = () => {
               {tabs.map((tab) => {
                 const isActive =
                   (tab.href === '/' && isShopActive) ||
-                  (tab.href === '/library' && isLibraryActive)
+                  (tab.href === '/library' && isLibraryActive) ||
+                  (tab.href === '/chat' && isChatActive)
 
                 return (
                   <a

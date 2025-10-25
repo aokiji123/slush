@@ -29,6 +29,8 @@ public class AppDbContext : DbContext
     public DbSet<ProfileComment> ProfileComments { get; set; }
     public DbSet<Badge> Badges { get; set; }
     public DbSet<UserBadge> UserBadges { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<ChatMessageAttachment> ChatMessageAttachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +45,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
         modelBuilder.ApplyConfiguration(new FriendRequestConfiguration());
         modelBuilder.ApplyConfiguration(new FriendshipConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatMessageAttachmentConfiguration());
         
         // UserRole configuration
         modelBuilder.Entity<UserRole>()

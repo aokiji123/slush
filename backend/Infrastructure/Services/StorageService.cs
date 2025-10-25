@@ -239,6 +239,95 @@ public class StorageService : IStorageService
         return (true, null);
     }
 
+    public (bool IsValid, string? ErrorMessage) ValidateChatMediaFile(IFormFile file)
+    {
+        if (file == null)
+        {
+            return (false, "No file provided");
+        }
+
+        // Allow empty text files but reject empty files of other types
+        if (file.Length == 0)
+        {
+            var emptyFileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var emptyFileContentType = file.ContentType.ToLowerInvariant();
+            
+            if (emptyFileExtension == ".txt" || emptyFileContentType == "text/plain")
+            {
+                // Allow empty text files
+                return (true, null);
+            }
+            else
+            {
+                return (false, "File is empty");
+            }
+        }
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var contentType = file.ContentType.ToLowerInvariant();
+
+        // Define chat media constraints
+        const long MaxImageSizeBytes = 10 * 1024 * 1024; // 10MB
+        const long MaxVideoSizeBytes = 100 * 1024 * 1024; // 100MB
+        const long MaxAudioSizeBytes = 25 * 1024 * 1024; // 25MB
+        const long MaxDocumentSizeBytes = 50 * 1024 * 1024; // 50MB
+
+        var allowedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var allowedVideoExtensions = new[] { ".mp4", ".webm", ".mov", ".avi", ".mkv", ".flv", ".wmv" };
+        var allowedAudioExtensions = new[] { ".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac" };
+        var allowedDocumentExtensions = new[] { ".txt", ".doc", ".docx", ".pdf", ".rtf", ".odt" };
+
+        var allowedImageMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+        var allowedVideoMimeTypes = new[] { "video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/x-matroska", "video/x-flv", "video/x-ms-wmv" };
+        var allowedAudioMimeTypes = new[] { "audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4", "audio/aac", "audio/flac" };
+        var allowedDocumentMimeTypes = new[] { "text/plain", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf", "application/rtf", "application/vnd.oasis.opendocument.text" };
+
+        // Determine file type and validate accordingly
+        // Check by MIME type first, then by extension as fallback
+        bool isImage = allowedImageMimeTypes.Contains(contentType) || allowedImageExtensions.Contains(extension);
+        bool isVideo = allowedVideoMimeTypes.Contains(contentType) || allowedVideoExtensions.Contains(extension);
+        bool isAudio = allowedAudioMimeTypes.Contains(contentType) || allowedAudioExtensions.Contains(extension);
+        bool isDocument = allowedDocumentMimeTypes.Contains(contentType) || allowedDocumentExtensions.Contains(extension);
+
+        if (isImage)
+        {
+            if (file.Length > MaxImageSizeBytes)
+            {
+                return (false, $"Image file size exceeds maximum allowed size of {MaxImageSizeBytes / (1024 * 1024)}MB");
+            }
+        }
+        else if (isVideo)
+        {
+            if (file.Length > MaxVideoSizeBytes)
+            {
+                return (false, $"Video file size exceeds maximum allowed size of {MaxVideoSizeBytes / (1024 * 1024)}MB");
+            }
+        }
+        else if (isAudio)
+        {
+            if (file.Length > MaxAudioSizeBytes)
+            {
+                return (false, $"Audio file size exceeds maximum allowed size of {MaxAudioSizeBytes / (1024 * 1024)}MB");
+            }
+        }
+        else if (isDocument)
+        {
+            if (file.Length > MaxDocumentSizeBytes)
+            {
+                return (false, $"Document file size exceeds maximum allowed size of {MaxDocumentSizeBytes / (1024 * 1024)}MB");
+            }
+        }
+        else
+        {
+            var allAllowedExtensions = allowedImageExtensions.Concat(allowedVideoExtensions).Concat(allowedAudioExtensions).Concat(allowedDocumentExtensions);
+            var allAllowedMimeTypes = allowedImageMimeTypes.Concat(allowedVideoMimeTypes).Concat(allowedAudioMimeTypes).Concat(allowedDocumentMimeTypes);
+            
+            return (false, $"File type not allowed for chat. Allowed extensions: {string.Join(", ", allAllowedExtensions)}. Allowed MIME types: {string.Join(", ", allAllowedMimeTypes)}");
+        }
+
+        return (true, null);
+    }
+
     public async Task<bool> TestBucketExistsAsync()
     {
         try

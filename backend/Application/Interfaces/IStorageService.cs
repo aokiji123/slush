@@ -51,6 +51,13 @@ public interface IStorageService
     (bool IsValid, string? ErrorMessage) ValidateBannerFile(IFormFile file);
 
     /// <summary>
+    /// Validates if a file meets the requirements for chat media upload
+    /// </summary>
+    /// <param name="file">The file to validate</param>
+    /// <returns>Validation result with error message if invalid</returns>
+    (bool IsValid, string? ErrorMessage) ValidateChatMediaFile(IFormFile file);
+
+    /// <summary>
     /// Tests if the configured storage bucket exists and is accessible
     /// </summary>
     /// <returns>True if bucket exists and is accessible</returns>

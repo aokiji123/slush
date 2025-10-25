@@ -210,7 +210,8 @@
       "screenshots": "Скріншоти",
       "videos": "Відео",
       "guides": "Гайди",
-      "reviews": "Рецензії"
+      "reviews": "Рецензії",
+      "friends": "Друзі"
     },
     "searchPlaceholders": {
       "games": "Пошук ігор...",
@@ -219,7 +220,8 @@
       "screenshots": "Пошук скріншотів...",
       "videos": "Пошук відео...",
       "guides": "Пошук гайдів...",
-      "reviews": "Пошук рецензій..."
+      "reviews": "Пошук рецензій...",
+      "friends": "Пошук за нікнеймом..."
     },
     "categories": {
       "shared": "Спільні",
@@ -236,6 +238,23 @@
       "comment": "Коментувати",
       "filters": "Фільтри",
       "sorting": "Сортування"
+    }
+  },
+  "friends": {
+    "tabs": {
+      "all": "Усі друзі",
+      "online": "Онлайн"
+    },
+    "search": {
+      "placeholder": "Пошук за нікнеймом...",
+      "byGame": "Пошук за грою",
+      "selectGame": "Обрати гру"
+    },
+    "empty": {
+      "noFriends": "Немає друзів",
+      "noOnlineFriends": "Немає друзів онлайн",
+      "noFriendsMessage": "Цей користувач ще не має друзів",
+      "noOnlineFriendsMessage": "Наразі немає друзів онлайн"
     }
   }
 }

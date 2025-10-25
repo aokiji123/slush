@@ -210,7 +210,8 @@
       "screenshots": "Screenshots",
       "videos": "Videos",
       "guides": "Guides",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "friends": "Friends"
     },
     "searchPlaceholders": {
       "games": "Search games...",
@@ -219,7 +220,8 @@
       "screenshots": "Search screenshots...",
       "videos": "Search videos...",
       "guides": "Search guides...",
-      "reviews": "Search reviews..."
+      "reviews": "Search reviews...",
+      "friends": "Search by nickname..."
     },
     "categories": {
       "shared": "Shared",
@@ -237,5 +239,22 @@
       "filters": "Filters",
       "sorting": "Sort by"
     }
+  },
+  "friends": {
+    "tabs": {
+      "all": "All Friends",
+      "online": "Online"
+    },
+    "search": {
+      "placeholder": "Search by nickname...",
+      "byGame": "Search by game",
+      "selectGame": "Select game"
+    },
+      "empty": {
+        "noFriends": "No friends",
+        "noOnlineFriends": "No friends online",
+        "noFriendsMessage": "This user doesn't have any friends yet",
+        "noOnlineFriendsMessage": "No friends are currently online"
+      }
   }
 }

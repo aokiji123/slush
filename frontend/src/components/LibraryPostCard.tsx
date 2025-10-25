@@ -53,7 +53,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
   const getCoverImage = () => {
     if (post.media.length > 0) {
       const coverMedia = post.media.find((m) => m.isCover) || post.media[0]
-      return coverMedia.file
+      return coverMedia?.file || '/cyberpunk-image.png'
     }
     // Use game's main image as fallback for posts without media
     return post.gameMainImage || '/cyberpunk-image.png'
