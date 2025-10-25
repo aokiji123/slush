@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.Tasks;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Repositories;
@@ -23,6 +24,7 @@ using Infrastructure.Configuration;
 using API.Middleware;
 using API.Helpers;
 using API.Extensions;
+using API.Hubs;
 using DotNetEnv;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -71,6 +73,23 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = SecretsConfiguration.GetRequiredSecret("JWT_AUDIENCE", "JWT audience"),
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(SecretsConfiguration.GetRequiredSecret("JWT_KEY", "JWT signing key")))
+        };
+
+        // Configure JWT for SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/api/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -169,5 +188,8 @@ app.UseMiddleware<OnlineStatusMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Map SignalR hubs
+app.MapHub<ChatHub>("/api/hubs/chat");
 
 app.Run();

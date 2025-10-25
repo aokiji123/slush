@@ -294,21 +294,13 @@ public class FriendshipController : ControllerBase
     /// <summary>
     /// Get the user's friends list with friendship details
     /// </summary>
-    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <param name="id">User ID</param>
     /// <returns>List of friendship details including user IDs and creation dates</returns>
     /// <response code="200">Friends list retrieved successfully</response>
-    /// <response code="403">Access denied - can only view own friends list</response>
     [HttpGet("friends/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<IEnumerable<FriendshipDto>>>> GetFriends(Guid id)
     {
-        var userId = GetAuthenticatedUserId();
-        if (id != userId)
-        {
-            return Forbid();
-        }
-
         var friendships = await _friendshipService.GetFriendshipsAsync(id);
         var response = friendships.Select(f => new FriendshipDto
         {
@@ -345,21 +337,13 @@ public class FriendshipController : ControllerBase
     /// <summary>
     /// Get friends list with full user details (nickname, avatar, level, online status)
     /// </summary>
-    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <param name="id">User ID</param>
     /// <returns>List of friend details</returns>
     /// <response code="200">Friends with details retrieved successfully</response>
-    /// <response code="403">Access denied - can only view own friends</response>
     [HttpGet("friends/{id:guid}/details")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<IEnumerable<FriendDetailsDto>>>> GetFriendsWithDetails(Guid id)
     {
-        var userId = GetAuthenticatedUserId();
-        if (id != userId)
-        {
-            return Forbid();
-        }
-
         var friends = await _friendshipService.GetFriendsWithDetailsAsync(id);
         return Ok(new ApiResponse<IEnumerable<FriendDetailsDto>>(friends));
     }
@@ -461,21 +445,13 @@ public class FriendshipController : ControllerBase
     /// <summary>
     /// Get only online friends (filtered list)
     /// </summary>
-    /// <param name="id">User ID (must match authenticated user)</param>
+    /// <param name="id">User ID</param>
     /// <returns>List of online friend user IDs only</returns>
     /// <response code="200">Online friend IDs retrieved successfully</response>
-    /// <response code="403">Access denied - can only view own online friends</response>
     [HttpGet("online/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<IEnumerable<Guid>>>> GetOnlineFriends(Guid id)
     {
-        var userId = GetAuthenticatedUserId();
-        if (id != userId)
-        {
-            return Forbid();
-        }
-
         var onlineFriendIds = await _friendshipService.GetOnlineFriendIdsAsync(id);
         return Ok(new ApiResponse<IEnumerable<Guid>>(onlineFriendIds));
     }

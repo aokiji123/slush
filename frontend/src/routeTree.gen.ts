@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CodeAccessRouteImport } from './routes/code-access'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CartRouteImport } from './routes/cart'
@@ -82,6 +83,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const CodeAccessRoute = CodeAccessRouteImport.update({
   id: '/code-access',
   path: '/code-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/change-password': typeof ChangePasswordRoute
+  '/chat': typeof ChatRoute
   '/code-access': typeof CodeAccessRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/library': typeof LibraryRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/change-password'
+    | '/chat'
     | '/code-access'
     | '/forgot-password'
     | '/library'
@@ -510,6 +522,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
+  ChatRoute: typeof ChatRoute
   CodeAccessRoute: typeof CodeAccessRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LibraryRoute: typeof LibraryRoute
@@ -570,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/code-access'
       fullPath: '/code-access'
       preLoaderRoute: typeof CodeAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/change-password': {
@@ -901,6 +921,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   ChangePasswordRoute: ChangePasswordRoute,
+  ChatRoute: ChatRoute,
   CodeAccessRoute: CodeAccessRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LibraryRoute: LibraryRoute,

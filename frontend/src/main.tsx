@@ -15,6 +15,9 @@ import './lib/i18n'
 // Import ErrorBoundary
 import { ErrorBoundary } from './components/ErrorBoundary'
 
+// Import SignalR Provider
+import { SignalRProvider } from './providers/SignalRProvider'
+
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
@@ -44,7 +47,9 @@ if (rootElement && !rootElement.innerHTML) {
       <ErrorBoundary>
         <Suspense fallback={<div>Loading...</div>}>
           <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
+            <SignalRProvider>
+              <RouterProvider router={router} />
+            </SignalRProvider>
           </QueryClientProvider>
         </Suspense>
       </ErrorBoundary>

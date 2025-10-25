@@ -97,6 +97,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReviewLikeRepository, ReviewLikeRepository>();
         services.AddScoped<IProfileCommentRepository, ProfileCommentRepository>();
         services.AddScoped<IBadgeRepository, BadgeRepository>();
+        services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
 
         // Register application services
         services.AddScoped<IAuthService, AuthService>();
@@ -115,6 +116,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWishlistService, WishlistService>();
         services.AddScoped<IProfileCommentService, ProfileCommentService>();
         services.AddScoped<IBadgeService, BadgeService>();
+        services.AddScoped<IChatService, ChatService>();
 
         return services;
     }
@@ -134,6 +136,12 @@ public static class ServiceCollectionExtensions
 
         // Add HttpClient
         services.AddHttpClient();
+
+        // Add SignalR
+        services.AddSignalR();
+
+        // Register chat services
+        services.AddSingleton<ConnectionMappingService>();
 
         return services;
     }
