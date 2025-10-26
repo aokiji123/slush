@@ -53,7 +53,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
   const getCoverImage = () => {
     if (post.media.length > 0) {
       const coverMedia = post.media.find((m) => m.isCover) || post.media[0]
-      return coverMedia?.file || '/cyberpunk-image.png'
+      return coverMedia.file || '/cyberpunk-image.png'
     }
     // Use game's main image as fallback for posts without media
     return post.gameMainImage || '/cyberpunk-image.png'
@@ -105,12 +105,18 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
                 preload="metadata"
                 controls
                 controlsList="nodownload"
+                crossOrigin="anonymous"
+                playsInline
                 onEnded={handleVideoEnded}
                 onLoadedMetadata={() => {
                   // Force video to load metadata for preview thumbnails
                   if (videoRef.current) {
                     videoRef.current.currentTime = 0.1
                   }
+                }}
+                onError={(e) => {
+                  console.error('Video load error:', e)
+                  // If video fails to load, show poster image as fallback
                 }}
               />
             ) : (

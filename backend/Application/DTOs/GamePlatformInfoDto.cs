@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Application.DTOs;
 
 public class GamePlatformInfoDto

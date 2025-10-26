@@ -13,6 +13,7 @@ import {
   FaXbox,
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { Search } from '@/components'
 import { ComplaintIcon, FavoriteIcon, FavoriteFilledIcon, RepostIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
@@ -137,11 +138,11 @@ function RouteComponent() {
       }
       
       // Show success message and navigate to library
-      alert('Purchase successful! The game has been added to your library.')
+      toast.success('Purchase successful! The game has been added to your library.')
       navigate({ to: '/library' })
     } catch (error) {
       console.error('Purchase failed:', error)
-      alert(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

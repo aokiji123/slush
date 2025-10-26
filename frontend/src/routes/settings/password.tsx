@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { useAuthenticatedUser, useResetPassword } from '@/api/queries/useUser'
 
 export const Route = createFileRoute('/settings/password')({
@@ -18,7 +19,6 @@ function RouteComponent() {
     confirmPassword: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const validatePassword = (password: string) => {
     const errors = []
@@ -73,10 +73,10 @@ function RouteComponent() {
         newPasswordConfirmed: formData.confirmPassword,
       })
       
-      setMessage({ type: 'success', text: t('password.successMessage') })
+      toast.success(t('password.successMessage'))
       setFormData({ oldPassword: '', newPassword: '', confirmPassword: '' })
     } catch (error) {
-      setMessage({ type: 'error', text: t('password.errorMessage') })
+      toast.error(t('password.errorMessage'))
     }
   }
 
@@ -113,17 +113,6 @@ function RouteComponent() {
           {t('password.title')}
         </p>
         
-        {/* Message Display */}
-        {message && (
-          <div className={`p-4 rounded-lg ${
-            message.type === 'success' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
-          }`}>
-            {message.text}
-          </div>
-        )}
-
         <div className="bg-[var(--color-background-17)] rounded-[16px] py-[12px] px-[24px]">
           <ul className="flex flex-col gap-[4px] list-disc list-inside">
             <li>{t('password.requirements.noRecentPasswords')}</li>

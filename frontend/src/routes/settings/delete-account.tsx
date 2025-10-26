@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { useAuthenticatedUser, useDeleteAccount } from '@/api/queries/useUser'
 
 export const Route = createFileRoute('/settings/delete-account')({
@@ -18,7 +19,6 @@ function RouteComponent() {
     confirmPassword: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -76,7 +76,7 @@ function RouteComponent() {
       sessionStorage.clear()
       window.location.href = '/'
     } catch (error) {
-      setMessage({ type: 'error', text: t('deleteAccount.errorMessage') })
+      toast.error(t('deleteAccount.errorMessage'))
       setShowConfirmation(false)
     }
   }
@@ -109,17 +109,6 @@ function RouteComponent() {
         <p className="text-[24px] font-bold text-center font-manrope">
           {t('deleteAccount.title')}
         </p>
-
-        {/* Message Display */}
-        {message && (
-          <div className={`p-4 rounded-lg ${
-            message.type === 'success' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
-          }`}>
-            {message.text}
-          </div>
-        )}
 
         <div className="p-[12px] bg-[#FF6F952E] rounded-[16px]">
           <p>

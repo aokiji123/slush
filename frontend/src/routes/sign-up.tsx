@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { CustomCheckbox } from '../components'
 import { useRegister } from '@/api/queries/useAuth'
 
@@ -64,9 +65,9 @@ function RouteComponent() {
 
       navigate({ to: '/' })
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || t('signUp.errors.registrationError'),
-      )
+      const errorMessage = err?.response?.data?.message || t('signUp.errors.registrationError')
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 

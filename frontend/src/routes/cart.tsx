@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { MdClose } from 'react-icons/md'
+import { useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { Search } from '@/components/Search'
 import { useCartStore } from '@/lib/cartStore'
-import { useAddToWishlist, useWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import { useAddToWishlist } from '@/api/queries/useWishlist'
 import { usePurchaseGame } from '@/api/queries/usePurchase'
 import { useWalletBalance } from '@/api/queries/useWallet'
 
@@ -42,8 +44,10 @@ function RouteComponent() {
   const addToWishlistMutation = useAddToWishlist()
   const purchaseGameMutation = usePurchaseGame()
   const { data: walletBalance } = useWalletBalance()
-  const { data: wishlistData } = useWishlist()
-  const removeFromWishlistMutation = useRemoveFromWishlist()
+  
+  // Bug #6: Add loading state
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [currentItemIndex, setCurrentItemIndex] = useState(0)
 
   const handleMoveToWishlist = (gameId: string) => {
     addToWishlistMutation.mutate(
@@ -62,7 +66,7 @@ function RouteComponent() {
 
   const handleCheckout = async () => {
     if (!walletBalance) {
-      alert('Unable to load wallet balance. Please try again.')
+      toast.error('Unable to load wallet balance. Please try again.')
       return
     }
 
@@ -70,41 +74,83 @@ function RouteComponent() {
     
     // Check if user has sufficient balance
     if (walletBalance.amount < totalPrice) {
-      alert(`Insufficient funds. You need ${(totalPrice - walletBalance.amount).toFixed(2)}₴ more.`)
+      toast.error(`Insufficient funds. You need ${(totalPrice - walletBalance.amount).toFixed(2)}₴ more.`)
       return
     }
 
+    setIsCheckingOut(true)
+    
     try {
       // Purchase each game in the cart
-      for (const item of items) {
-        const result = await purchaseGameMutation.mutateAsync({ 
-          gameId: item.game.id,
-          title: `Purchase: ${item.game.name}`
-        })
+      const purchased: typeof items = []
+      let failedAtIndex = -1
+      
+      try {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i]
+          setCurrentItemIndex(i)
+          
+          const result = await purchaseGameMutation.mutateAsync({ 
+            gameId: item.game.id,
+            title: `Purchase: ${item.game.name}`
+          })
+          
+          // Check if purchase was successful
+          if (!result.success) {
+            failedAtIndex = i
+            throw new Error(result.message || 'Purchase failed')
+          }
+          
+          purchased.push(item)
+        }
         
-        // Check if purchase was successful
-        if (!result.success) {
-          throw new Error(result.message || 'Purchase failed')
+        // Clear cart only after ALL purchases succeed
+        clearCart()
+        
+        // Show success message and redirect
+        toast.success('Purchase successful! Your games have been added to your library.')
+        setTimeout(() => {
+          navigate({ to: '/library' })
+        }, 1500)
+      } catch (error) {
+        // Bug #2: Handle partial checkout failure
+        if (purchased.length > 0) {
+          // Some purchases succeeded before failure
+          console.error('Partial checkout success:', {
+            totalItems: items.length,
+            successful: purchased.length,
+            failedAt: failedAtIndex + 1,
+            successfulItems: purchased.map(p => p.game.name),
+            error
+          })
+          
+          // Don't clear cart - user keeps the games they already purchased
+          // Show informative error message
+          toast.error(
+            `Purchase partially completed. ${purchased.length} of ${items.length} games purchased. ` +
+            `The ${items.length - purchased.length} remaining games are still in your cart.`,
+            { duration: 8000 }
+          )
+          
+          // Remove successfully purchased games from cart
+          purchased.forEach(item => removeFromCart(item.game.id))
+          
+          // Show which games were successfully purchased
+          if (purchased.length > 0) {
+            toast.success(`${purchased.length} game(s) added to your library!`, { duration: 5000 })
+          }
+        } else {
+          // No purchases succeeded
+          console.error('Checkout failed:', error)
+          toast.error(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
       }
-      
-      // Remove purchased games from wishlist if they were in wishlist
-      for (const item of items) {
-        const isInWishlist = wishlistData?.data?.some(wishlistGame => wishlistGame.id === item.game.id)
-        if (isInWishlist) {
-          await removeFromWishlistMutation.mutateAsync({ gameId: item.game.id })
-        }
-      }
-      
-      // Clear cart after successful purchase
-      clearCart()
-      
-      // Show success message and redirect
-      alert('Purchase successful! Your games have been added to your library.')
-      navigate({ to: '/library' })
     } catch (error) {
-      console.error('Checkout failed:', error)
-      alert(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Unexpected checkout error:', error)
+      toast.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsCheckingOut(false)
+      setCurrentItemIndex(0)
     }
   }
 
@@ -252,17 +298,19 @@ function RouteComponent() {
                 <div className="flex flex-col gap-[12px] w-full">
                   <button 
                     onClick={handleCheckout}
-                    disabled={hasInsufficientFunds || purchaseGameMutation.isPending || !walletBalance}
+                    disabled={hasInsufficientFunds || isCheckingOut || !walletBalance}
                     className={`h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[20px] font-medium transition-colors ${
                       hasInsufficientFunds || !walletBalance
                         ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                        : purchaseGameMutation.isPending
+                        : isCheckingOut
                         ? 'bg-yellow-600 text-white cursor-wait'
                         : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
                     }`}
                   >
-                    {purchaseGameMutation.isPending 
-                      ? 'Processing...' 
+                    {isCheckingOut 
+                      ? items.length > 1 
+                        ? `Processing ${currentItemIndex + 1} of ${items.length}...`
+                        : 'Processing...'
                       : hasInsufficientFunds 
                       ? 'Insufficient Funds' 
                       : t('cart.proceedToCheckout')

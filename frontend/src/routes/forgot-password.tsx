@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { useForgotPassword } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/forgot-password')({
@@ -38,10 +39,9 @@ function RouteComponent() {
         search: { email } as any,
       })
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          t('forgotPassword.errors.sendError'),
-      )
+      const errorMessage = err?.response?.data?.message || t('forgotPassword.errors.sendError')
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 
