@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Domain.Extensions;
 
 namespace Domain.Entities;
@@ -108,7 +109,30 @@ public class Game
 
     public List<Review> Reviews { get; set; } = new();
 
-    public GameCharacteristic? GameCharacteristic { get; set; }
+    public List<GameCharacteristic> GameCharacteristics { get; set; } = new();
+    
+    // Backward compatibility property
+    [NotMapped]
+    public GameCharacteristic? GameCharacteristic
+    {
+        get => GameCharacteristics.FirstOrDefault();
+        set
+        {
+            if (value != null)
+            {
+                if (GameCharacteristics.Count == 0)
+                {
+                    GameCharacteristics.Add(value);
+                }
+                else
+                {
+                    GameCharacteristics[0] = value;
+                }
+            }
+        }
+    }
+    
+    public List<GameConsoleFeature> ConsoleFeatures { get; set; } = new();
 
     // Helper methods for getting localized data
     public string GetLocalizedName(string language = "uk")

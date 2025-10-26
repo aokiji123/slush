@@ -8,7 +8,8 @@ namespace Domain.Entities;
 public class GameCharacteristic
 {
     [Key]
-    [ForeignKey(nameof(Game))]
+    public Guid Id { get; set; } = Guid.NewGuid();
+    
     public Guid GameId { get; set; }
 
     [MaxLength(100)]
@@ -65,6 +66,10 @@ public class GameCharacteristic
     public List<string>? LangAudio { get; set; }
 
     public List<string>? LangText { get; set; }
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Game? Game { get; set; }
 }

@@ -17,4 +17,20 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      // Proxy API calls to backend (including SignalR hubs)
+      '/api': {
+        target: 'http://localhost:5088',
+        changeOrigin: true,
+        secure: false,
+        ws: true, // Enable WebSocket support for SignalR
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.log('Proxy error:', err)
+          })
+        },
+      },
+    },
+  },
 })

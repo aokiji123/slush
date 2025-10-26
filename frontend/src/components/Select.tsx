@@ -27,6 +27,12 @@ export function Select({
   )
   const selectRef = useRef<HTMLDivElement>(null)
 
+  // Update selected option when value prop changes
+  useEffect(() => {
+    const matchingOption = options.find((opt) => opt.value === value) || null
+    setSelectedOption(matchingOption)
+  }, [value, options])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

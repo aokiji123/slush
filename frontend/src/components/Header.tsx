@@ -31,7 +31,7 @@ export const Header = () => {
       href: '/library',
     },
     {
-      name: 'Чат',
+      name: t('header.chat'),
       href: '/chat',
     },
   ], [t])

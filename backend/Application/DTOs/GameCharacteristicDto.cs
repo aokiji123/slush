@@ -5,6 +5,7 @@ namespace Application.DTOs;
 
 public class GameCharacteristicDto
 {
+    public Guid Id { get; set; }
     public Guid GameId { get; set; }
     public string Platform { get; set; } = string.Empty;
     public string MinVersion { get; set; } = string.Empty;

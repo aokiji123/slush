@@ -16,7 +16,16 @@
     "additional": "Additional",
     "languageSupport": "Language Support",
     "audio": "Audio",
-    "text": "Text"
+    "text": "Text",
+    "noDataForPlatform": "No characteristics available for this platform.",
+    "consoleFeatures": "Console Features",
+    "resolution": "Resolution",
+    "frameRate": "Frame Rate",
+    "performanceModes": "Performance Modes",
+    "hdrSupport": "HDR Support",
+    "rayTracing": "Ray Tracing",
+    "controllerFeatures": "Controller Features",
+    "onlineRequired": "Online Play Required"
   },
   "bundles": {
     "title": "Bundles",
@@ -33,7 +42,10 @@
     "addToCart": "Add to Cart",
     "otherDlc": "Other DLC",
     "allDlc": "All DLC",
-    "addAllDlcToCart": "Add all DLC to cart"
+    "addAllDlcToCart": "Add all DLC to cart",
+    "badge": "DLC",
+    "baseGame": "Base Game",
+    "requiresBaseGame": "Requires base game"
   },
   "actions": {
     "addToCart": "Add to Cart",

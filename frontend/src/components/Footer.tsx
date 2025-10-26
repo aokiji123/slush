@@ -10,15 +10,15 @@ export const Footer = () => {
   const tabs = [
     {
       name: t('footer.termsOfUse'),
-      href: '/',
+      href: '/terms-of-use',
     },
     {
       name: t('footer.privacyPolicy'),
-      href: '/',
+      href: '/privacy-policy',
     },
     {
       name: t('footer.refundPolicy'),
-      href: '/',
+      href: '/store-refund-policy',
     },
   ]
 
@@ -45,7 +45,10 @@ export const Footer = () => {
           <div className="flex items-center gap-[32px] mt-[16px]">
             {tabs.map((tab) => (
               <p key={tab.name} className="text-white text-[16px] font-normal">
-                <a href={tab.href}>{tab.name}</a>
+                <a href={tab.href} onClick={(e) => {
+                  e.preventDefault()
+                  navigate({ to: tab.href })
+                }}>{tab.name}</a>
               </p>
             ))}
           </div>

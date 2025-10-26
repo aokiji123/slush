@@ -207,9 +207,16 @@ function RouteComponent() {
           ) : (
             <div className="w-full flex gap-[24px]">
               <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
-                <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
-                  {game.data.name}
-                </p>
+                <div className="flex items-center gap-[16px]">
+                  {game.data.isDlc && (
+                    <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[16px] font-bold">
+                      {t('dlc.badge')}
+                    </div>
+                  )}
+                  <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                    {game.data.name}
+                  </p>
+                </div>
                 <Outlet />
               </div>
 
@@ -237,12 +244,14 @@ function RouteComponent() {
                 </div>
 
                 <div className="flex flex-col gap-[20px]">
-                  <img
-                    src={game.data.mainImage}
-                    alt={game.data.name}
-                    className="w-full h-[145px] rounded-[20px] object-cover"
-                    loading="lazy"
-                  />
+                  {game.data.mainImage && (
+                    <img
+                      src={game.data.mainImage}
+                      alt={game.data.name}
+                      className="w-full h-[145px] rounded-[20px] object-cover"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="flex items-center gap-[8px]">
                     {game.data.salePrice && game.data.salePrice > 0 ? (
                       <>
@@ -360,18 +369,43 @@ function RouteComponent() {
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">{t('sidebar.platforms')}</p>
                       <div className="flex items-center gap-[12px]">
-                        {game.data.platforms.some(p => p.toLowerCase() === 'windows') && (
-                          <FaWindows size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'apple') && (
-                          <FaApple size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'playstation') && (
-                          <FaPlaystation size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'xbox') && (
-                          <FaXbox size={24} />
-                        )}
+                        {(() => {
+                          const platforms = game.data.platforms
+                          const hasPlatforms = Array.isArray(platforms) && platforms.length > 0
+                          
+                          if (!hasPlatforms) {
+                            return <p className="text-[14px] text-[var(--color-background-25)]">N/A</p>
+                          }
+                          
+                          return (
+                            <>
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'windows' || lower === 'pc' || lower.includes('windows')
+                              }) && (
+                                <FaWindows size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'apple' || lower === 'mac' || lower === 'macos' || lower.includes('mac')
+                              }) && (
+                                <FaApple size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'playstation' || lower === 'ps' || lower.includes('ps') || lower.includes('playstation')
+                              }) && (
+                                <FaPlaystation size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'xbox' || lower.includes('xbox')
+                              }) && (
+                                <FaXbox size={24} />
+                              )}
+                            </>
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>

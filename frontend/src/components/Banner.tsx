@@ -3,8 +3,10 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Autoplay, EffectFade, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
+import { useTranslation } from 'react-i18next'
 import { Search } from './Search'
 import { useNewGames } from '@/api/queries/useGame'
+import { useGenreTranslation } from '@/utils/translateGenre'
 import type { GameData } from '@/api/types/game'
 
 // @ts-expect-error - Swiper CSS imports are valid
@@ -17,7 +19,9 @@ import 'swiper/css/effect-fade'
 import 'swiper/css/pagination'
 
 export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
+  const { t } = useTranslation('store')
   const { data: newGames } = useNewGames()
+  const translateGenre = useGenreTranslation()
   const swiperRef = useRef<SwiperType | null>(null)
 
   const games = newGames?.data || []
@@ -25,11 +29,6 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
     .filter((game: GameData) => game.name && !game.isDlc)
     .slice(0, 10)
 
-  console.log('Display games count:', displayGames.length)
-  console.log(
-    'Games:',
-    displayGames.map((g) => ({ name: g.name, image: g.mainImage })),
-  )
 
   const formatPrice = (price: number) => {
     return `${price.toFixed(2)}₴`
@@ -58,7 +57,7 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
           <Search className="md:px-0 px-[4px] absolute top-[16px] left-1/2 -translate-x-1/2 z-[3]" />
           <div className="flex flex-col items-left absolute bottom-[32px] left-1/2 -translate-x-1/2 max-w-[1460px] w-full z-[3] text-white">
             <p className="text-[20px] font-light opacity-60">
-              Завантажуваний контент для
+              {t('home.dlcFor')}
             </p>
             <p className="text-[32px] font-bold font-manrope">Cyberpunk 2077</p>
           </div>
@@ -152,12 +151,12 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
                     )}
                     {game.price === 0 && (
                       <p className="text-[32px] text-white font-bold font-manrope">
-                        Free to Play
+                        {t('home.freeToPlay')}
                       </p>
                     )}
                     {game.saleDate && game.discountPercent > 0 && (
                       <p className="text-[16px] text-[var(--color-background-25)] font-normal text-left md:text-center">
-                        Знижка діє до {formatDate(game.saleDate)}
+                        {t('home.discountValidUntil')} {formatDate(game.saleDate)}
                       </p>
                     )}
                   </div>
@@ -165,9 +164,23 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
                     <p className="md:block hidden text-[24px] text-white font-bold font-manrope">
                       {game.name}
                     </p>
-                    <p className="md:block hidden text-[16px] text-white font-normal">
-                      {game.description}
-                    </p>
+                    {game.description && game.description !== 'Action RPG' && (
+                      <p className="md:block hidden text-[16px] text-white font-normal line-clamp-2">
+                        {game.description}
+                      </p>
+                    )}
+                    {game.genre.length > 0 && (
+                      <div className="md:flex hidden items-center gap-[8px] flex-wrap justify-end">
+                        {game.genre.slice(0, 3).map((genre) => (
+                          <span
+                            key={genre}
+                            className="text-[12px] rounded-[20px] py-[2px] px-[8px] font-medium text-white bg-[rgba(255,255,255,0.2)]"
+                          >
+                            {translateGenre(genre)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

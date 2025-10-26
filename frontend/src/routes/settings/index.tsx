@@ -12,7 +12,7 @@ export const Route = createFileRoute('/settings/')({
 })
 
 function RouteComponent() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { data: user, isLoading: userLoading } = useAuthenticatedUser()
   const updateUserMutation = useUpdateUser()
   const uploadAvatarMutation = useUploadAvatar()
@@ -54,16 +54,22 @@ function RouteComponent() {
   // Initialize form data when user data loads
   useEffect(() => {
     if (user) {
+      // Use i18n.language as the source of truth (from localStorage),
+      // but fallback to user.lang if i18n.language is not set
+      const currentLang = i18n.language && ['uk', 'en'].includes(i18n.language) 
+        ? i18n.language 
+        : mapBackendLanguageCode(user.lang || 'UA')
+      
       const userData = {
         nickname: user.nickname || '',
         email: user.email || '',
         bio: user.bio || '',
-        lang: mapBackendLanguageCode(user.lang || 'UA'),
+        lang: currentLang,
       }
       setFormData(userData)
       setOriginalData(userData)
     }
-  }, [user])
+  }, [user, i18n.language])
 
   // Check if form is dirty
   useEffect(() => {
@@ -76,8 +82,30 @@ function RouteComponent() {
   }
 
   const handleLanguageChange = async (value: string) => {
+    if (!user) return
+    
     try {
+      // Update i18n language
       await changeLanguage(value)
+      
+      // Update form data to keep Select in sync
+      setFormData(prev => ({ ...prev, lang: value }))
+      // Also update originalData to keep form state clean
+      setOriginalData(prev => ({ ...prev, lang: value }))
+      
+      // Also update backend directly with full user data
+      const updateRequest: UserUpdateRequest = {
+        id: user.id,
+        nickname: user.nickname || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        lang: mapLanguageCode(value),
+        avatar: user.avatar,
+        banner: user.banner,
+      }
+      
+      await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
+      
       setMessage({ type: 'success', text: t('general.success') })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
@@ -169,11 +197,6 @@ function RouteComponent() {
         avatar: user.avatar,
         banner: user.banner,
       }
-
-      // Debug: Log the request data
-      console.log('Sending update request:', updateRequest)
-      console.log('Form data:', formData)
-      console.log('Mapped language:', mapLanguageCode(formData.lang))
 
       await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
       setOriginalData(formData)

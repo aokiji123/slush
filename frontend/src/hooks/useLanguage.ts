@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuthState } from '@/api/queries/useAuth'
 import { useUpdateUser } from '@/api/queries/useUser'
 
 export const useLanguage = () => {
   const { i18n } = useTranslation()
+  const queryClient = useQueryClient()
   const { user, isAuth } = useAuthState()
   const updateUserMutation = useUpdateUser()
 
@@ -20,6 +22,26 @@ export const useLanguage = () => {
         
         // Save to localStorage for all users
         localStorage.setItem('i18nextLng', newLanguage)
+        
+        // Invalidate and refetch all game queries to force refetch with new language
+        await queryClient.invalidateQueries({ predicate: (query) => 
+          query.queryKey[0] === 'newGames' || 
+          query.queryKey[0] === 'discountedGames' ||
+          query.queryKey[0] === 'recommendedGames' ||
+          query.queryKey[0] === 'gamesWithPriceLessThan' ||
+          query.queryKey[0] === 'hitsGames' ||
+          query.queryKey[0] === 'freeGames'
+        })
+        
+        // Now refetch queries with new language
+        await queryClient.refetchQueries({ predicate: (query) => 
+          query.queryKey[0] === 'newGames' || 
+          query.queryKey[0] === 'discountedGames' ||
+          query.queryKey[0] === 'recommendedGames' ||
+          query.queryKey[0] === 'gamesWithPriceLessThan' ||
+          query.queryKey[0] === 'hitsGames' ||
+          query.queryKey[0] === 'freeGames'
+        })
         
         // If user is authenticated, update their profile
         if (isAuth && user && 'id' in user && typeof user.id === 'string') {
@@ -59,7 +81,7 @@ export const useLanguage = () => {
         throw error
       }
     },
-    [i18n, isAuth, user, updateUserMutation]
+    [i18n, isAuth, user, updateUserMutation, queryClient]
   )
 
   // Load user's preferred language on auth state change

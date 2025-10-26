@@ -10,10 +10,10 @@ public class GameConfiguration : IEntityTypeConfiguration<Game>
     {
         builder.HasKey(g => g.Id);
 
-        // Configure one-to-one relationship with GameCharacteristic
-        builder.HasOne(g => g.GameCharacteristic)
+        // Configure one-to-many relationship with GameCharacteristic
+        builder.HasMany(g => g.GameCharacteristics)
             .WithOne(gc => gc.Game)
-            .HasForeignKey<GameCharacteristic>(gc => gc.GameId)
+            .HasForeignKey(gc => gc.GameId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure composite index for DLC filtering

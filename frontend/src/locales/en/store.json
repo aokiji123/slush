@@ -8,7 +8,10 @@
     "freeGames": "Free Games",
     "onSale": "Special Offers",
     "under100": "Under 100₴",
-    "comingSoon": "Coming Soon"
+    "comingSoon": "Coming Soon",
+    "freeToPlay": "Free to Play",
+    "discountValidUntil": "Discount valid until",
+    "dlcFor": "Downloadable content for"
   },
   "catalog": {
     "title": "Game Catalog",

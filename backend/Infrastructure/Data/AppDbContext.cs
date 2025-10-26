@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameCharacteristic> GameCharacteristics { get; set; }
+    public DbSet<GameConsoleFeature> GameConsoleFeatures { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<Library> Libraries { get; set; }

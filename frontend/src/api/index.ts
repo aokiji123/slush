@@ -6,8 +6,14 @@ const headers: Record<string, string> = {
   Accept: 'application/json',
 }
 
+// In development, use relative paths thanks to Vite proxy
+// In production, use the configured API URL
+const baseURL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_DOTNET_API_URL || '/api')
+  : '/api'
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_DOTNET_API_URL,
+  baseURL,
   headers,
   withCredentials: true,
 })

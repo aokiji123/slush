@@ -5,6 +5,7 @@ import type {
   CreateReviewRequest,
   Game,
   GameCharacteristics,
+  GamePlatformInfo,
   GamesListResponse,
   PagedGamesResponse,
   Review,
@@ -92,6 +93,16 @@ async function getGameCharacteristics(
   return data
 }
 
+async function getGamePlatformInfo(identifier: string): Promise<GamePlatformInfo> {
+  const { data } = await axiosInstance.get(`/game/${identifier}/platforms`)
+  return data
+}
+
+async function getBaseGame(gameId: string): Promise<Game> {
+  const { data } = await axiosInstance.get(`/game/${gameId}/base-game`)
+  return data
+}
+
 async function getAllGames(): Promise<GamesListResponse> {
   const { data } = await axiosInstance.get('/game/all')
   return data
@@ -160,18 +171,20 @@ async function searchGames(
 }
 
 export function useNewGames() {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['newGames'],
+    queryKey: ['newGames', i18n.language],
     queryFn: () => getNewGames(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // Make data stale immediately to allow refetch on language change
     retry: 3,
     refetchOnWindowFocus: false,
   })
 }
 
 export function useDiscountedGames() {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['discountedGames'],
+    queryKey: ['discountedGames', i18n.language],
     queryFn: () => getDiscountedGames(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -180,8 +193,9 @@ export function useDiscountedGames() {
 }
 
 export function useRecommendedGames() {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['recommendedGames'],
+    queryKey: ['recommendedGames', i18n.language],
     queryFn: () => getRecommendedGames(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -201,8 +215,9 @@ export function useGameById(id: string) {
 }
 
 export function useGamesWithPriceLessThan(price: number) {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['gamesWithPriceLessThan', price],
+    queryKey: ['gamesWithPriceLessThan', price, i18n.language],
     queryFn: () => getGamesWithPriceLessThan(price),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -211,8 +226,9 @@ export function useGamesWithPriceLessThan(price: number) {
 }
 
 export function useHitsGames() {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['hitsGames'],
+    queryKey: ['hitsGames', i18n.language],
     queryFn: () => getHitsGames(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -221,8 +237,9 @@ export function useHitsGames() {
 }
 
 export function useFreeGames() {
+  const { i18n } = useTranslation()
   return useQuery({
-    queryKey: ['freeGames'],
+    queryKey: ['freeGames', i18n.language],
     queryFn: () => getFreeGames(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
@@ -254,6 +271,28 @@ export function useGameCharacteristics(id: string) {
   return useQuery({
     queryKey: ['gameCharacteristics', id],
     queryFn: () => getGameCharacteristics(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useGamePlatformInfo(identifier: string) {
+  return useQuery({
+    queryKey: ['gamePlatformInfo', identifier],
+    queryFn: () => getGamePlatformInfo(identifier),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useBaseGame(gameId: string | null | undefined) {
+  const { i18n } = useTranslation()
+  return useQuery({
+    queryKey: ['baseGame', gameId, i18n.language],
+    queryFn: () => getBaseGame(gameId!),
+    enabled: !!gameId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,

@@ -12,6 +12,7 @@ import enGame from '../locales/en/game.json'
 import enCart from '../locales/en/cart.json'
 import enErrors from '../locales/en/errors.json'
 import enChat from '../locales/en/chat.json'
+import enPolicy from '../locales/en/policy.json'
 
 import ukCommon from '../locales/uk/common.json'
 import ukAuth from '../locales/uk/auth.json'
@@ -22,6 +23,7 @@ import ukGame from '../locales/uk/game.json'
 import ukCart from '../locales/uk/cart.json'
 import ukErrors from '../locales/uk/errors.json'
 import ukChat from '../locales/uk/chat.json'
+import ukPolicy from '../locales/uk/policy.json'
 
 const resources = {
   en: {
@@ -34,6 +36,7 @@ const resources = {
     cart: enCart,
     errors: enErrors,
     chat: enChat,
+    policy: enPolicy,
   },
   uk: {
     common: ukCommon,
@@ -45,6 +48,7 @@ const resources = {
     cart: ukCart,
     errors: ukErrors,
     chat: ukChat,
+    policy: ukPolicy,
   },
 }
 
@@ -72,7 +76,7 @@ i18n
     
     // Namespace configuration
     defaultNS: 'common',
-    ns: ['common', 'auth', 'settings', 'store', 'library', 'game', 'cart', 'errors', 'chat'],
+    ns: ['common', 'auth', 'settings', 'store', 'library', 'game', 'cart', 'errors', 'chat', 'policy'],
     
     // Enable namespace fallback
     fallbackNS: 'common',
