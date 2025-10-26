@@ -48,7 +48,7 @@ const glowCoords = [
 ]
 
 function RouteComponent() {
-  const { t } = useTranslation('cart')
+  const { t } = useTranslation('library')
   const navigate = useNavigate()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
@@ -111,7 +111,7 @@ function RouteComponent() {
             className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
           >
             {!isSidebarCollapsed && (
-              <h2 className="text-[20px] font-bold">{t('library.allGames')}</h2>
+              <h2 className="text-[20px] font-bold">{t('filters.all')}</h2>
             )}
             <button
               type="button"
@@ -126,16 +126,16 @@ function RouteComponent() {
             <div className="flex flex-col gap-[20px]">
               {isLoading ? (
                 <div className="text-center py-4">
-                  <p className="text-[var(--color-background-25)]">Loading...</p>
+                  <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
                 </div>
               ) : isError ? (
                 <div className="text-center py-4">
-                  <p className="text-red-400">Error loading games</p>
+                  <p className="text-red-400">{t('games.errorLoading')}</p>
                 </div>
               ) : filteredGames.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-[var(--color-background-25)]">
-                    {searchText ? 'No games found' : 'No games in library'}
+                    {searchText ? t('search.noResults') : t('empty.noGamesInLibrary')}
                   </p>
                 </div>
               ) : (
@@ -176,7 +176,7 @@ function RouteComponent() {
           />
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
-            <h3 className="text-[24px] font-bold text-white">{t('library.news')}</h3>
+            <h3 className="text-[24px] font-bold text-white">{t('empty.news')}</h3>
 
             <div className="relative">
               <Swiper
@@ -191,13 +191,13 @@ function RouteComponent() {
                 {newsLoading ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[450px]">
-                      <p className="text-[var(--color-background-25)]">Loading news...</p>
+                      <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
                     </div>
                   </SwiperSlide>
                 ) : newsError ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[450px]">
-                      <p className="text-red-400">Error loading news</p>
+                      <p className="text-red-400">{t('common.error')}</p>
                     </div>
                   </SwiperSlide>
                 ) : newsPosts && newsPosts.length > 0 ? (
@@ -212,7 +212,7 @@ function RouteComponent() {
                 ) : (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[450px]">
-                      <p className="text-[var(--color-background-25)]">No news posts found</p>
+                      <p className="text-[var(--color-background-25)]">{t('empty.noNewsPosts')}</p>
                     </div>
                   </SwiperSlide>
                 )}
@@ -234,7 +234,7 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
             <h3 className="text-[24px] font-bold text-white">
-              {t('library.communityHighlights')}
+              {t('empty.communityPicks')}
             </h3>
 
             <div className="relative">
@@ -250,13 +250,13 @@ function RouteComponent() {
                 {communityLoading ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[400px]">
-                      <p className="text-[var(--color-background-25)]">Loading community highlights...</p>
+                      <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
                     </div>
                   </SwiperSlide>
                 ) : communityError ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[400px]">
-                      <p className="text-red-400">Error loading community highlights</p>
+                      <p className="text-red-400">{t('common.error')}</p>
                     </div>
                   </SwiperSlide>
                 ) : filteredCommunityPosts && filteredCommunityPosts.length > 0 ? (
@@ -271,7 +271,7 @@ function RouteComponent() {
                 ) : (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[400px]">
-                      <p className="text-[var(--color-background-25)]">No community highlights found</p>
+                      <p className="text-[var(--color-background-25)]">{t('empty.noCommunityHighlights')}</p>
                     </div>
                   </SwiperSlide>
                 )}
@@ -294,13 +294,13 @@ function RouteComponent() {
           <div className="flex flex-col gap-[10px] w-full mb-[256px]">
             <div className="flex items-center gap-[45px] text-[24px]">
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                {t('library.allGames')}
+                {t('filters.all')}
               </p>
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                {t('library.favorites')}
+                {t('filters.favorites')}
               </p>
               <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
-                {t('library.myCollection')}
+                {t('empty.myCollection')}
               </p>
               <div className="cursor-pointer text-[var(--color-background-21)]">
                 <FiPlusCircle size={24} />
@@ -309,16 +309,16 @@ function RouteComponent() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <p className="text-[var(--color-background-25)] text-lg">Loading games...</p>
+                <p className="text-[var(--color-background-25)] text-lg">{t('common.loading')}</p>
               </div>
             ) : isError ? (
               <div className="flex items-center justify-center py-8">
-                <p className="text-red-400 text-lg">Error loading games</p>
+                <p className="text-red-400 text-lg">{t('games.errorLoading')}</p>
               </div>
             ) : filteredGames.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <p className="text-[var(--color-background-25)] text-lg">
-                  {searchText ? 'No games found matching your search' : 'No games in your library'}
+                  {searchText ? t('search.noResults') : t('empty.noGamesInLibrary')}
                 </p>
               </div>
             ) : (

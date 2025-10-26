@@ -3,7 +3,13 @@
   "empty": {
     "title": "Ваша бібліотека порожня",
     "description": "Ігри, які ви купите, з'являться тут",
-    "browseStore": "Переглянути магазин"
+    "browseStore": "Переглянути магазин",
+    "noGamesInLibrary": "Немає ігор у бібліотеці",
+    "noNewsPosts": "Немає новин",
+    "noCommunityHighlights": "Немає підбірок спільноти",
+    "news": "Новини",
+    "communityPicks": "Підбірки спільноти",
+    "myCollection": "Моя колекція"
   },
   "filters": {
     "all": "Всі ігри",
@@ -40,5 +46,15 @@
     "installing": "Встановлення...",
     "installed": "Встановлено",
     "notInstalled": "Не встановлено"
+  },
+  "common": {
+    "loading": "Завантаження...",
+    "error": "Помилка"
+  },
+  "search": {
+    "noResults": "Ігор не знайдено"
+  },
+  "games": {
+    "errorLoading": "Помилка завантаження ігор"
   }
 }

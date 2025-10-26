@@ -24,6 +24,15 @@ export const useLanguage = () => {
         // If user is authenticated, update their profile
         if (isAuth && user && 'id' in user && typeof user.id === 'string') {
           try {
+            // Map frontend language codes to backend language codes
+            const mapLanguageCode = (frontendLang: string): string => {
+              const mapping: Record<string, string> = {
+                'uk': 'UA',
+                'en': 'EN'
+              }
+              return mapping[frontendLang] || 'UA'
+            }
+
             await updateUserMutation.mutateAsync({
               userId: user.id,
               request: {
@@ -33,7 +42,7 @@ export const useLanguage = () => {
                 bio: (user as any).bio || '',
                 avatar: (user as any).avatar || undefined,
                 banner: (user as any).banner || undefined,
-                lang: newLanguage,
+                lang: mapLanguageCode(newLanguage),
               }
             })
           } catch (error) {
@@ -56,10 +65,21 @@ export const useLanguage = () => {
   // Load user's preferred language on auth state change
   useEffect(() => {
     if (isAuth && user && 'lang' in user && typeof (user as any).lang === 'string') {
+      // Map backend language codes to frontend language codes
+      const mapBackendLanguageCode = (backendLang: string): string => {
+        const mapping: Record<string, string> = {
+          'UA': 'uk',
+          'EN': 'en'
+        }
+        return mapping[backendLang] || 'uk'
+      }
+
+      const frontendLang = mapBackendLanguageCode((user as any).lang)
+      
       // If user has a language preference and it's different from current
-      if ((user as any).lang !== currentLanguage) {
-        i18n.changeLanguage((user as any).lang)
-        localStorage.setItem('i18nextLng', (user as any).lang)
+      if (frontendLang !== currentLanguage) {
+        i18n.changeLanguage(frontendLang)
+        localStorage.setItem('i18nextLng', frontendLang)
       }
     } else if (!isAuth) {
       // For non-authenticated users, use localStorage or browser default
