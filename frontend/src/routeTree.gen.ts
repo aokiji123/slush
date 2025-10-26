@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
+import { Route as StoreRefundPolicyRouteImport } from './routes/store-refund-policy'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LibraryRouteImport } from './routes/library'
@@ -55,9 +58,24 @@ const WishlistRoute = WishlistRouteImport.update({
   path: '/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsOfUseRoute = TermsOfUseRouteImport.update({
+  id: '/terms-of-use',
+  path: '/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreRefundPolicyRoute = StoreRefundPolicyRouteImport.update({
+  id: '/store-refund-policy',
+  path: '/store-refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewRoute = NewRouteImport.update({
@@ -278,7 +296,10 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/sign-up': typeof SignUpRoute
+  '/store-refund-policy': typeof StoreRefundPolicyRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
@@ -318,7 +339,10 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/sign-up': typeof SignUpRoute
+  '/store-refund-policy': typeof StoreRefundPolicyRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
@@ -360,7 +384,10 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/new': typeof NewRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/sign-up': typeof SignUpRoute
+  '/store-refund-policy': typeof StoreRefundPolicyRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/wishlist': typeof WishlistRoute
   '/$slug/characteristics': typeof SlugCharacteristicsRouteRoute
   '/$slug/community': typeof SlugCommunityRouteRouteWithChildren
@@ -404,7 +431,10 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/new'
+    | '/privacy-policy'
     | '/sign-up'
+    | '/store-refund-policy'
+    | '/terms-of-use'
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
@@ -444,7 +474,10 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/new'
+    | '/privacy-policy'
     | '/sign-up'
+    | '/store-refund-policy'
+    | '/terms-of-use'
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
@@ -485,7 +518,10 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/new'
+    | '/privacy-policy'
     | '/sign-up'
+    | '/store-refund-policy'
+    | '/terms-of-use'
     | '/wishlist'
     | '/$slug/characteristics'
     | '/$slug/community'
@@ -528,7 +564,10 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   NewRoute: typeof NewRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   SignUpRoute: typeof SignUpRoute
+  StoreRefundPolicyRoute: typeof StoreRefundPolicyRoute
+  TermsOfUseRoute: typeof TermsOfUseRoute
   WishlistRoute: typeof WishlistRoute
   FriendsAllRouteRoute: typeof FriendsAllRouteRoute
   ProfileNicknameRouteRoute: typeof ProfileNicknameRouteRouteWithChildren
@@ -543,11 +582,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WishlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms-of-use': {
+      id: '/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof TermsOfUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store-refund-policy': {
+      id: '/store-refund-policy'
+      path: '/store-refund-policy'
+      fullPath: '/store-refund-policy'
+      preLoaderRoute: typeof StoreRefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/new': {
@@ -927,7 +987,10 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   NewRoute: NewRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   SignUpRoute: SignUpRoute,
+  StoreRefundPolicyRoute: StoreRefundPolicyRoute,
+  TermsOfUseRoute: TermsOfUseRoute,
   WishlistRoute: WishlistRoute,
   FriendsAllRouteRoute: FriendsAllRouteRoute,
   ProfileNicknameRouteRoute: ProfileNicknameRouteRouteWithChildren,
