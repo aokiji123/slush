@@ -521,6 +521,59 @@ public class GameController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get base game for a DLC
+    /// </summary>
+    /// <param name="id">The unique identifier of the DLC</param>
+    /// <returns>Base game information</returns>
+    [HttpGet("{id:guid}/base-game")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ResponseCache(Duration = CacheDurationSeconds)]
+    public async Task<ActionResult<ApiResponse<GameDto>>> GetBaseGame(
+        [FromRoute, Required] Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
+        }
+
+        // Extract language from Accept-Language header
+        var language = ExtractLanguageFromHeader();
+        var cacheKey = $"{CacheKeyPrefix}BaseGame_{id}_{language}";
+        
+        if (_cache.TryGetValue(cacheKey, out GameDto? cachedBaseGame))
+        {
+            _logger.LogInformation("Retrieved base game for DLC {DlcId} in language {Language} from cache", id, language);
+            return Ok(new ApiResponse<GameDto>(cachedBaseGame!));
+        }
+
+        try
+        {
+            _logger.LogInformation("Retrieving base game for DLC with ID: {DlcId} in language: {Language}", id, language);
+            var baseGame = await _gameService.GetBaseGameAsync(id, language);
+            
+            if (baseGame == null)
+            {
+                _logger.LogWarning("No base game found for DLC with ID {DlcId}", id);
+                return NotFound(new ApiResponse<GameDto>("Base game not found for this DLC"));
+            }
+            
+            // Cache the base game data with language-specific key
+            _cache.Set(cacheKey, baseGame, CacheExpiration);
+            
+            _logger.LogInformation("Successfully retrieved base game for DLC with ID: {DlcId} in language: {Language}", id, language);
+            return Ok(new ApiResponse<GameDto>(baseGame));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving base game for DLC {DlcId} in language {Language}", id, language);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse<GameDto>("An error occurred while retrieving the base game."));
+        }
+    }
 
     /// <summary>
     /// Get game characteristics by game id

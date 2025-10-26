@@ -207,9 +207,16 @@ function RouteComponent() {
           ) : (
             <div className="w-full flex gap-[24px]">
               <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
-                <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
-                  {game.data.name}
-                </p>
+                <div className="flex items-center gap-[16px]">
+                  {game.data.isDlc && (
+                    <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[16px] font-bold">
+                      {t('dlc.badge')}
+                    </div>
+                  )}
+                  <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                    {game.data.name}
+                  </p>
+                </div>
                 <Outlet />
               </div>
 
@@ -237,12 +244,14 @@ function RouteComponent() {
                 </div>
 
                 <div className="flex flex-col gap-[20px]">
-                  <img
-                    src={game.data.mainImage}
-                    alt={game.data.name}
-                    className="w-full h-[145px] rounded-[20px] object-cover"
-                    loading="lazy"
-                  />
+                  {game.data.mainImage && (
+                    <img
+                      src={game.data.mainImage}
+                      alt={game.data.name}
+                      className="w-full h-[145px] rounded-[20px] object-cover"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="flex items-center gap-[8px]">
                     {game.data.salePrice && game.data.salePrice > 0 ? (
                       <>

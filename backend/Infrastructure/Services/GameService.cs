@@ -462,6 +462,28 @@ public class GameService : IGameService
         return await GetDlcsByGameIdAsync(game.Id, language);
     }
 
+    public async Task<GameDto?> GetBaseGameAsync(Guid gameId, string language = "uk")
+    {
+        // First, find the game by ID to get its BaseGameId
+        var game = await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Id == gameId)
+            .FirstOrDefaultAsync();
+
+        if (game == null || !game.BaseGameId.HasValue)
+        {
+            return null;
+        }
+
+        // Then find the base game
+        var baseGame = await _db.Set<Game>()
+            .AsNoTracking()
+            .Where(g => g.Id == game.BaseGameId.Value)
+            .FirstOrDefaultAsync();
+
+        return baseGame != null ? GameDto.FromEntity(baseGame, language) : null;
+    }
+
     public async Task<List<GameCharacteristicDto>> GetGameCharacteristicsAsync(Guid gameId)
     {
         return await _db.Set<GameCharacteristic>()

@@ -98,6 +98,11 @@ async function getGamePlatformInfo(identifier: string): Promise<GamePlatformInfo
   return data
 }
 
+async function getBaseGame(gameId: string): Promise<Game> {
+  const { data } = await axiosInstance.get(`/game/${gameId}/base-game`)
+  return data
+}
+
 async function getAllGames(): Promise<GamesListResponse> {
   const { data } = await axiosInstance.get('/game/all')
   return data
@@ -270,6 +275,18 @@ export function useGamePlatformInfo(identifier: string) {
   return useQuery({
     queryKey: ['gamePlatformInfo', identifier],
     queryFn: () => getGamePlatformInfo(identifier),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useBaseGame(gameId: string | null | undefined) {
+  const { i18n } = useTranslation()
+  return useQuery({
+    queryKey: ['baseGame', gameId, i18n.language],
+    queryFn: () => getBaseGame(gameId!),
+    enabled: !!gameId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,

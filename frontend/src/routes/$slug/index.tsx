@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MasonryLayout, SortDropdown, GameComment } from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
-import { useGameById, useGameDlcs, useGameReviews } from '@/api/queries/useGame'
+import { useGameById, useGameDlcs, useGameReviews, useBaseGame } from '@/api/queries/useGame'
 import { useAuthState } from '@/api/queries/useAuth'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
@@ -48,7 +48,14 @@ function RouteComponent() {
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug' })
   const { data: game, isLoading, isError } = useGameById(slug)
-  const { data: gameDlcs } = useGameDlcs(slug)
+  const { data: baseGame } = useBaseGame(game?.data?.isDlc ? game.data.id : null)
+  // Fetch DLCs from base game if this is a DLC, otherwise fetch from current game
+  const { data: gameDlcs } = useGameDlcs(game?.data?.isDlc ? baseGame?.data?.slug : slug)
+  
+  // Filter out current DLC from the list if viewing a DLC
+  const otherDlcs = game?.data?.isDlc 
+    ? gameDlcs?.data?.filter(dlc => dlc.id !== game.data.id) || []
+    : gameDlcs?.data || []
   const { data: reviews, isLoading: reviewsLoading, refetch: refetchReviews } = useGameReviews(game?.data?.id || '', selectedSort)
   const { user: authUser } = useAuthState()
   const { data: authenticatedUser } = useAuthenticatedUser()
@@ -65,8 +72,11 @@ function RouteComponent() {
   // Create combined images array with mainImage as first element, avoiding duplicates
   const allImages = game?.data ? [
     game.data.mainImage, 
-    ...(game.data.images || []).filter(img => img !== game.data.mainImage)
+    ...(game.data.images || []).filter(img => img !== game.data.mainImage && img && img.trim())
   ] : []
+
+  // Get valid selected image
+  const validSelectedImage = selectedImage || game?.data?.mainImage || ''
 
   // Initialize selected image when game data loads
   useEffect(() => {
@@ -200,12 +210,14 @@ function RouteComponent() {
           }
         `}
       </style>
-      <img
-        src={selectedImage || game.data.mainImage}
-        alt={game.data.name}
-        className="w-full object-cover h-[435px] rounded-[20px]"
-        loading="lazy"
-      />
+      {validSelectedImage && (
+        <img
+          src={validSelectedImage}
+          alt={game.data.name}
+          className="w-full object-cover h-[435px] rounded-[20px]"
+          loading="lazy"
+        />
+      )}
       <div className="w-full relative mb-[24px]">
         <Swiper
           modules={[Navigation]}
@@ -217,31 +229,31 @@ function RouteComponent() {
           onSlideChange={handleSlideChange}
           className="w-full"
         >
-          {allImages.map((image, index) => {
-            const isSelected = selectedImage === image
-            return (
-              <SwiperSlide
-                key={index}
-                className="w-[180px] p-1"
-              >
-                <div 
-                  className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
-                    isSelected ? 'ring-2 ring-[#0d8a6b]' : 'hover:opacity-80'
-                  }`}
-                  onClick={() => handleSlideClick(index)}
-                >
-                  <img
-                    src={image}
-                    alt={`${game.data.name} ${index + 1}`}
-                    className={`w-full object-cover h-full rounded-[20px] transition-all duration-200 ${
-                      isSelected ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-                    }`}
-                    loading="lazy"
-                  />
-                </div>
-              </SwiperSlide>
-            )
-          })}
+              {allImages.filter(img => img && img.trim()).map((image, index) => {
+                const isSelected = selectedImage === image
+                return (
+                  <SwiperSlide
+                    key={index}
+                    className="w-[180px] p-1"
+                  >
+                    <div 
+                      className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
+                        isSelected ? 'ring-2 ring-[#0d8a6b]' : 'hover:opacity-80'
+                      }`}
+                      onClick={() => handleSlideClick(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`${game.data.name} ${index + 1}`}
+                        className={`w-full object-cover h-full rounded-[20px] transition-all duration-200 ${
+                          isSelected ? 'opacity-100' : 'opacity-90 hover:opacity-100'
+                        }`}
+                        loading="lazy"
+                      />
+                    </div>
+                  </SwiperSlide>
+                )
+              })}
         </Swiper>
         
         {allImages.length > 1 && (
@@ -284,6 +296,43 @@ function RouteComponent() {
         <p className="text-[20px] font-light">{game.data.description}</p>
         <FaChevronDown size={24} />
       </div>
+
+      {/* Base Game Section - Only for DLCs */}
+      {game.data.isDlc && baseGame?.data && (
+        <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
+          <div 
+            className="w-full bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex flex-col gap-[12px] cursor-pointer hover:bg-[var(--color-background-8)] transition-colors"
+            onClick={() => navigate({ to: `/${baseGame.data.slug}` })}
+          >
+            <div className="flex items-center gap-[16px]">
+              <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[16px] font-bold">
+                {t('game:dlc.baseGame')}
+              </div>
+              <p className="text-[24px] font-bold font-manrope">{baseGame.data.name}</p>
+            </div>
+            <div className="flex items-center justify-end">
+              <div className="flex items-center gap-[20px]">
+                <p className="text-[20px] font-bold">
+                  {baseGame.data.salePrice > 0 
+                    ? `${baseGame.data.salePrice}₴` 
+                    : baseGame.data.price > 0 
+                      ? `${baseGame.data.price}₴` 
+                      : t('game:actions.free')}
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    addToCart(baseGame.data)
+                  }}
+                  className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[36px] py-[13px] rounded-[20px] text-[20px] font-medium hover:bg-[var(--color-background-22)] transition-colors cursor-pointer"
+                >
+                  {t('game:actions.addToCart')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
         <p className="text-[32px] font-bold font-manrope">{t('game:bundles.title')}</p>
@@ -353,7 +402,58 @@ function RouteComponent() {
           </div>
         </div>
 
-        {gameDlcs && gameDlcs.data.length > 0 && (
+        {/* Show Other DLCs section on DLC page */}
+        {game.data.isDlc && otherDlcs.length > 0 && (
+          <div className="flex flex-col gap-[20px]">
+            <div className="flex items-center justify-between">
+              <p className="text-[32px] font-bold font-manrope">{t('game:dlc.otherDlc')}</p>
+              {baseGame?.data?.slug && (
+                <p
+                  className="text-[16px] flex items-center gap-[8px] cursor-pointer text-[var(--color-background)]"
+                  onClick={() => navigate({ to: `/${baseGame.data.slug}/dlc` })}
+                >
+                  {t('game:dlc.allDlc')} <FaChevronRight />
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-[8px]">
+              {otherDlcs.map((dlc) => (
+                <div
+                  key={dlc.id}
+                  onClick={() => navigate({ to: `/${dlc.slug}` })}
+                  className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold cursor-pointer hover:bg-[var(--color-background-8)] transition-colors"
+                >
+                  <p className="font-manrope">{dlc.name}</p>
+                  <p>{dlc.price ? `${dlc.price}₴` : t('game:actions.free')}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end">
+              <div className="flex items-center gap-[16px]">
+                <p className="text-[20px] font-bold text-[var(--color-background)] font-manrope">
+                  {otherDlcs.reduce((total, dlc) => total + dlc.price, 0)}₴
+                </p>
+                <button
+                  onClick={() => {
+                    otherDlcs.forEach((dlc) => {
+                      if (!isInCart(dlc.id)) {
+                        addToCart(dlc)
+                      }
+                    })
+                  }}
+                  className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[26px] py-[12px] rounded-[20px] text-[20px] font-medium hover:bg-[var(--color-background-22)] transition-colors cursor-pointer"
+                >
+                  <p>{t('game:dlc.addAllDlcToCart')}</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Show DLCs section on regular game page */}
+        {!game.data.isDlc && gameDlcs && gameDlcs.data.length > 0 && (
           <div className="flex flex-col gap-[20px]">
             <div className="flex items-center justify-between">
               <p className="text-[32px] font-bold font-manrope">{t('game:dlc.otherDlc')}</p>
@@ -369,7 +469,8 @@ function RouteComponent() {
               {gameDlcs.data.map((dlc) => (
                 <div
                   key={dlc.id}
-                  className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold"
+                  onClick={() => navigate({ to: `/${dlc.slug}` })}
+                  className="p-[20px] rounded-[20px] bg-[var(--color-background-15)] flex items-center justify-between text-[20px] font-bold cursor-pointer hover:bg-[var(--color-background-8)] transition-colors"
                 >
                   <p className="font-manrope">{dlc.name}</p>
                   <p>{dlc.price ? `${dlc.price}₴` : t('game:actions.free')}</p>

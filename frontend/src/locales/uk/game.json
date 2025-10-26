@@ -42,7 +42,10 @@
     "addToCart": "У кошик",
     "otherDlc": "Інші DLC",
     "allDlc": "Усі DLC",
-    "addAllDlcToCart": "Додати в кошик усі DLC"
+    "addAllDlcToCart": "Додати в кошик усі DLC",
+    "badge": "DLC",
+    "baseGame": "Базова гра",
+    "requiresBaseGame": "Потрібна базова гра"
   },
   "actions": {
     "addToCart": "У кошик",

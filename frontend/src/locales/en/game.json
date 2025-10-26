@@ -42,7 +42,10 @@
     "addToCart": "Add to Cart",
     "otherDlc": "Other DLC",
     "allDlc": "All DLC",
-    "addAllDlcToCart": "Add all DLC to cart"
+    "addAllDlcToCart": "Add all DLC to cart",
+    "badge": "DLC",
+    "baseGame": "Base Game",
+    "requiresBaseGame": "Requires base game"
   },
   "actions": {
     "addToCart": "Add to Cart",
