@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation } from 'swiper/modules'
 import type { GameData } from '@/api/types/game'
 import { OptimizedImage } from './OptimizedImage'
+import { GamePriceDisplay } from './GamePriceDisplay'
 
 // @ts-expect-error - Swiper CSS imports are valid
 import 'swiper/css'
@@ -83,25 +84,13 @@ export const HomeProducts = ({ products, grid = 3, title }: Props) => {
                 <p className="text-[20px] font-bold font-manrope line-clamp-1">
                   {game.name}
                 </p>
-                <div className="flex items-center gap-[8px]">
-                  {game.salePrice > 0 && (
-                    <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">
-                      -{game.discountPercent}%
-                    </p>
-                  )}
-                  {game.salePrice > 0 && (
-                    <p className="text-[16px] font-normal">{game.salePrice}₴</p>
-                  )}
-                  <p
-                    className={`text-[16px] font-normal ${
-                      game.salePrice > 0
-                        ? 'line-through text-[var(--color-background-25)] font-extralight'
-                        : ''
-                    }`}
-                  >
-                    {game.price ? `${game.price}₴` : t('common.free')}
-                  </p>
-                </div>
+                <GamePriceDisplay
+                  price={game.price}
+                  salePrice={game.salePrice}
+                  discountPercent={game.discountPercent}
+                  freeText={t('common.free')}
+                  size="sm"
+                />
               </div>
             </div>
           </SwiperSlide>

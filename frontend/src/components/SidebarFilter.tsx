@@ -104,6 +104,7 @@ export const SidebarFilter = ({
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
   const [searchText, setSearchText] = useState(filters.search || '')
+  const [selectedPrice, setSelectedPrice] = useState<string | undefined>(undefined)
   const sortOptions = getSortOptions(t)
   const filterSections = getFilters(t)
 
@@ -138,6 +139,8 @@ export const SidebarFilter = ({
   }
 
   function handlePriceFilterChange(priceValue: string) {
+    setSelectedPrice(priceValue)
+    
     if (priceValue === 'unlimited') {
       handleFilterChange('minPrice', undefined)
       handleFilterChange('maxPrice', undefined)
@@ -154,10 +157,8 @@ export const SidebarFilter = ({
     }
 
     const range = priceRanges[priceValue]
-    if (range) {
-      handleFilterChange('minPrice', range.min)
-      handleFilterChange('maxPrice', range.max)
-    }
+    handleFilterChange('minPrice', range.min)
+    handleFilterChange('maxPrice', range.max)
   }
 
   function handleDiscountToggle(checked: boolean) {
@@ -183,6 +184,7 @@ export const SidebarFilter = ({
       sortBy: undefined,
     })
     setSearchText('')
+    setSelectedPrice(undefined)
   }
 
   function isFilterSelected(key: keyof CatalogFilters | 'price', value: any): boolean {
@@ -196,19 +198,8 @@ export const SidebarFilter = ({
       return filters[key] === true
     }
     if (key === 'price') {
-      if (value === 'unlimited') return !filters.minPrice && !filters.maxPrice
-      // Handle specific price ranges
-      const priceRanges: Record<string, { min?: number; max?: number }> = {
-        free: { min: 0, max: 0 },
-        under100: { min: 0, max: 100 },
-        under300: { min: 0, max: 300 },
-        under600: { min: 0, max: 600 },
-        under900: { min: 0, max: 900 },
-      }
-      const range = priceRanges[value]
-      if (range) {
-        return filters.minPrice === range.min && filters.maxPrice === range.max
-      }
+      // Use selectedPrice state to determine which option is selected
+      return selectedPrice === value
     }
     return false
   }
@@ -322,6 +313,7 @@ export const SidebarFilter = ({
                           checked={isSelected}
                           onChange={(checked) => {
                             if (filter.key === 'price') {
+                              // For price filters, always select (radio button behavior)
                               handlePriceFilterChange(opt.value)
                             } else if (filter.key === 'genres' || filter.key === 'platforms') {
                               handleArrayFilterChange(filter.key, opt.value, checked)

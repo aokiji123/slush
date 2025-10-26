@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFriends, useOnlineFriends } from '@/api/queries/useFriendship'
+import { 
+  useFriends, 
+  useOnlineFriends, 
+  useBlockedUsers, 
+  useFriendRequests 
+} from '@/api/queries/useFriendship'
 import { FriendCard } from './FriendCard'
 import { GameSelector } from './GameSelector'
 import type { GameData } from '@/api/types/game'
@@ -34,6 +39,14 @@ export const FriendsListSection = ({
   // Fetch friends data for all profiles (public)
   const { data: friends, isLoading: isLoadingFriends } = useFriends(userId)
   const { data: onlineFriends, isLoading: isLoadingOnline } = useOnlineFriends(userId)
+  
+  // Fetch blocked users and requests (only for own profile or when tabs are enabled)
+  const { data: blockedUsers, isLoading: isLoadingBlocked } = useBlockedUsers(
+    showBlockedTab || showRequestsTab ? userId : ''
+  )
+  const { incoming, outgoing, isLoading: isLoadingRequests } = useFriendRequests(
+    showRequestsTab ? userId : ''
+  )
 
   // Get available tabs based on props
   const availableTabs = useMemo(() => {
@@ -46,16 +59,14 @@ export const FriendsListSection = ({
       tabs.push({ key: 'online', label: t('friends.tabs.online'), count: onlineFriends?.length || 0 })
     }
     if (showBlockedTab) {
-      // TODO: Add blocked users count when API is available
-      tabs.push({ key: 'blocked', label: t('friends.tabs.blocked'), count: 0 })
+      tabs.push({ key: 'blocked', label: t('friends.tabs.blocked'), count: blockedUsers?.length || 0 })
     }
     if (showRequestsTab) {
-      // TODO: Add friend requests count when API is available
-      tabs.push({ key: 'requests', label: t('friends.tabs.requests'), count: 0 })
+      tabs.push({ key: 'requests', label: t('friends.tabs.requests'), count: (incoming?.length || 0) + (outgoing?.length || 0) })
     }
     
     return tabs
-  }, [friends, onlineFriends, showAllTab, showOnlineTab, showBlockedTab, showRequestsTab, t])
+  }, [friends, onlineFriends, blockedUsers, incoming, outgoing, showAllTab, showOnlineTab, showBlockedTab, showRequestsTab, t])
 
   // Filter friends by search
   const getFilteredFriends = (friendsList: typeof friends) => {
@@ -85,9 +96,9 @@ export const FriendsListSection = ({
       case 'online':
         return getFilteredFriends(onlineFriends)
       case 'blocked':
-        return [] // TODO: Implement blocked users
+        return blockedUsers || []
       case 'requests':
-        return [] // TODO: Implement friend requests
+        return [...(incoming || []), ...(outgoing || [])]
       default:
         return []
     }
@@ -100,9 +111,9 @@ export const FriendsListSection = ({
       case 'online':
         return isLoadingOnline
       case 'blocked':
-        return false // TODO: Add loading state for blocked users
+        return isLoadingBlocked
       case 'requests':
-        return false // TODO: Add loading state for friend requests
+        return isLoadingRequests
       default:
         return false
     }

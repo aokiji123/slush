@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchUsers, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useSendFriendRequest, useFriendRequests, useFriends, useBlockedUsers, useUnblockUser } from '@/api/queries/useFriendship'
+import { useToastStore } from '@/lib/toast-store'
 
 interface AddFriendModalProps {
   isOpen: boolean
@@ -15,6 +16,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const { data: searchResults, isLoading: isSearching } = useSearchUsers(debouncedQuery)
   const sendFriendRequestMutation = useSendFriendRequest()
   const unblockUserMutation = useUnblockUser()
+  const { error: showError, success: showSuccess } = useToastStore()
   
   // Get friend IDs, outgoing requests, and blocked users to check status
   const { data: friends } = useFriends(currentUser?.id ?? '')
@@ -35,21 +37,22 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const handleSendRequest = async (receiverId: string) => {
     try {
       await sendFriendRequestMutation.mutateAsync(receiverId)
+      showSuccess('Запит на дружбу відправлено')
     } catch (error: any) {
       console.error('Failed to send friend request:', error)
-      // Extract error message from API response
-      const errorMessage = error?.response?.data?.message || 'Failed to send friend request'
-      alert(errorMessage) // TODO: Replace with proper toast notification
+      const errorMessage = error?.response?.data?.message || 'Не вдалося відправити запит на дружбу'
+      showError(errorMessage)
     }
   }
 
   const handleUnblock = async (blockedUserId: string) => {
     try {
       await unblockUserMutation.mutateAsync(blockedUserId)
+      showSuccess('Користувача розблоковано')
     } catch (error: any) {
       console.error('Failed to unblock user:', error)
-      const errorMessage = error?.response?.data?.message || 'Failed to unblock user'
-      alert(errorMessage) // TODO: Replace with proper toast notification
+      const errorMessage = error?.response?.data?.message || 'Не вдалося розблокувати користувача'
+      showError(errorMessage)
     }
   }
 

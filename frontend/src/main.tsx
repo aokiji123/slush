@@ -19,6 +19,9 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 // Import SignalR Provider
 import { SignalRProvider } from './providers/SignalRProvider'
 
+// Import Toast Container
+import { ToastContainer } from './components/Toast'
+
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
@@ -50,24 +53,26 @@ if (rootElement && !rootElement.innerHTML) {
           <QueryClientProvider client={queryClient}>
             <SignalRProvider>
               <RouterProvider router={router} />
-              <Toaster 
+              <ToastContainer />
+              <Toaster
                 position="top-right"
                 toastOptions={{
                   duration: 4000,
                   style: {
-                    background: 'var(--color-background-15)',
+                    background: 'var(--color-background-8)',
                     color: 'var(--color-background)',
+                    borderRadius: '12px',
                     border: '1px solid var(--color-background-16)',
                   },
                   success: {
                     iconTheme: {
-                      primary: '#24e5c2',
+                      primary: 'var(--color-background-21)',
                       secondary: 'white',
                     },
                   },
                   error: {
                     iconTheme: {
-                      primary: '#ff6f95',
+                      primary: 'var(--color-background-10)',
                       secondary: 'white',
                     },
                   },

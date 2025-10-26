@@ -94,5 +94,15 @@
     "contentRequired": "Review content is required",
     "contentTooShort": "Review must be at least 10 characters long",
     "ratingRequired": "Please select a rating"
+  },
+  "purchaseModal": {
+    "title": "Confirm Purchase",
+    "currentBalance": "Current Balance",
+    "balanceAfter": "Balance After Purchase",
+    "price": "Price",
+    "confirmButton": "Confirm Purchase",
+    "cancelButton": "Cancel",
+    "insufficientFunds": "Insufficient funds in wallet",
+    "processing": "Processing..."
   }
 }

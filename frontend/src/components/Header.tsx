@@ -11,6 +11,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { HiMenuAlt3 } from 'react-icons/hi'
 import { IoClose } from 'react-icons/io5'
 import { useAuthState } from '@/api/queries/useAuth'
+import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { OptimizedImage } from './OptimizedImage'
 import { IconButton } from './IconButton'
 
@@ -19,7 +20,21 @@ export const Header = () => {
   const location = useLocation()
   const { t } = useTranslation('common')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { user, isAuth } = useAuthState()
+  const { user: authUser, isAuth } = useAuthState()
+  const { data: authenticatedUser } = useAuthenticatedUser()
+  
+  const user = authenticatedUser || authUser
+  
+  // Get the nickname for profile navigation
+  const getUserIdentifier = () => {
+    if (authenticatedUser && 'nickname' in authenticatedUser) {
+      return authenticatedUser.nickname
+    }
+    if (authUser && 'username' in authUser) {
+      return authUser.username
+    }
+    return 'unknown'
+  }
 
   const tabs = useMemo(() => [
     {
@@ -136,14 +151,15 @@ export const Header = () => {
                   className="w-[52px] h-[52px] flex items-center justify-center cursor-pointer"
                   onClick={() => {
                     navigate({
-                      to: '/settings',
+                      to: '/profile/$nickname',
+                      params: { nickname: getUserIdentifier() }
                     })
                   }}
                   aria-label="User profile"
                 >
                   <OptimizedImage
                     src={user?.avatar || '/avatar.png'}
-                    alt={`${user?.username || 'User'}'s avatar`}
+                    alt={`${getUserIdentifier()}'s avatar`}
                     className="w-[52px] h-[52px] rounded-full object-cover"
                     loading="lazy"
                   />
@@ -239,8 +255,10 @@ export const Header = () => {
                   className="flex items-center gap-3 p-3 bg-[var(--color-background-17)] rounded-[12px] overflow-hidden cursor-pointer"
                   onClick={() => {
                     navigate({
-                      to: '/settings',
+                      to: '/profile/$nickname',
+                      params: { nickname: getUserIdentifier() }
                     })
+                    setIsMobileMenuOpen(false)
                   }}
                 >
                   <img
@@ -251,7 +269,7 @@ export const Header = () => {
                   />
                   <div className="flex flex-col min-w-0 flex-1">
                     <p className="text-white text-[16px] font-bold truncate">
-                      {user?.username || 'Юзернейм'}
+                      {(authenticatedUser && 'nickname' in authenticatedUser ? authenticatedUser.nickname : authUser && 'username' in authUser ? authUser.username : 'Юзернейм')}
                     </p>
                     <p className="text-[var(--color-background-25)] text-[14px] truncate">
                       {user?.email || 'user@example.com'}

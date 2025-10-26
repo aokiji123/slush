@@ -117,7 +117,7 @@ export const Modal = ({
         )}
 
         {/* Content */}
-        <div className="max-h-[calc(90vh-120px)] overflow-y-auto">
+        <div className="max-h-[calc(90vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-background-16)] [&::-webkit-scrollbar-thumb]:rounded-[5px] [&::-webkit-scrollbar-thumb]:hover:bg-[var(--color-background-17)]">
           {children}
         </div>
       </div>

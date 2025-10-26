@@ -1,11 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
+import { 
+  useFriendshipStatus,
+  useSendFriendRequest,
+  useCancelFriendRequest,
+  useAcceptFriendRequest,
+  useRemoveFriend
+} from '@/api/queries/useFriendship'
 import { useUserStatistics } from '@/api/queries/useProfile'
 import { ProfileHeader } from '@/components/ProfileHeader'
 import { ProfileTabs } from '@/components/ProfileTabs'
 import { ProfileFriendsPreview } from '@/components/ProfileFriendsPreview'
 import { FriendsListSection } from '@/components/FriendsListSection'
+import { useToastStore } from '@/lib/toast-store'
 
 export const Route = createFileRoute('/profile/$nickname/friends')({
   component: ProfileFriendsPage,
@@ -13,6 +20,7 @@ export const Route = createFileRoute('/profile/$nickname/friends')({
 
 function ProfileFriendsPage() {
   const { nickname } = Route.useParams()
+  const { success: showSuccess, error: showError } = useToastStore()
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -32,24 +40,76 @@ function ProfileFriendsPage() {
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
+  // Mutations
+  const sendFriendRequestMutation = useSendFriendRequest()
+  const cancelFriendRequestMutation = useCancelFriendRequest()
+  const acceptFriendRequestMutation = useAcceptFriendRequest()
+  const removeFriendMutation = useRemoveFriend()
+
   const handleEditProfile = () => {
-    // TODO: Implement edit profile
+    // Navigate to settings page when implemented
+    console.log('Edit profile - to be implemented')
   }
 
-  const handleAddFriend = () => {
-    // TODO: Implement add friend
+  const handleAddFriend = async () => {
+    if (!profileUser?.id) return
+    
+    try {
+      await sendFriendRequestMutation.mutateAsync(profileUser.id)
+      showSuccess('Запит на дружбу відправлено')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося відправити запит на дружбу'
+      showError(errorMessage)
+    }
   }
 
-  const handleCancelRequest = () => {
-    // TODO: Implement cancel request
+  const handleCancelRequest = async () => {
+    if (!currentUser?.id || !profileUser?.id) return
+    
+    try {
+      await cancelFriendRequestMutation.mutateAsync({
+        senderId: currentUser.id,
+        receiverId: profileUser.id
+      })
+      showSuccess('Запит скасовано')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося скасувати запит'
+      showError(errorMessage)
+    }
   }
 
-  const handleAcceptRequest = () => {
-    // TODO: Implement accept request
+  const handleAcceptRequest = async () => {
+    if (!currentUser?.id || !profileUser?.id) return
+    
+    try {
+      await acceptFriendRequestMutation.mutateAsync({
+        senderId: profileUser.id,
+        receiverId: currentUser.id
+      })
+      showSuccess('Запит прийнято')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося прийняти запит'
+      showError(errorMessage)
+    }
   }
 
-  const handleRemoveFriend = () => {
-    // TODO: Implement remove friend
+  const handleRemoveFriend = async () => {
+    if (!currentUser?.id || !profileUser?.id) return
+    
+    if (!window.confirm('Ви впевнені, що хочете видалити цього користувача з друзів?')) {
+      return
+    }
+    
+    try {
+      await removeFriendMutation.mutateAsync({
+        senderId: currentUser.id,
+        receiverId: profileUser.id
+      })
+      showSuccess('Користувача видалено з друзів')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося видалити друга'
+      showError(errorMessage)
+    }
   }
 
   // Loading state
