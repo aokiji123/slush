@@ -50,7 +50,7 @@ function RouteComponent() {
   const { data: game, isLoading, isError } = useGameById(slug)
   const { data: baseGame } = useBaseGame(game?.data?.isDlc ? game.data.id : null)
   // Fetch DLCs from base game if this is a DLC, otherwise fetch from current game
-  const { data: gameDlcs } = useGameDlcs(game?.data?.isDlc ? baseGame?.data?.slug : slug)
+  const { data: gameDlcs } = useGameDlcs(game?.data?.isDlc ? (baseGame?.data?.slug || slug) : slug)
   
   // Filter out current DLC from the list if viewing a DLC
   const otherDlcs = game?.data?.isDlc 

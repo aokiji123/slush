@@ -8,7 +8,10 @@
     "freeGames": "Безкоштовні ігри",
     "onSale": "Особливі пропозиції",
     "under100": "До 100₴",
-    "comingSoon": "Незабаром"
+    "comingSoon": "Незабаром",
+    "freeToPlay": "Безкоштовно",
+    "discountValidUntil": "Знижка діє до",
+    "dlcFor": "Завантажуваний контент для"
   },
   "catalog": {
     "title": "Каталог ігор",

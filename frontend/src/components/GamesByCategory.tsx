@@ -80,7 +80,7 @@ const GamesColumn = ({
           }}
         >
           <img
-            src={product.image}
+            src={product.image || '/game-image.png'}
             alt={product.name}
             loading="lazy"
             className="w-full h-[180px] sm:h-[200px] md:h-[240px] object-cover"

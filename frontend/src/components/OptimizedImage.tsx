@@ -57,6 +57,9 @@ export const OptimizedImage = ({
     onError?.()
   }, [onError])
 
+  // If src is empty or undefined, use placeholder or default image
+  const imageSrc = src || placeholder || '/game-image.png'
+
   if (hasError && placeholder) {
     return (
       <img
@@ -82,7 +85,7 @@ export const OptimizedImage = ({
       
       {/* Main image */}
       <img
-        src={src}
+        src={imageSrc}
         alt={alt}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           isLoaded ? 'opacity-100' : 'opacity-0'

@@ -2,6 +2,7 @@
   "header": {
     "store": "Store",
     "library": "Library",
+    "chat": "Chat",
     "login": "Login",
     "signUp": "Sign Up",
     "profile": "Profile",
