@@ -30,38 +30,77 @@ public class PurchaseService : IPurchaseService
         if (owned)
             return new PurchaseResultDto { Success = false, Message = "Game already owned" };
 
-        var price = (decimal)game.Price;
+        // Fix Bug #1: Use sale price when available
+        var price = game.SalePrice > 0 ? (decimal)game.SalePrice : (decimal)game.Price;
 
+        // Fix Bug #7: Check if it's a free game
+        var isFreeGame = price == 0;
+
+        // Fix Bug #8: Validate DLC base game ownership
+        if (game.IsDlc && game.BaseGameId.HasValue)
+        {
+            var ownsBaseGame = await _context.Libraries
+                .AnyAsync(l => l.UserId == userId && l.GameId == game.BaseGameId.Value);
+            
+            if (!ownsBaseGame)
+            {
+                return new PurchaseResultDto 
+                { 
+                    Success = false, 
+                    Message = "You must own the base game before purchasing DLC" 
+                };
+            }
+        }
+
+        // Fix Bug #3: Wrap in database transaction for atomicity
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
+        Library libraryEntry = null;
+        
         try
         {
-            await _walletService.SubtractAsync(userId, new WalletChangeDto
+            // Fix Bug #7: Only deduct from wallet if not a free game
+            if (!isFreeGame)
             {
-                Amount = price,
-                Title = string.IsNullOrWhiteSpace(dto.Title) ? $"Purchase: {game.Title}" : dto.Title
-            });
+                await _walletService.SubtractAsync(userId, new WalletChangeDto
+                {
+                    Amount = price,
+                    Title = string.IsNullOrWhiteSpace(dto.Title) ? $"Purchase: {game.Title}" : dto.Title
+                });
+            }
+
+            libraryEntry = new Library
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                GameId = game.Id,
+                AddedAt = DateTime.UtcNow
+            };
+            _context.Libraries.Add(libraryEntry);
+            
+            // Remove from wishlist if the game is in user's wishlist
+            var wishlistItem = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == game.Id);
+            if (wishlistItem != null)
+            {
+                _context.Wishlists.Remove(wishlistItem);
+            }
+            
+            await _context.SaveChangesAsync();
+            
+            // Commit the transaction
+            await transaction.CommitAsync();
         }
         catch (Exception ex)
         {
+            // Rollback transaction on any error
+            await transaction.RollbackAsync();
             return new PurchaseResultDto { Success = false, Message = ex.Message };
         }
 
-        var libraryEntry = new Library
+        if (libraryEntry == null)
         {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            GameId = game.Id,
-            AddedAt = DateTime.UtcNow
-        };
-        _context.Libraries.Add(libraryEntry);
-        
-        // Remove from wishlist if the game is in user's wishlist
-        var wishlistItem = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == game.Id);
-        if (wishlistItem != null)
-        {
-            _context.Wishlists.Remove(wishlistItem);
+            return new PurchaseResultDto { Success = false, Message = "Failed to create library entry" };
         }
-        
-        await _context.SaveChangesAsync();
 
         var balance = await _walletService.GetBalanceAsync(userId);
         return new PurchaseResultDto

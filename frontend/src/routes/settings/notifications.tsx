@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { Switch } from '@/components/Switch'
 import { useAuthenticatedUser, useNotifications, useUpdateNotifications } from '@/api/queries/useUser'
 import type { NotificationsSettings } from '@/api/types/user'
@@ -24,7 +24,6 @@ function RouteComponent() {
   const { data: notifications, isLoading: notificationsLoading } = useNotifications(user?.id || '')
   const updateNotificationsMutation = useUpdateNotifications()
   
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const notificationSettings = getNotificationSettings(t)
 
   const handleNotificationToggle = async (key: keyof NotificationsSettings, checked: boolean) => {
@@ -49,11 +48,9 @@ function RouteComponent() {
         }
       })
 
-      setMessage({ type: 'success', text: t('notifications.success') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success(t('notifications.success'))
     } catch (error) {
-      setMessage({ type: 'error', text: t('notifications.error') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error(t('notifications.error'))
     }
   }
 
@@ -83,16 +80,6 @@ function RouteComponent() {
 
   return (
     <div className="w-full bg-[var(--color-background-15)] rounded-[20px] overflow-hidden text-white p-[24px] pb-[40px] flex flex-col gap-[64px]">
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-600 text-white' 
-            : 'bg-red-600 text-white'
-        }`}>
-          {message.text}
-        </div>
-      )}
-
       <div className="w-full max-w-[500px] flex flex-col gap-[16px]">
         <p className="text-[20px] font-bold font-manrope">
           {t('notifications.silentNotifications')}

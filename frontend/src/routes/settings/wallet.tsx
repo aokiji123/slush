@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { WalletIcon } from '@/icons'
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useWalletBalance, useAddBalance, usePaymentHistory } from '@/api/queries/useWallet'
@@ -18,7 +19,6 @@ function RouteComponent() {
   const { data: paymentHistory, isLoading: historyLoading } = usePaymentHistory(user?.id || '', 1, 10)
   
   const [amount, setAmount] = useState('')
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
 
   const formatDate = (dateString: string) => {
@@ -44,7 +44,7 @@ function RouteComponent() {
 
     const amountNum = parseFloat(amount)
     if (isNaN(amountNum) || amountNum <= 0) {
-      setMessage({ type: 'error', text: t('wallet.invalidAmount') })
+      toast.error(t('wallet.invalidAmount'))
       return
     }
 
@@ -54,9 +54,9 @@ function RouteComponent() {
         title: t('wallet.balanceReplenishment')
       })
       setAmount('')
-      setMessage({ type: 'success', text: t('wallet.successMessage') })
+      toast.success(t('wallet.successMessage'))
     } catch (error) {
-      setMessage({ type: 'error', text: t('wallet.errorMessage') })
+      toast.error(t('wallet.errorMessage'))
     }
   }
 
@@ -156,17 +156,6 @@ function RouteComponent() {
             </p>
           </div>
         </div>
-
-        {/* Message Display */}
-        {message && (
-          <div className={`p-4 rounded-lg ${
-            message.type === 'success' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
-          }`}>
-            {message.text}
-          </div>
-        )}
 
         <div className="flex flex-col gap-[8px]">
           <label

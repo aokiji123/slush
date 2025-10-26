@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Outlet,
   createFileRoute,
@@ -7,13 +7,15 @@ import {
 } from '@tanstack/react-router'
 import {
   FaApple,
+  FaCheck,
   FaPlaystation,
   FaStar,
   FaWindows,
   FaXbox,
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
-import { Search } from '@/components'
+import { toast } from 'react-hot-toast'
+import { Search, PurchaseConfirmationModal } from '@/components'
 import { ComplaintIcon, FavoriteIcon, FavoriteFilledIcon, RepostIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
@@ -21,6 +23,7 @@ import { usePurchaseGame } from '@/api/queries/usePurchase'
 import { useWalletBalance } from '@/api/queries/useWallet'
 import { useGameOwnership } from '@/api/queries/useLibrary'
 import { useFriendsWhoOwnGame, useFriendsWhoWishlistGame } from '@/api/queries/useFriendship'
+import { useCartStore } from '@/lib/cartStore'
 
 export const Route = createFileRoute('/$slug')({
   component: RouteComponent,
@@ -92,10 +95,15 @@ function RouteComponent() {
   const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(game?.data?.id || '')
   const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data?.id || '')
   
-  
+  // Cart functionality
+  const { addToCart, isInCart } = useCartStore()
+  const gameInCart = game?.data?.id ? isInCart(game.data.id) : false
 
   // Check if current game is in wishlist
   const isInWishlist = wishlistData?.data?.some((wishlistGame) => wishlistGame.id === game?.data?.id) || false
+
+  // Modal state
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false)
 
   // Handle wishlist toggle
   const handleWishlistToggle = () => {
@@ -108,17 +116,9 @@ function RouteComponent() {
     }
   }
 
-  // Handle purchase
-  const handlePurchase = async () => {
+  // Handle purchase confirmation from modal
+  const handleConfirmPurchase = async () => {
     if (!game?.data?.id) return
-
-    const gamePrice = game.data.salePrice > 0 ? game.data.salePrice : game.data.price
-    
-    if (walletBalance && walletBalance.amount < gamePrice) {
-      // Redirect to wallet page if insufficient funds
-      navigate({ to: '/settings/wallet' })
-      return
-    }
 
     try {
       const result = await purchaseGameMutation.mutateAsync({
@@ -131,18 +131,27 @@ function RouteComponent() {
         throw new Error(result.message || 'Purchase failed')
       }
       
-      // Remove from wishlist if the game was in wishlist
-      if (isInWishlist) {
-        await removeFromWishlistMutation.mutateAsync({ gameId: game.data.id })
-      }
+      // Close modal
+      setIsPurchaseModalOpen(false)
+      
+      // Note: Wishlist removal is handled automatically by the backend purchase service
       
       // Show success message and navigate to library
-      alert('Purchase successful! The game has been added to your library.')
+      toast.success('Purchase successful! The game has been added to your library.')
       navigate({ to: '/library' })
     } catch (error) {
       console.error('Purchase failed:', error)
-      alert(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // Keep modal open on error so user can try again
     }
+  }
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    if (!game?.data) return
+    
+    addToCart(game.data)
+    toast.success('Game added to cart!')
   }
 
   const currentPage = location.pathname.split('/')[2]
@@ -280,7 +289,7 @@ function RouteComponent() {
                       </button>
                     ) : (
                       <button 
-                        onClick={handlePurchase}
+                        onClick={() => setIsPurchaseModalOpen(true)}
                         disabled={purchaseGameMutation.isPending || !walletBalance}
                         className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] transition-colors ${
                           purchaseGameMutation.isPending || !walletBalance
@@ -300,8 +309,23 @@ function RouteComponent() {
                     )}
                     {!isOwned && (
                       <div className="w-full flex items-center gap-[8px]">
-                        <button className="h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] cursor-pointer">
-                          <p>{t('actions.addToCart')}</p>
+                        <button
+                          onClick={handleAddToCart}
+                          disabled={gameInCart}
+                          className={`h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
+                            gameInCart
+                              ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
+                              : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
+                          }`}
+                        >
+                          {gameInCart ? (
+                            <div className="flex items-center gap-[8px]">
+                              <FaCheck size={16} />
+                              <p>{t('actions.inCart')}</p>
+                            </div>
+                          ) : (
+                            <p>{t('actions.addToCart')}</p>
+                          )}
                         </button>
                         <button 
                           onClick={handleWishlistToggle}
@@ -517,6 +541,18 @@ function RouteComponent() {
           }}
         />
       ))}
+
+      {/* Purchase Confirmation Modal */}
+      {game?.data && walletBalance && (
+        <PurchaseConfirmationModal
+          isOpen={isPurchaseModalOpen}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          game={game.data}
+          walletBalance={walletBalance.amount}
+          onConfirmPurchase={handleConfirmPurchase}
+          isPurchasing={purchaseGameMutation.isPending}
+        />
+      )}
     </div>
   )
 }

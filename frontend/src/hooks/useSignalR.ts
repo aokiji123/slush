@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { signalRService, type SignalRMessage, type TypingIndicator } from '@/lib/signalr'
 import { useAuthState } from '@/api/queries/useAuth'
 
@@ -38,21 +38,14 @@ export const useSignalR = (): UseSignalRReturn => {
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionState, setConnectionState] = useState<string | null>(null)
 
-  // Connect when user is authenticated
+  // Use ref to track current state without causing re-renders
+  const stateRef = useRef({ isConnecting, isConnected })
   useEffect(() => {
-    if (isAuth && user) {
-      connect()
-    } else {
-      disconnect()
-    }
-
-    return () => {
-      disconnect()
-    }
-  }, [isAuth, user])
+    stateRef.current = { isConnecting, isConnected }
+  }, [isConnecting, isConnected])
 
   const connect = useCallback(async () => {
-    if (isConnecting || isConnected) return
+    if (stateRef.current.isConnecting || stateRef.current.isConnected) return
 
     setIsConnecting(true)
     try {
@@ -66,7 +59,7 @@ export const useSignalR = (): UseSignalRReturn => {
     } finally {
       setIsConnecting(false)
     }
-  }, [isConnecting, isConnected])
+  }, [])
 
   const disconnect = useCallback(async () => {
     try {
@@ -77,6 +70,19 @@ export const useSignalR = (): UseSignalRReturn => {
       console.error('Failed to disconnect from SignalR:', error)
     }
   }, [])
+
+  // Connect when user is authenticated
+  useEffect(() => {
+    if (isAuth && user) {
+      connect()
+    } else {
+      disconnect()
+    }
+
+    return () => {
+      disconnect()
+    }
+  }, [isAuth, connect, disconnect])
 
   // Set up event listeners
   useEffect(() => {

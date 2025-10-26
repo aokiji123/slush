@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useMemo, useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 import { DescriptionPole } from '@/components/poleInput/DescriptionPole'
 import { FilePole } from '@/components/poleInput/FilePole'
 import { TextPole } from '@/components/poleInput/TextPole'
@@ -214,10 +215,12 @@ function RouteComponent() {
           })
           
           // Don't fail the entire operation if media upload fails
-          setError(`Пост створено, але не вдалося завантажити медіа: ${uploadError?.response?.data?.message || uploadError?.message || 'Невідома помилка'}`)
+          toast.error(`Пост створено, але не вдалося завантажити медіа: ${uploadError?.response?.data?.message || uploadError?.message || 'Невідома помилка'}`, { duration: 5000 })
         }
       }
 
+      toast.success('Пост успішно створено!')
+      
       // Navigate back to community
       navigate({
         to: '/$slug/community',
@@ -225,7 +228,9 @@ function RouteComponent() {
       })
     } catch (error: any) {
       console.error('Failed to create post:', error)
-      setError(error?.message || error?.response?.data?.message || 'Помилка створення поста')
+      const errorMessage = error?.message || error?.response?.data?.message || 'Помилка створення поста'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }

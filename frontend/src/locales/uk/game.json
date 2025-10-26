@@ -94,5 +94,15 @@
     "contentRequired": "Вміст рецензії обов'язковий",
     "contentTooShort": "Рецензія повинна містити принаймні 10 символів",
     "ratingRequired": "Будь ласка, оберіть оцінку"
+  },
+  "purchaseModal": {
+    "title": "Підтвердити покупку",
+    "currentBalance": "Поточний баланс",
+    "balanceAfter": "Баланс після покупки",
+    "price": "Ціна",
+    "confirmButton": "Підтвердити покупку",
+    "cancelButton": "Скасувати",
+    "insufficientFunds": "Недостатньо коштів у гаманці",
+    "processing": "Обробка..."
   }
 }

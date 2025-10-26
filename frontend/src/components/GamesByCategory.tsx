@@ -2,6 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { FaChevronRight } from 'react-icons/fa'
 import type { GameData } from '@/api/types/game'
+import { GamePriceDisplay } from './GamePriceDisplay'
+import { OptimizedImage } from './OptimizedImage'
 
 type Product = {
   id: string
@@ -79,7 +81,7 @@ const GamesColumn = ({
             navigate({ to: '/$slug', params: { slug: product.id } })
           }}
         >
-          <img
+          <OptimizedImage
             src={product.image || '/game-image.png'}
             alt={product.name}
             loading="lazy"
@@ -90,25 +92,13 @@ const GamesColumn = ({
             <p className="text-[18px] md:text-[20px] font-bold font-manrope line-clamp-1">
               {product.name}
             </p>
-            <div className="flex items-center gap-[8px]">
-              {product.salePrice && (
-                <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">
-                  -25%
-                </p>
-              )}
-              {product.salePrice && (
-                <p className="text-[16px] font-normal">{product.salePrice}₴</p>
-              )}
-              <p
-                className={`text-[16px] font-normal ${
-                  product.salePrice
-                    ? 'line-through text-[var(--color-background-25)] font-extralight'
-                    : ''
-                }`}
-              >
-                {product.price ? `${product.price}₴` : t('common.free')}
-              </p>
-            </div>
+            <GamePriceDisplay
+              price={product.price}
+              salePrice={product.salePrice}
+              discountPercent={product.salePrice ? 25 : undefined}
+              freeText={t('common.free')}
+              size="sm"
+            />
           </div>
         </div>
       ))}

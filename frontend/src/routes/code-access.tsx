@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router'
 import { useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { useVerifyCode, useResendVerificationCode } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/code-access')({
@@ -68,9 +69,9 @@ function RouteComponent() {
         search: { email, code: codeString } as any,
       })
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || t('codeAccess.errors.invalidCode'),
-      )
+      const errorMessage = err?.response?.data?.message || t('codeAccess.errors.invalidCode')
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 
@@ -84,10 +85,9 @@ function RouteComponent() {
       setCode(['', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          t('codeAccess.errors.resendError'),
-      )
+      const errorMessage = err?.response?.data?.message || t('codeAccess.errors.resendError')
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 

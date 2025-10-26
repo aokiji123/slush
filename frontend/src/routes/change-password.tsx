@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { useResetPassword } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/change-password')({
@@ -51,10 +52,9 @@ function RouteComponent() {
 
       navigate({ to: '/login' })
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          t('changePassword.errors.changeError'),
-      )
+      const errorMessage = err?.response?.data?.message || t('changePassword.errors.changeError')
+      setError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 

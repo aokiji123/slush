@@ -2,6 +2,7 @@ import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'react-hot-toast'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
@@ -17,6 +18,9 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Import SignalR Provider
 import { SignalRProvider } from './providers/SignalRProvider'
+
+// Import Toast Container
+import { ToastContainer } from './components/Toast'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
@@ -49,6 +53,31 @@ if (rootElement && !rootElement.innerHTML) {
           <QueryClientProvider client={queryClient}>
             <SignalRProvider>
               <RouterProvider router={router} />
+              <ToastContainer />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'var(--color-background-8)',
+                    color: 'var(--color-background)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--color-background-16)',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'var(--color-background-21)',
+                      secondary: 'white',
+                    },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: 'var(--color-background-10)',
+                      secondary: 'white',
+                    },
+                  },
+                }}
+              />
             </SignalRProvider>
           </QueryClientProvider>
         </Suspense>

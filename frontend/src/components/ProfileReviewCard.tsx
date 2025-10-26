@@ -1,11 +1,11 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useLikePost, useUnlikePost } from '@/api/queries/useCommunity'
-import { useAuthState } from '@/api/queries/useAuth'
-import { FavoriteIcon, FavoriteFilledIcon, CommentsIcon } from '@/icons'
+import { useLikeToggle } from '@/hooks/useLikeToggle'
+import { useShare } from '@/hooks/useShare'
+import { formatRelativeDate } from '@/utils/formatters'
 import { BsThreeDots } from 'react-icons/bs'
-import { FaStar, FaShare } from 'react-icons/fa'
+import { FaStar } from 'react-icons/fa'
 import { OptimizedImage } from './OptimizedImage'
+import { PostActionButtons } from './PostActionButtons'
 
 export interface ProfileReviewCardProps {
   review: {
@@ -32,13 +32,12 @@ export const ProfileReviewCard = ({
   className = '' 
 }: ProfileReviewCardProps) => {
   const navigate = useNavigate()
-  const { user } = useAuthState()
+  const { share } = useShare()
   
-  const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(review.likesCount || 0)
-
-  const likePostMutation = useLikePost()
-  const unlikePostMutation = useUnlikePost()
+  const { isLiked, likesCount, handleLike } = useLikeToggle({
+    itemId: review.id,
+    initialLikesCount: review.likesCount || 0
+  })
 
   const handleReviewClick = () => {
     if (onNavigate) {
@@ -50,57 +49,18 @@ export const ProfileReviewCard = ({
     })
   }
 
-  const handleLike = async (e: React.MouseEvent) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    
-    if (!user) return
-
-    const wasLiked = isLiked
-    const previousLikesCount = likesCount
-
-    // Optimistic update
-    setIsLiked(!wasLiked)
-    setLikesCount(wasLiked ? likesCount - 1 : likesCount + 1)
-
-    try {
-      if (wasLiked) {
-        await unlikePostMutation.mutateAsync(review.id)
-      } else {
-        await likePostMutation.mutateAsync(review.id)
-      }
-    } catch (error) {
-      // Revert optimistic update on error
-      setIsLiked(wasLiked)
-      setLikesCount(previousLikesCount)
-    }
-  }
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    // TODO: Implement share functionality
+    await share({
+      title: review.title,
+      text: review.content,
+      url: `${window.location.origin}/${review.gameId}/community/post/${review.id}`
+    })
   }
 
   const handleComment = (e: React.MouseEvent) => {
     e.stopPropagation()
     handleReviewClick()
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
-    if (diffInHours < 1) return 'Щойно'
-    if (diffInHours < 24) return `${diffInHours} год. тому`
-    
-    const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays} дн. тому`
-    
-    return date.toLocaleDateString('uk-UA', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
   }
 
   const renderStars = (rating: number) => {
@@ -158,44 +118,20 @@ export const ProfileReviewCard = ({
         {/* Date */}
         <div className="mb-[16px]">
           <span className="text-[14px] font-artifakt text-[rgba(204,248,255,0.65)]">
-            {formatDate(review.createdAt)}
+            {formatRelativeDate(review.createdAt)}
           </span>
         </div>
 
         {/* Actions */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-[24px]">
-            {/* Like Button */}
-            <button
-              onClick={handleLike}
-              className="flex items-center gap-[8px] bg-[rgba(55,195,255,0.12)] px-[8px] py-[4px] rounded-[8px] text-[rgba(204,248,255,0.65)] hover:text-[#24E5C2] transition-colors"
-            >
-            {isLiked ? (
-              <FavoriteFilledIcon className="text-[#24E5C2] w-[24px] h-[24px]" />
-            ) : (
-              <FavoriteIcon className="w-[24px] h-[24px]" />
-            )}
-              <span className="text-[16px] font-artifakt-medium">{likesCount}</span>
-            </button>
-
-            {/* Comment Button */}
-            <button
-              onClick={handleComment}
-              className="flex items-center gap-[8px] bg-[rgba(55,195,255,0.12)] px-[8px] py-[4px] rounded-[8px] text-[rgba(204,248,255,0.65)] hover:text-[#24E5C2] transition-colors"
-            >
-              <CommentsIcon className="w-[24px] h-[24px]" />
-              <span className="text-[16px] font-artifakt-medium">{review.commentsCount || 0}</span>
-            </button>
-
-            {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-[8px] bg-[rgba(55,195,255,0.12)] px-[8px] py-[4px] rounded-[8px] text-[rgba(204,248,255,0.65)] hover:text-[#24E5C2] transition-colors"
-            >
-              <FaShare className="w-[24px] h-[24px]" />
-              <span className="text-[16px] font-artifakt-medium">Поділитись</span>
-            </button>
-          </div>
+          <PostActionButtons
+            likesCount={likesCount}
+            commentsCount={review.commentsCount || 0}
+            isLiked={isLiked}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+          />
         </div>
       </div>
     </div>

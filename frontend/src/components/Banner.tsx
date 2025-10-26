@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next'
 import { Search } from './Search'
 import { useNewGames } from '@/api/queries/useGame'
 import { useGenreTranslation } from '@/utils/translateGenre'
+import { formatSimpleDate } from '@/utils/formatters'
+import { GamePriceDisplay } from './GamePriceDisplay'
 import type { GameData } from '@/api/types/game'
 
 // @ts-expect-error - Swiper CSS imports are valid
@@ -28,20 +30,6 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
   const displayGames = games
     .filter((game: GameData) => game.name && !game.isDlc)
     .slice(0, 10)
-
-
-  const formatPrice = (price: number) => {
-    return `${price.toFixed(2)}₴`
-  }
-
-  const formatDate = (dateString: string | Date) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('uk-UA', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
 
   if (isDlc) {
     return (
@@ -128,35 +116,16 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
                     <p className="md:hidden block text-[24px] text-left text-white font-bold font-manrope">
                       {game.name}
                     </p>
-                    {game.price > 0 && (
-                      <div className="flex items-center gap-[16px]">
-                        {game.discountPercent > 0 && (
-                          <p className="rounded-[20px] px-[12px] py-[4px] bg-[var(--color-background-10)]">
-                            -{game.discountPercent}%
-                          </p>
-                        )}
-                        <div className="flex items-center gap-[8px]">
-                          <p className="text-[32px] text-white font-bold font-manrope">
-                            {formatPrice(
-                              game.salePrice > 0 ? game.salePrice : game.price,
-                            )}
-                          </p>
-                          {game.salePrice > 0 && game.discountPercent > 0 && (
-                            <p className="text-[32px] text-[var(--color-background-25)] font-extralight line-through">
-                              {formatPrice(game.price)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {game.price === 0 && (
-                      <p className="text-[32px] text-white font-bold font-manrope">
-                        {t('home.freeToPlay')}
-                      </p>
-                    )}
+                    <GamePriceDisplay
+                      price={game.price}
+                      salePrice={game.salePrice}
+                      discountPercent={game.discountPercent}
+                      freeText={t('home.freeToPlay')}
+                      size="md"
+                    />
                     {game.saleDate && game.discountPercent > 0 && (
                       <p className="text-[16px] text-[var(--color-background-25)] font-normal text-left md:text-center">
-                        {t('home.discountValidUntil')} {formatDate(game.saleDate)}
+                        {t('home.discountValidUntil')} {formatSimpleDate(String(game.saleDate))}
                       </p>
                     )}
                   </div>

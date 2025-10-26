@@ -14,6 +14,7 @@ import { useState, useCallback } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SearchModal } from './SearchModal'
 import { useCartStore } from '@/lib/cartStore'
+import { useWishlist } from '@/api/queries/useWishlist'
 
 type SearchProps = {
   className?: string
@@ -36,6 +37,8 @@ export const Search = ({
   const [internalSearchText, setInternalSearchText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const cartCount = useCartStore((state) => state.getCartCount())
+  const { data: wishlistData } = useWishlist()
+  const wishlistDiscountCount = wishlistData?.data?.filter(game => game.discountPercent > 0).length || 0
   
   // Use external search text if provided, otherwise use internal state
   const searchText = externalSearchText !== undefined ? externalSearchText : internalSearchText
@@ -137,7 +140,7 @@ export const Search = ({
       {location.pathname !== '/library' && (
         <div className="sm:flex hidden items-center gap-[8px]">
           <div
-            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer transition-colors ${
+            className={`w-[52px] h-[52px] flex items-center justify-center rounded-[20px] cursor-pointer relative ${
               location.pathname === '/wishlist'
                 ? 'bg-[#F1FDFF]'
                 : 'bg-[var(--color-background-16)]'
@@ -150,6 +153,11 @@ export const Search = ({
               <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
             ) : (
               <FavoriteIcon className="w-[24px] h-[24px] text-white" />
+            )}
+            {wishlistDiscountCount > 0 && (
+              <div className="absolute -top-1 -right-1 bg-[var(--color-background-21)] text-[var(--color-night-background)] rounded-full w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold">
+                {wishlistDiscountCount > 99 ? '99+' : wishlistDiscountCount}
+              </div>
             )}
           </div>
           <div

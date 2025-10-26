@@ -89,7 +89,7 @@ export const Product = memo(({ linear, game }: ProductProps) => {
     </div>
   ) : (
     <div
-      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer relative group`}
+      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer relative group flex flex-col h-full`}
       key={game.id}
       onClick={handleCardClick}
     >
@@ -97,12 +97,12 @@ export const Product = memo(({ linear, game }: ProductProps) => {
         src={game.mainImage}
         alt={game.name}
         loading="lazy"
-        className={`max-w-[1000px] w-full h-[400px] object-cover`}
+        className={`max-w-[1000px] w-full h-[400px] object-cover flex-shrink-0`}
       />
 
-      <div className="p-[20px] pt-[16px] text-white text-left">
+      <div className="p-[20px] pt-[16px] text-white text-left flex flex-col flex-1">
         <p className="text-[20px] font-bold mb-[8px]">{game.name}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-[8px]">
             {hasDiscount && (
               <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">

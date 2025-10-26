@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import { ChangeImageIcon } from '@/icons'
 import { Select } from '@/components/Select'
 import { useAuthenticatedUser, useUpdateUser, useUploadAvatar, useUploadBanner } from '@/api/queries/useUser'
@@ -40,7 +41,6 @@ function RouteComponent() {
   })
   const [originalData, setOriginalData] = useState(formData)
   const [isDirty, setIsDirty] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Map backend language codes to frontend language codes
   const mapBackendLanguageCode = (backendLang: string): string => {
@@ -106,11 +106,9 @@ function RouteComponent() {
       
       await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
       
-      setMessage({ type: 'success', text: t('general.success') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success(t('general.success'))
     } catch (error) {
-      setMessage({ type: 'error', text: t('general.error') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error(t('general.error'))
     }
   }
 
@@ -120,11 +118,9 @@ function RouteComponent() {
 
     try {
       await uploadAvatarMutation.mutateAsync({ userId: user.id, file })
-      setMessage({ type: 'success', text: t('general.avatarSuccess') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success(t('general.avatarSuccess'))
     } catch (error) {
-      setMessage({ type: 'error', text: t('general.avatarError') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error(t('general.avatarError'))
     }
   }
 
@@ -134,11 +130,9 @@ function RouteComponent() {
 
     try {
       await uploadBannerMutation.mutateAsync({ userId: user.id, file })
-      setMessage({ type: 'success', text: t('general.bannerSuccess') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success(t('general.bannerSuccess'))
     } catch (error) {
-      setMessage({ type: 'error', text: t('general.bannerError') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error(t('general.bannerError'))
     }
   }
 
@@ -156,34 +150,29 @@ function RouteComponent() {
 
     // Client-side validation
     if (!formData.nickname || formData.nickname.trim().length < 2) {
-      setMessage({ type: 'error', text: 'Nickname must be at least 2 characters long' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error('Nickname must be at least 2 characters long')
       return
     }
 
     if (formData.nickname.trim().length > 50) {
-      setMessage({ type: 'error', text: 'Nickname cannot exceed 50 characters' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error('Nickname cannot exceed 50 characters')
       return
     }
 
     // Check nickname format (only letters, numbers, underscores, and hyphens)
     const nicknameRegex = /^[a-zA-Z0-9_-]+$/
     if (!nicknameRegex.test(formData.nickname.trim())) {
-      setMessage({ type: 'error', text: 'Nickname can only contain letters, numbers, underscores, and hyphens' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error('Nickname can only contain letters, numbers, underscores, and hyphens')
       return
     }
 
     if (!formData.email || !formData.email.includes('@')) {
-      setMessage({ type: 'error', text: 'Please enter a valid email address' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error('Please enter a valid email address')
       return
     }
 
     if (formData.bio && formData.bio.length > 500) {
-      setMessage({ type: 'error', text: 'Bio cannot exceed 500 characters' })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error('Bio cannot exceed 500 characters')
       return
     }
 
@@ -201,8 +190,7 @@ function RouteComponent() {
       await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
       setOriginalData(formData)
       setIsDirty(false)
-      setMessage({ type: 'success', text: t('general.success') })
-      setTimeout(() => setMessage(null), 3000)
+      toast.success(t('general.success'))
     } catch (error) {
       console.error('Update user error:', error)
       
@@ -217,15 +205,13 @@ function RouteComponent() {
         }
       }
       
-      setMessage({ type: 'error', text: errorMessage })
-      setTimeout(() => setMessage(null), 3000)
+      toast.error(errorMessage)
     }
   }
 
   const handleCancel = () => {
     setFormData(originalData)
     setIsDirty(false)
-    setMessage(null)
   }
 
   if (userLoading) {
@@ -250,17 +236,6 @@ function RouteComponent() {
 
   return (
     <div className="w-full bg-[var(--color-background-15)] rounded-[20px] overflow-hidden text-white">
-      {/* Message Display */}
-      {message && (
-        <div className={`p-4 m-4 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-600 text-white' 
-            : 'bg-red-600 text-white'
-        }`}>
-          {message.text}
-        </div>
-      )}
-
       <div className="w-full relative">
         <img
           src={user.banner || "/banner-settings.jpg"}
