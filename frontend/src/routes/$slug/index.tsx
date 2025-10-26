@@ -58,6 +58,7 @@ function RouteComponent() {
   const { data: isOwned } = useGameOwnership(game?.data?.id || '')
   const swiperRef = useRef<SwiperType | null>(null)
   const [selectedImage, setSelectedImage] = useState<string>('')
+  const [activeImageIndex, setActiveImageIndex] = useState<number>(0)
   
   const gameInCart = game?.data ? isInCart(game.data.id) : false
 
@@ -72,6 +73,7 @@ function RouteComponent() {
     if (game?.data) {
       // Always use mainImage as the default selected image
       setSelectedImage(game.data.mainImage)
+      setActiveImageIndex(0)
     }
   }, [game?.data])
 
@@ -100,13 +102,47 @@ function RouteComponent() {
     const activeIndex = swiper.activeIndex
     if (allImages[activeIndex]) {
       setSelectedImage(allImages[activeIndex])
+      setActiveImageIndex(activeIndex)
     }
   }
 
   const handleSlideClick = (index: number) => {
     setSelectedImage(allImages[index])
+    setActiveImageIndex(index)
     if (swiperRef.current) {
       swiperRef.current.slideTo(index)
+    }
+  }
+
+  const handlePrevClick = () => {
+    if (allImages.length === 0) return
+    
+    // Calculate the previous image index with wraparound
+    const newIndex = activeImageIndex > 0 ? activeImageIndex - 1 : allImages.length - 1
+    
+    // Update selected image immediately
+    setSelectedImage(allImages[newIndex])
+    setActiveImageIndex(newIndex)
+    
+    // Tell swiper to slide to this index
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(newIndex)
+    }
+  }
+
+  const handleNextClick = () => {
+    if (allImages.length === 0) return
+    
+    // Calculate the next image index with wraparound
+    const newIndex = activeImageIndex < allImages.length - 1 ? activeImageIndex + 1 : 0
+    
+    // Update selected image immediately
+    setSelectedImage(allImages[newIndex])
+    setActiveImageIndex(newIndex)
+    
+    // Tell swiper to slide to this index
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(newIndex)
     }
   }
 
@@ -212,13 +248,13 @@ function RouteComponent() {
           <>
             <div 
               className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -left-3 top-[35px] z-10 shadow-lg cursor-pointer"
-              onClick={() => swiperRef.current?.slidePrev()}
+              onClick={handlePrevClick}
             >
               <FaChevronLeft size={16} />
             </div>
             <div 
               className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -right-3 top-[35px] z-10 shadow-lg cursor-pointer"
-              onClick={() => swiperRef.current?.slideNext()}
+              onClick={handleNextClick}
             >
               <FaChevronRight size={16} />
             </div>
