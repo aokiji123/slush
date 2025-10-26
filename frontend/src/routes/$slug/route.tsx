@@ -360,18 +360,43 @@ function RouteComponent() {
                     <div className="flex items-center justify-between">
                       <p className="text-[16px] font-bold">{t('sidebar.platforms')}</p>
                       <div className="flex items-center gap-[12px]">
-                        {game.data.platforms.some(p => p.toLowerCase() === 'windows') && (
-                          <FaWindows size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'apple') && (
-                          <FaApple size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'playstation') && (
-                          <FaPlaystation size={24} />
-                        )}
-                        {game.data.platforms.some(p => p.toLowerCase() === 'xbox') && (
-                          <FaXbox size={24} />
-                        )}
+                        {(() => {
+                          const platforms = game.data.platforms
+                          const hasPlatforms = Array.isArray(platforms) && platforms.length > 0
+                          
+                          if (!hasPlatforms) {
+                            return <p className="text-[14px] text-[var(--color-background-25)]">N/A</p>
+                          }
+                          
+                          return (
+                            <>
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'windows' || lower === 'pc' || lower.includes('windows')
+                              }) && (
+                                <FaWindows size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'apple' || lower === 'mac' || lower === 'macos' || lower.includes('mac')
+                              }) && (
+                                <FaApple size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'playstation' || lower === 'ps' || lower.includes('ps') || lower.includes('playstation')
+                              }) && (
+                                <FaPlaystation size={24} />
+                              )}
+                              {platforms.some(p => {
+                                const lower = p.toLowerCase()
+                                return lower === 'xbox' || lower.includes('xbox')
+                              }) && (
+                                <FaXbox size={24} />
+                              )}
+                            </>
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>

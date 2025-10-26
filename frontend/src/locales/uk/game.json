@@ -16,7 +16,16 @@
     "additional": "Додатково",
     "languageSupport": "Мовна підтримка",
     "audio": "Аудіо",
-    "text": "Текст"
+    "text": "Текст",
+    "noDataForPlatform": "Характеристики для цієї платформи недоступні.",
+    "consoleFeatures": "Особливості консолі",
+    "resolution": "Роздільність",
+    "frameRate": "Частота кадрів",
+    "performanceModes": "Режими продуктивності",
+    "hdrSupport": "Підтримка HDR",
+    "rayTracing": "Ray Tracing",
+    "controllerFeatures": "Особливості контролера",
+    "onlineRequired": "Потрібна онлайн-гра"
   },
   "bundles": {
     "title": "Комплекти",

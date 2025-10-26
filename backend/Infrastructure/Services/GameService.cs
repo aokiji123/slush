@@ -462,13 +462,14 @@ public class GameService : IGameService
         return await GetDlcsByGameIdAsync(game.Id, language);
     }
 
-    public async Task<GameCharacteristicDto?> GetGameCharacteristicsAsync(Guid gameId)
+    public async Task<List<GameCharacteristicDto>> GetGameCharacteristicsAsync(Guid gameId)
     {
         return await _db.Set<GameCharacteristic>()
             .AsNoTracking()
             .Where(gc => gc.GameId == gameId)
             .Select(gc => new GameCharacteristicDto
             {
+                Id = gc.Id,
                 GameId = gc.GameId,
                 Platform = gc.Platform,
                 MinVersion = gc.MinVersion,
@@ -487,10 +488,71 @@ public class GameService : IGameService
                 RecommendedAudioCard = gc.RecommendedAudioCard,
                 Controller = gc.Controller,
                 Additional = gc.Additional,
-                LangAudio = gc.LangAudio,
-                LangText = gc.LangText
+                LangAudio = gc.LangAudio ?? new List<string>(),
+                LangText = gc.LangText ?? new List<string>()
             })
-            .FirstOrDefaultAsync();
+            .ToListAsync();
+    }
+    
+    public async Task<GamePlatformInfoDto?> GetGamePlatformInfoAsync(string identifier)
+    {
+        // Try to parse as GUID first, then fall back to slug
+        var game = Guid.TryParse(identifier, out var gameId)
+            ? await _db.Set<Game>()
+                .AsNoTracking()
+                .Include(g => g.GameCharacteristics)
+                .Include(g => g.ConsoleFeatures)
+                .FirstOrDefaultAsync(g => g.Id == gameId)
+            : await _db.Set<Game>()
+                .AsNoTracking()
+                .Include(g => g.GameCharacteristics)
+                .Include(g => g.ConsoleFeatures)
+                .FirstOrDefaultAsync(g => g.Slug == identifier);
+            
+        if (game == null) return null;
+        
+        return new GamePlatformInfoDto
+        {
+            PcCharacteristics = game.GameCharacteristics.Select(gc => new GameCharacteristicDto
+            {
+                Id = gc.Id,
+                GameId = gc.GameId,
+                Platform = gc.Platform,
+                MinVersion = gc.MinVersion,
+                MinCpu = gc.MinCpu,
+                MinRam = gc.MinRam,
+                MinGpu = gc.MinGpu,
+                MinDirectX = gc.MinDirectX,
+                MinMemory = gc.MinMemory,
+                MinAudioCard = gc.MinAudioCard,
+                RecommendedVersion = gc.RecommendedVersion,
+                RecommendedCpu = gc.RecommendedCpu,
+                RecommendedRam = gc.RecommendedRam,
+                RecommendedGpu = gc.RecommendedGpu,
+                RecommendedDirectX = gc.RecommendedDirectX,
+                RecommendedMemory = gc.RecommendedMemory,
+                RecommendedAudioCard = gc.RecommendedAudioCard,
+                Controller = gc.Controller,
+                Additional = gc.Additional,
+                LangAudio = gc.LangAudio ?? new List<string>(),
+                LangText = gc.LangText ?? new List<string>()
+            }).ToList(),
+            ConsoleFeatures = game.ConsoleFeatures.Select(cf => new GameConsoleFeaturesDto
+            {
+                Id = cf.Id,
+                GameId = cf.GameId,
+                Platform = cf.Platform,
+                PerformanceModes = cf.PerformanceModes,
+                Resolution = cf.Resolution,
+                FrameRate = cf.FrameRate,
+                HDRSupport = cf.HDRSupport,
+                RayTracingSupport = cf.RayTracingSupport,
+                ControllerFeatures = cf.ControllerFeatures,
+                StorageRequired = cf.StorageRequired,
+                OnlinePlayRequired = cf.OnlinePlayRequired
+            }).ToList(),
+            AvailablePlatforms = game.Platforms ?? new List<string>()
+        };
     }
 
 

@@ -5,6 +5,7 @@ import type {
   CreateReviewRequest,
   Game,
   GameCharacteristics,
+  GamePlatformInfo,
   GamesListResponse,
   PagedGamesResponse,
   Review,
@@ -89,6 +90,11 @@ async function getGameCharacteristics(
   id: string,
 ): Promise<GameCharacteristics> {
   const { data } = await axiosInstance.get(`/game/${id}/characteristics`)
+  return data
+}
+
+async function getGamePlatformInfo(identifier: string): Promise<GamePlatformInfo> {
+  const { data } = await axiosInstance.get(`/game/${identifier}/platforms`)
   return data
 }
 
@@ -254,6 +260,16 @@ export function useGameCharacteristics(id: string) {
   return useQuery({
     queryKey: ['gameCharacteristics', id],
     queryFn: () => getGameCharacteristics(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useGamePlatformInfo(identifier: string) {
+  return useQuery({
+    queryKey: ['gamePlatformInfo', identifier],
+    queryFn: () => getGamePlatformInfo(identifier),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,

@@ -67,29 +67,56 @@ export type UpdateReviewRequest = {
   Rating: number
 }
 
+export type GameCharacteristicData = {
+  id: string
+  gameId: string
+  platform: string
+  minVersion: string
+  minCpu: string
+  minRam: string
+  minGpu: string
+  minDirectX: string
+  minMemory: string
+  minAudioCard: string
+  recommendedVersion: string
+  recommendedCpu: string
+  recommendedRam: string
+  recommendedGpu: string
+  recommendedDirectX: string
+  recommendedMemory: string
+  recommendedAudioCard: string
+  controller: string
+  additional: string
+  langAudio: string[]
+  langText: string[]
+}
+
 export type GameCharacteristics = {
   success: boolean
   message: string
+  data: GameCharacteristicData[]
+}
+
+export type GameConsoleFeature = {
+  id: string
+  gameId: string
+  platform: string
+  performanceModes?: string
+  resolution?: string
+  frameRate?: string
+  hdrSupport: boolean
+  rayTracingSupport: boolean
+  controllerFeatures?: string
+  storageRequired?: string
+  onlinePlayRequired: boolean
+}
+
+export type GamePlatformInfo = {
+  success: boolean
+  message: string
   data: {
-    gameId: string
-    platform: string
-    minVersion: string
-    minCpu: string
-    minRam: string
-    minGpu: string
-    minDirectX: string
-    minMemory: string
-    minAudioCard: string
-    recommendedVersion: string
-    recommendedCpu: string
-    recommendedRam: string
-    recommendedGpu: string
-    recommendedDirectX: string
-    recommendedMemory: string
-    recommendedAudioCard: string
-    controller: string
-    additional: string
-    langAudio: string[]
-    langText: string[]
+    pcCharacteristics: GameCharacteristicData[]
+    consoleFeatures: GameConsoleFeature[]
+    availablePlatforms: string[]
   }
 }
