@@ -57,8 +57,13 @@ class SignalRService {
   private isConnecting = false
 
   private getConnectionUrl(): string {
-    const baseUrl = import.meta.env.VITE_DOTNET_API_URL || 'http://localhost:5088'
-    return `${baseUrl}/hubs/chat`
+    // In development, use relative path (Vite proxy will handle it)
+    // In production, use the configured API URL or fallback to relative
+    if (import.meta.env.PROD) {
+      const baseUrl = import.meta.env.VITE_DOTNET_API_URL || ''
+      return baseUrl ? `${baseUrl}/api/hubs/chat` : '/api/hubs/chat'
+    }
+    return '/api/hubs/chat'
   }
 
   private getAuthToken(): string | null {
