@@ -2,10 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileTabSection, ProfileGameCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics } from '@/api/queries/useProfile'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
 import { useMyLibraryQuery, useSharedGames } from '@/api/queries/useLibrary'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { useProfileActions } from '@/hooks'
 import type { LibraryQueryParams } from '@/api/types/library'
 
 export const Route = createFileRoute('/profile/$nickname/games')({
@@ -31,11 +31,13 @@ function ProfileGamesPage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
@@ -188,12 +190,12 @@ function ProfileGamesPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">

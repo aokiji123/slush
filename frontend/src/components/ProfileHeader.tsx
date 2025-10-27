@@ -1,3 +1,5 @@
+import { OptimizedImage } from './OptimizedImage'
+
 interface ProfileHeaderProps {
   username: string
   bio: string
@@ -31,10 +33,12 @@ export const ProfileHeader = ({
     <div className="relative mb-[40px]">
       {/* Banner */}
       <div className="relative h-[240px] rounded-[20px] overflow-hidden">
-        <img
+        <OptimizedImage
           src={banner}
           alt="Profile banner"
           className="w-full h-full object-cover"
+          loading="lazy"
+          placeholder="/banner.png"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-night-background)] to-transparent" />
       </div>
@@ -42,10 +46,12 @@ export const ProfileHeader = ({
       {/* Avatar and Info */}
       <div className="flex items-start gap-[24px] -mt-[100px] relative z-10">
         <div className="relative">
-          <img
+          <OptimizedImage
             src={avatar}
             alt={username}
             className="w-[200px] h-[200px] rounded-[20px] border-4 border-[var(--color-background-15)] object-cover"
+            loading="eager"
+            placeholder="/avatar.png"
           />
           {isOnline && (
             <div className="absolute -bottom-2 -right-2 w-[24px] h-[24px] bg-[var(--color-background-21)] rounded-full border-4 border-[var(--color-background-15)]" />

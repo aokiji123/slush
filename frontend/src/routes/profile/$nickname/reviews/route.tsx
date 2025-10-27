@@ -2,9 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileReviewCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics, useUserReviews } from '@/api/queries/useProfile'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { useProfileActions } from '@/hooks'
 import type { Review } from '@/api/types/game'
 import { useGameById } from '@/api/queries/useGame'
 
@@ -27,11 +27,13 @@ function ProfileReviewsPage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
@@ -176,12 +178,12 @@ function ProfileReviewsPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">

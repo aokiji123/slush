@@ -1,5 +1,6 @@
 import type { PostDto } from '@/types/community'
 import { PostType } from '@/types/community'
+import { OptimizedImage } from './OptimizedImage'
 
 interface VideoGalleryProps {
   posts: PostDto[]
@@ -56,10 +57,12 @@ export const VideoGallery = ({ posts }: VideoGalleryProps) => {
         {/* Featured Video */}
         {featuredPost && (
           <div className="relative w-full h-[522px] bg-[var(--color-background-15)] rounded-[16px] overflow-hidden group">
-            <img
+            <OptimizedImage
               src={getCoverVideo(featuredPost)}
               alt={featuredPost.title}
               className="w-full h-full object-cover"
+              loading="lazy"
+              placeholder="/game-image.png"
             />
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
               <PlayButton size="large" />
@@ -74,10 +77,12 @@ export const VideoGallery = ({ posts }: VideoGalleryProps) => {
               key={post.id}
               className="relative w-[345px] h-[184px] bg-[var(--color-background-15)] rounded-[16px] overflow-hidden group cursor-pointer"
             >
-              <img
+              <OptimizedImage
                 src={getCoverVideo(post)}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                placeholder="/game-image.png"
               />
               <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <PlayButton size="small" />
