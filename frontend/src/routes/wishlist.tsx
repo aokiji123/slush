@@ -5,7 +5,10 @@ import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { Search, SidebarFilter, SortDropdown } from '@/components'
 import { useGenreTranslation } from '@/utils/translateGenre'
-import { useWishlistQuery, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import {
+  useWishlistQuery,
+  useRemoveFromWishlist,
+} from '@/api/queries/useWishlist'
 import { useCartStore } from '@/lib/cartStore'
 import type { WishlistQueryParams } from '@/api/types/wishlist'
 import type { CatalogFilters } from '@/types/catalog'
@@ -80,19 +83,24 @@ function RouteComponent() {
     isDlc: filters.isDlc,
   }
 
-  const { data: wishlistData, isLoading, isError } = useWishlistQuery(queryParams)
+  const {
+    data: wishlistData,
+    isLoading,
+    isError,
+  } = useWishlistQuery(queryParams)
 
   // Client-side search filtering (wishlist is small, instant filtering)
-  const filteredItems = wishlistData?.data?.items?.filter((game) => {
-    if (!searchText.trim()) return true
-    const searchLower = searchText.toLowerCase()
-    return (
-      game.name?.toLowerCase().includes(searchLower) ||
-      game.developer?.toLowerCase().includes(searchLower) ||
-      game.publisher?.toLowerCase().includes(searchLower) ||
-      game.description?.toLowerCase().includes(searchLower)
-    )
-  }) || []
+  const filteredItems =
+    wishlistData?.data?.items?.filter((game) => {
+      if (!searchText.trim()) return true
+      const searchLower = searchText.toLowerCase()
+      return (
+        game.name?.toLowerCase().includes(searchLower) ||
+        game.developer?.toLowerCase().includes(searchLower) ||
+        game.publisher?.toLowerCase().includes(searchLower) ||
+        game.description?.toLowerCase().includes(searchLower)
+      )
+    }) || []
 
   function handleSortDropdownOpen() {
     setIsSortDropdownOpen(!isSortDropdownOpen)
@@ -124,19 +132,19 @@ function RouteComponent() {
           {t('wishlist.title')}
         </h2>
 
-        <div className="flex gap-[24px] mt-[16px]">
-          <div className="w-[25%]">
-            <SidebarFilter 
-              noSort 
+        <div className="flex flex-col lg:flex-row gap-[24px] mt-[16px]">
+          <div className="lg:w-[25%] w-full">
+            <SidebarFilter
+              noSort
               filters={filters}
               onFiltersChange={setFilters}
               onSortChange={handleSortChange}
             />
           </div>
 
-          <div className="w-[75%] pb-[256px]">
+          <div className="lg:w-[75%] w-full pb-[256px]">
             <div className="bg-[var(--color-background-8)] p-[20px] rounded-[20px] flex flex-col gap-[16px]">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-[16px]">
                 <input
                   className="w-full max-w-[420px] h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)]"
                   placeholder={t('wishlist.searchPlaceholder')}
@@ -151,7 +159,10 @@ function RouteComponent() {
                     className="text-[var(--color-background)] text-[16px] flex items-center gap-[4px] cursor-pointer"
                     onClick={handleSortDropdownOpen}
                   >
-                    <p>{sortOptions.find(opt => opt.value === sortBy)?.label || tCommon('sorting.relevance')}</p>
+                    <p>
+                      {sortOptions.find((opt) => opt.value === sortBy)?.label ||
+                        tCommon('sorting.relevance')}
+                    </p>
 
                     {isSortDropdownOpen ? (
                       <FaChevronUp size={16} />
@@ -170,35 +181,41 @@ function RouteComponent() {
                 </div>
               </div>
               <div className="flex flex-col gap-[8px]">
-                      {isLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                          <p className="text-[var(--color-background-25)] text-lg">Loading wishlist...</p>
-                        </div>
-                      ) : isError ? (
-                        <div className="flex items-center justify-center py-8">
-                          <p className="text-red-400 text-lg">Error loading wishlist</p>
-                        </div>
-                      ) : !filteredItems.length ? (
-                        <div className="flex items-center justify-center py-8">
-                          <p className="text-[var(--color-background-25)] text-lg">
-                            {searchText ? 'No games found matching your search' : 'Your wishlist is empty'}
-                          </p>
-                        </div>
-                      ) : (
-                        filteredItems.map((game) => (
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-[var(--color-background-25)] text-lg">
+                      Loading wishlist...
+                    </p>
+                  </div>
+                ) : isError ? (
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-red-400 text-lg">
+                      Error loading wishlist
+                    </p>
+                  </div>
+                ) : !filteredItems.length ? (
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-[var(--color-background-25)] text-lg">
+                      {searchText
+                        ? 'No games found matching your search'
+                        : 'Your wishlist is empty'}
+                    </p>
+                  </div>
+                ) : (
+                  filteredItems.map((game) => (
                     <div
                       key={game.id}
-                      className="bg-[var(--color-background-15)] rounded-[20px] p-[16px] flex gap-[20px]"
+                      className="bg-[var(--color-background-15)] rounded-[20px] p-[16px] flex flex-col lg:flex-row gap-[20px]"
                     >
                       <img
                         src={game.mainImage}
                         alt={game.name}
-                        className="w-[320px] h-[145px] rounded-[12px] object-cover"
+                        className="lg:w-[320px] w-full lg:h-[145px] h-[200px] rounded-[12px] object-cover"
                       />
                       <div className="flex flex-col gap-[20px] w-full">
-                        <div className="flex flex-col gap-[12px]">
+                        <div className="flex flex-col lg:gap-[12px]">
                           <div className="flex items-center justify-between">
-                            <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
+                            <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope line-clamp-1">
                               {game.name}
                             </p>
                             <MdClose
@@ -223,7 +240,7 @@ function RouteComponent() {
                             )}
                           </div>
                         </div>
-                        <div className="flex justify-between w-full">
+                        <div className="flex flex-col items-start lg:flex-row lg:justify-between lg:items-center w-full gap-[16px]">
                           <div className="flex items-center gap-[4px] h-[24px] justify-center">
                             <p className="text-[24px] font-medium text-[var(--color-background)]">
                               {game.rating.toFixed(1)}
@@ -244,7 +261,10 @@ function RouteComponent() {
                                   )}
                                   <div className="flex items-center gap-[8px]">
                                     <p className="text-[20px] font-bold text-[var(--color-background)]">
-                                      {game.discountPercent > 0 ? game.salePrice : game.price}₴
+                                      {game.discountPercent > 0
+                                        ? game.salePrice
+                                        : game.price}
+                                      ₴
                                     </p>
                                     {game.discountPercent > 0 && (
                                       <p className="text-[20px] font-normal line-through text-[var(--color-background-25)]">
@@ -255,11 +275,14 @@ function RouteComponent() {
                                 </div>
                                 {game.saleDate && (
                                   <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-                                    {t('wishlist.discountValidUntil')} {new Date(game.saleDate).toLocaleDateString()}
+                                    {t('wishlist.discountValidUntil')}{' '}
+                                    {new Date(
+                                      game.saleDate,
+                                    ).toLocaleDateString()}
                                   </p>
                                 )}
                               </div>
-                              <button 
+                              <button
                                 className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
                                   isInCart(game.id)
                                     ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'

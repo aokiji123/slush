@@ -3,7 +3,14 @@ import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
 import { FiPlusCircle } from 'react-icons/fi'
-import { Search, LibraryPostCard, LibraryNewsCard, OptimizedImage, Pagination, CollectionModal } from '@/components'
+import {
+  Search,
+  LibraryPostCard,
+  LibraryNewsCard,
+  OptimizedImage,
+  Pagination,
+  CollectionModal,
+} from '@/components'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { useMyLibraryQuery } from '@/api/queries/useLibrary'
 import { useLibraryPosts } from '@/api/queries/useCommunity'
@@ -20,7 +27,6 @@ import 'swiper/css/navigation'
 export const Route = createFileRoute('/library')({
   component: RouteComponent,
 })
-
 
 const glowCoords = [
   {
@@ -53,7 +59,9 @@ function RouteComponent() {
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
   const [searchText, setSearchText] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | 'myCollection'>('all')
+  const [activeFilter, setActiveFilter] = useState<
+    'all' | 'favorites' | 'myCollection'
+  >('all')
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false)
   const debouncedSearchText = useDebounce(searchText, 300)
 
@@ -61,20 +69,32 @@ function RouteComponent() {
   const newsSwiperRef = useRef<any>(null)
   const communitySwiperRef = useRef<any>(null)
 
-  const { data: libraryData, isLoading, isError } = useMyLibraryQuery({
+  const {
+    data: libraryData,
+    isLoading,
+    isError,
+  } = useMyLibraryQuery({
     page: currentPage,
     limit: 20,
   })
 
   // Fetch news posts from user's library
-  const { data: newsPosts, isLoading: newsLoading, isError: newsError } = useLibraryPosts({
+  const {
+    data: newsPosts,
+    isLoading: newsLoading,
+    isError: newsError,
+  } = useLibraryPosts({
     type: PostType.News,
     sortBy: 'recent',
     limit: 10,
   })
 
   // Fetch popular posts (excluding news) from user's library
-  const { data: communityPosts, isLoading: communityLoading, isError: communityError } = useLibraryPosts({
+  const {
+    data: communityPosts,
+    isLoading: communityLoading,
+    isError: communityError,
+  } = useLibraryPosts({
     sortBy: 'popular',
     limit: 10,
   })
@@ -84,36 +104,40 @@ function RouteComponent() {
   }
 
   // Filter out news posts from community highlights
-  const filteredCommunityPosts = communityPosts?.filter(post => post.type !== PostType.News) || []
+  const filteredCommunityPosts =
+    communityPosts?.filter((post) => post.type !== PostType.News) || []
 
   // Filter games based on active filter and search text
-  const filteredGames = (libraryData?.data?.items ?? []).filter(game => {
-    const matchesSearch = game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
-    
+  const filteredGames = (libraryData?.data?.items ?? []).filter((game) => {
+    const matchesSearch = game.name
+      .toLowerCase()
+      .includes(debouncedSearchText.toLowerCase())
+
     if (activeFilter === 'favorites') {
       return matchesSearch && game.isFavorite === true
     }
-    
+
     // TODO: Implement collections when backend supports it
     if (activeFilter === 'myCollection') {
       // For now, return all games - will be implemented when backend supports collections
       return matchesSearch
     }
-    
+
     // 'all' filter - return all games
     return matchesSearch
   })
 
   // Navigation handlers
   const handlePostClick = (postId: string, gameId: string) => {
-    navigate({ to: '/$slug/community/post/$id', params: { slug: gameId, id: postId } })
+    navigate({
+      to: '/$slug/community/post/$id',
+      params: { slug: gameId, id: postId },
+    })
   }
 
   const handleGameClick = (gameSlug: string) => {
     navigate({ to: '/$slug', params: { slug: gameSlug } })
   }
-
-
 
   return (
     <div className="bg-[var(--color-night-background)] min-h-screen flex flex-col">
@@ -140,7 +164,9 @@ function RouteComponent() {
             <div className="flex flex-col gap-[20px]">
               {isLoading ? (
                 <div className="text-center py-4">
-                  <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
+                  <p className="text-[var(--color-background-25)]">
+                    {t('common.loading')}
+                  </p>
                 </div>
               ) : isError ? (
                 <div className="text-center py-4">
@@ -149,13 +175,15 @@ function RouteComponent() {
               ) : filteredGames.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-[var(--color-background-25)]">
-                    {searchText ? t('search.noResults') : t('empty.noGamesInLibrary')}
+                    {searchText
+                      ? t('search.noResults')
+                      : t('empty.noGamesInLibrary')}
                   </p>
                 </div>
               ) : (
                 filteredGames.map((game) => (
-                  <div 
-                    key={game.id} 
+                  <div
+                    key={game.id}
                     className="flex items-center gap-[16px] cursor-pointer hover:bg-[var(--color-background-15)] transition-colors p-2 rounded-[8px]"
                     onClick={() => handleGameClick(game.slug)}
                   >
@@ -191,7 +219,9 @@ function RouteComponent() {
           />
 
           <div className="flex flex-col gap-[12px] mb-[48px]">
-            <h3 className="text-[24px] font-bold text-white">{t('empty.news')}</h3>
+            <h3 className="text-[24px] font-bold text-white">
+              {t('empty.news')}
+            </h3>
 
             <div className="relative">
               <Swiper
@@ -206,7 +236,9 @@ function RouteComponent() {
                 {newsLoading ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[450px]">
-                      <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
+                      <p className="text-[var(--color-background-25)]">
+                        {t('common.loading')}
+                      </p>
                     </div>
                   </SwiperSlide>
                 ) : newsError ? (
@@ -218,7 +250,7 @@ function RouteComponent() {
                 ) : newsPosts && newsPosts.length > 0 ? (
                   newsPosts.map((post) => (
                     <SwiperSlide key={post.id} className="w-[475px]">
-                      <LibraryNewsCard 
+                      <LibraryNewsCard
                         post={post}
                         onClick={() => handlePostClick(post.id, post.gameId)}
                       />
@@ -227,20 +259,22 @@ function RouteComponent() {
                 ) : (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[450px]">
-                      <p className="text-[var(--color-background-25)]">{t('empty.noNewsPosts')}</p>
+                      <p className="text-[var(--color-background-25)]">
+                        {t('empty.noNewsPosts')}
+                      </p>
                     </div>
                   </SwiperSlide>
                 )}
               </Swiper>
               {newsPosts && newsPosts.length > 1 && (
                 <>
-                  <div 
+                  <div
                     className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
                     onClick={() => newsSwiperRef.current?.slidePrev()}
                   >
                     <FaChevronLeft className="size-[12px]" />
                   </div>
-                  <div 
+                  <div
                     className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
                     onClick={() => newsSwiperRef.current?.slideNext()}
                   >
@@ -269,7 +303,9 @@ function RouteComponent() {
                 {communityLoading ? (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[400px]">
-                      <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
+                      <p className="text-[var(--color-background-25)]">
+                        {t('common.loading')}
+                      </p>
                     </div>
                   </SwiperSlide>
                 ) : communityError ? (
@@ -281,7 +317,7 @@ function RouteComponent() {
                 ) : filteredCommunityPosts.length > 0 ? (
                   filteredCommunityPosts.map((post) => (
                     <SwiperSlide key={post.id} className="w-[475px]">
-                      <LibraryPostCard 
+                      <LibraryPostCard
                         post={post}
                         onClick={() => handlePostClick(post.id, post.gameId)}
                       />
@@ -290,20 +326,22 @@ function RouteComponent() {
                 ) : (
                   <SwiperSlide className="w-full">
                     <div className="flex items-center justify-center h-[400px]">
-                      <p className="text-[var(--color-background-25)]">{t('empty.noCommunityHighlights')}</p>
+                      <p className="text-[var(--color-background-25)]">
+                        {t('empty.noCommunityHighlights')}
+                      </p>
                     </div>
                   </SwiperSlide>
                 )}
               </Swiper>
               {filteredCommunityPosts.length > 1 && (
                 <>
-                  <div 
+                  <div
                     className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
                     onClick={() => communitySwiperRef.current?.slidePrev()}
                   >
                     <FaChevronLeft className="size-[12px]" />
                   </div>
-                  <div 
+                  <div
                     className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
                     onClick={() => communitySwiperRef.current?.slideNext()}
                   >
@@ -316,7 +354,7 @@ function RouteComponent() {
 
           <div className="flex flex-col gap-[10px] w-full mb-[256px]">
             <div className="flex items-center gap-[45px] text-[24px]">
-              <p 
+              <p
                 className={`font-bold cursor-pointer font-manrope transition-colors ${
                   activeFilter === 'all'
                     ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
@@ -326,7 +364,7 @@ function RouteComponent() {
               >
                 {t('filters.all')}
               </p>
-              <p 
+              <p
                 className={`font-bold cursor-pointer font-manrope transition-colors ${
                   activeFilter === 'favorites'
                     ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
@@ -336,7 +374,7 @@ function RouteComponent() {
               >
                 {t('filters.favorites')}
               </p>
-              <p 
+              <p
                 className={`font-bold cursor-pointer font-manrope transition-colors ${
                   activeFilter === 'myCollection'
                     ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
@@ -346,7 +384,7 @@ function RouteComponent() {
               >
                 {t('empty.myCollection')}
               </p>
-              <div 
+              <div
                 className="cursor-pointer text-[var(--color-background-21)] hover:opacity-80 transition-opacity"
                 onClick={() => setIsCollectionModalOpen(true)}
               >
@@ -356,16 +394,22 @@ function RouteComponent() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <p className="text-[var(--color-background-25)] text-lg">{t('common.loading')}</p>
+                <p className="text-[var(--color-background-25)] text-lg">
+                  {t('common.loading')}
+                </p>
               </div>
             ) : isError ? (
               <div className="flex items-center justify-center py-8">
-                <p className="text-red-400 text-lg">{t('games.errorLoading')}</p>
+                <p className="text-red-400 text-lg">
+                  {t('games.errorLoading')}
+                </p>
               </div>
             ) : filteredGames.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <p className="text-[var(--color-background-25)] text-lg">
-                  {searchText ? t('search.noResults') : t('empty.noGamesInLibrary')}
+                  {searchText
+                    ? t('search.noResults')
+                    : t('empty.noGamesInLibrary')}
                 </p>
               </div>
             ) : (
@@ -412,7 +456,7 @@ function RouteComponent() {
                 )}
               </div>
             )}
-            
+
             {libraryData?.data && libraryData.data.totalPages > 1 && (
               <Pagination
                 currentPage={currentPage}
@@ -425,7 +469,7 @@ function RouteComponent() {
         </div>
       </div>
 
-      {glowCoords.map((glow) => (
+      {/* {glowCoords.map((glow) => (
         <img
           key={glow.id}
           loading="lazy"
@@ -441,7 +485,7 @@ function RouteComponent() {
             height: glow.height,
           }}
         />
-      ))}
+      ))} */}
 
       {/* Collection Creation Modal */}
       <CollectionModal

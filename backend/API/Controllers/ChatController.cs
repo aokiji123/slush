@@ -268,7 +268,7 @@ public class ChatController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<FileUploadDto>>> UploadFile(
-        [FromForm(Name = "file")] IFormFile file, 
+        IFormFile file, 
         [FromQuery] string receiverId)
     {
         try

@@ -15,7 +15,7 @@ export const Product = memo(({ linear, game }: ProductProps) => {
   const navigate = useNavigate()
   const { t } = useTranslation('common')
   const { addToCart, isInCart } = useCartStore()
-  
+
   const discountPercent = game.discountPercent || 0
   const hasDiscount = discountPercent > 0
   const isFree = game.price === 0
@@ -34,18 +34,20 @@ export const Product = memo(({ linear, game }: ProductProps) => {
 
   return linear ? (
     <div
-      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer h-[88px]`}
+      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden cursor-pointer h-auto lg:h-[88px]`}
       onClick={handleCardClick}
     >
-      <div className="w-full flex">
+      <div className="w-full flex flex-col lg:flex-row">
         <OptimizedImage
           src={game.mainImage}
           alt={game.name}
           loading="lazy"
-          className={`w-[306px] h-[88px] object-cover`}
+          className={`w-full h-[200px] sm:h-[250px] lg:w-[306px] lg:h-[88px] object-cover`}
         />
-        <div className="pl-[20px] p-[32px] w-full text-[var(--color-background)] flex items-center justify-between h-[88px]">
-          <p className="text-[20px] font-bold font-manrope">{game.name}</p>
+        <div className="p-[16px] sm:p-[20px] lg:pl-[20px] lg:p-[32px] w-full text-[var(--color-background)] flex flex-col lg:flex-row lg:items-center lg:justify-between lg:h-[88px] gap-[12px] lg:gap-0">
+          <p className="text-[18px] sm:text-[20px] font-bold font-manrope lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
+            {game.name}
+          </p>
           <div className="flex items-center gap-[12px]">
             <div className="flex items-center gap-[8px]">
               {hasDiscount && (
@@ -68,7 +70,7 @@ export const Product = memo(({ linear, game }: ProductProps) => {
             </div>
             <button
               onClick={handleAddToCart}
-              className={`px-[16px] py-[8px] rounded-[16px] text-[14px] font-medium transition-colors ${
+              className={`px-[16px] py-[8px] rounded-[16px] text-[14px] font-medium transition-colors cursor-pointer ${
                 inCart
                   ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
                   : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)]'
@@ -100,9 +102,11 @@ export const Product = memo(({ linear, game }: ProductProps) => {
         className={`max-w-[1000px] w-full h-[400px] object-cover flex-shrink-0`}
       />
 
-      <div className="p-[20px] pt-[16px] text-white text-left flex flex-col flex-1">
-        <p className="text-[20px] font-bold mb-[8px]">{game.name}</p>
-        <div className="flex items-center justify-between mt-auto">
+      <div className="p-[20px] pt-[16px] text-white text-left">
+        <p className="text-[20px] font-bold mb-[8px] whitespace-nowrap overflow-hidden text-ellipsis">
+          {game.name}
+        </p>
+        <div className="flex flex-col gap-2">
           <div className="flex items-center gap-[8px]">
             {hasDiscount && (
               <p className="rounded-[20px] px-[8px] py-[4px] bg-[var(--color-background-10)] text-[14px] text-black">
@@ -124,7 +128,7 @@ export const Product = memo(({ linear, game }: ProductProps) => {
           </div>
           <button
             onClick={handleAddToCart}
-            className={`px-[16px] py-[8px] rounded-[16px] text-[14px] font-medium transition-colors ${
+            className={`px-[16px] py-[8px] rounded-[16px] text-[14px] font-medium transition-colors cursor-pointer ${
               inCart
                 ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
                 : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)]'

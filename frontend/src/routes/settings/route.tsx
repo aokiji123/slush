@@ -99,8 +99,8 @@ function RouteComponent() {
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
       <div className="container mx-auto relative z-20">
-        <div className="flex gap-[24px] my-[16px]">
-          <div className="w-[25%]">
+        <div className="flex flex-col lg:flex-row gap-[8px] sm:gap-[16px] lg:gap-[24px] my-[16px]">
+          <div className="lg:w-[25%] w-full">
             <div className="w-full bg-[var(--color-background-8)] p-[20px] rounded-[20px] flex flex-col gap-[12px]">
               <input
                 type="text"
@@ -122,9 +122,11 @@ function RouteComponent() {
                     }`}
                     onClick={() => handleSettingClick(setting)}
                   >
-                    <div className="flex items-center gap-[12px]">
-                      <setting.icon />
-                      <p>{setting.title}</p>
+                    <div className="flex items-center gap-[12px] w-full">
+                      <div className="flex-shrink-0">
+                        <setting.icon />
+                      </div>
+                      <p className="text-[16px] truncate">{setting.title}</p>
                     </div>
                     {setting.hasSwitch && <Switch checked />}
                   </li>
@@ -132,7 +134,7 @@ function RouteComponent() {
               </ul>
             </div>
           </div>
-          <div className="w-[75%] mb-[192px]">
+          <div className="lg:w-[75%] w-full mb-[192px]">
             <Outlet />
           </div>
         </div>
