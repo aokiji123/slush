@@ -14,5 +14,6 @@ namespace Application.DTOs
         public DateTime CreatedAt { get; set; }
         public int Likes { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
+        public int CommentsCount { get; set; }
     }
 }

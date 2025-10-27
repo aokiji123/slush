@@ -3,9 +3,8 @@ import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
 import { FiPlusCircle } from 'react-icons/fi'
-import { Search, LibraryPostCard, LibraryNewsCard } from '@/components'
-import { BsThreeDots } from 'react-icons/bs'
-import { FaChevronLeft, FaChevronRight, FaRegStar } from 'react-icons/fa'
+import { Search, LibraryPostCard, LibraryNewsCard, OptimizedImage, Pagination, CollectionModal } from '@/components'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { useMyLibraryQuery } from '@/api/queries/useLibrary'
 import { useLibraryPosts } from '@/api/queries/useCommunity'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -53,7 +52,9 @@ function RouteComponent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
   const [searchText, setSearchText] = useState('')
-  const [currentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | 'myCollection'>('all')
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false)
   const debouncedSearchText = useDebounce(searchText, 300)
 
   // Swiper refs
@@ -85,10 +86,23 @@ function RouteComponent() {
   // Filter out news posts from community highlights
   const filteredCommunityPosts = communityPosts?.filter(post => post.type !== PostType.News) || []
 
-  // Filter games based on search text
-  const filteredGames = libraryData?.data?.items?.filter(game => 
-    game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
-  ) || []
+  // Filter games based on active filter and search text
+  const filteredGames = (libraryData?.data?.items ?? []).filter(game => {
+    const matchesSearch = game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
+    
+    if (activeFilter === 'favorites') {
+      return matchesSearch && game.isFavorite === true
+    }
+    
+    // TODO: Implement collections when backend supports it
+    if (activeFilter === 'myCollection') {
+      // For now, return all games - will be implemented when backend supports collections
+      return matchesSearch
+    }
+    
+    // 'all' filter - return all games
+    return matchesSearch
+  })
 
   // Navigation handlers
   const handlePostClick = (postId: string, gameId: string) => {
@@ -145,10 +159,11 @@ function RouteComponent() {
                     className="flex items-center gap-[16px] cursor-pointer hover:bg-[var(--color-background-15)] transition-colors p-2 rounded-[8px]"
                     onClick={() => handleGameClick(game.slug)}
                   >
-                    <img
+                    <OptimizedImage
                       src={game.mainImage}
                       alt={game.name}
                       className="w-[40px] h-[40px] rounded-[10px] object-cover object-center flex-shrink-0"
+                      loading="lazy"
                     />
                     <p className="text-[16px] font-bold line-clamp-1">
                       {game.name}
@@ -217,18 +232,22 @@ function RouteComponent() {
                   </SwiperSlide>
                 )}
               </Swiper>
-              <div 
-                className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
-                onClick={() => newsSwiperRef.current?.slidePrev()}
-              >
-                <FaChevronLeft className="size-[12px]" />
-              </div>
-              <div 
-                className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
-                onClick={() => newsSwiperRef.current?.slideNext()}
-              >
-                <FaChevronRight className="size-[12px]" />
-              </div>
+              {newsPosts && newsPosts.length > 1 && (
+                <>
+                  <div 
+                    className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                    onClick={() => newsSwiperRef.current?.slidePrev()}
+                  >
+                    <FaChevronLeft className="size-[12px]" />
+                  </div>
+                  <div 
+                    className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                    onClick={() => newsSwiperRef.current?.slideNext()}
+                  >
+                    <FaChevronRight className="size-[12px]" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -259,7 +278,7 @@ function RouteComponent() {
                       <p className="text-red-400">{t('common.error')}</p>
                     </div>
                   </SwiperSlide>
-                ) : filteredCommunityPosts && filteredCommunityPosts.length > 0 ? (
+                ) : filteredCommunityPosts.length > 0 ? (
                   filteredCommunityPosts.map((post) => (
                     <SwiperSlide key={post.id} className="w-[475px]">
                       <LibraryPostCard 
@@ -276,33 +295,61 @@ function RouteComponent() {
                   </SwiperSlide>
                 )}
               </Swiper>
-              <div 
-                className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
-                onClick={() => communitySwiperRef.current?.slidePrev()}
-              >
-                <FaChevronLeft className="size-[12px]" />
-              </div>
-              <div 
-                className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
-                onClick={() => communitySwiperRef.current?.slideNext()}
-              >
-                <FaChevronRight className="size-[12px]" />
-              </div>
+              {filteredCommunityPosts.length > 1 && (
+                <>
+                  <div 
+                    className="absolute bottom-[16px] -left-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                    onClick={() => communitySwiperRef.current?.slidePrev()}
+                  >
+                    <FaChevronLeft className="size-[12px]" />
+                  </div>
+                  <div 
+                    className="absolute bottom-[16px] -right-3 top-1/2 -translate-y-1/2 z-10 size-[24px] rounded-full bg-white flex items-center justify-center cursor-pointer shadow-lg"
+                    onClick={() => communitySwiperRef.current?.slideNext()}
+                  >
+                    <FaChevronRight className="size-[12px]" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           <div className="flex flex-col gap-[10px] w-full mb-[256px]">
             <div className="flex items-center gap-[45px] text-[24px]">
-              <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
+              <p 
+                className={`font-bold cursor-pointer font-manrope transition-colors ${
+                  activeFilter === 'all'
+                    ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
+                    : 'text-[var(--color-background-25)] hover:text-[var(--color-background-21)]'
+                }`}
+                onClick={() => setActiveFilter('all')}
+              >
                 {t('filters.all')}
               </p>
-              <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
+              <p 
+                className={`font-bold cursor-pointer font-manrope transition-colors ${
+                  activeFilter === 'favorites'
+                    ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
+                    : 'text-[var(--color-background-25)] hover:text-[var(--color-background-21)]'
+                }`}
+                onClick={() => setActiveFilter('favorites')}
+              >
                 {t('filters.favorites')}
               </p>
-              <p className="text-[var(--color-background-25)] font-bold hover:text-[var(--color-background-21)] border-b-3 border-transparent hover:border-[var(--color-background-21)] cursor-pointer font-manrope">
+              <p 
+                className={`font-bold cursor-pointer font-manrope transition-colors ${
+                  activeFilter === 'myCollection'
+                    ? 'text-[var(--color-background-21)] border-b-2 border-[var(--color-background-21)]'
+                    : 'text-[var(--color-background-25)] hover:text-[var(--color-background-21)]'
+                }`}
+                onClick={() => setActiveFilter('myCollection')}
+              >
                 {t('empty.myCollection')}
               </p>
-              <div className="cursor-pointer text-[var(--color-background-21)]">
+              <div 
+                className="cursor-pointer text-[var(--color-background-21)] hover:opacity-80 transition-opacity"
+                onClick={() => setIsCollectionModalOpen(true)}
+              >
                 <FiPlusCircle size={24} />
               </div>
             </div>
@@ -336,10 +383,11 @@ function RouteComponent() {
                       className="w-[225px] h-[300px] rounded-[20px] cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => handleGameClick(game.slug)}
                     >
-                      <img
+                      <OptimizedImage
                         src={game.mainImage}
                         alt={game.name}
                         className="w-full h-full object-cover rounded-[20px]"
+                        loading="lazy"
                       />
                     </div>
                   ) : (
@@ -348,41 +396,30 @@ function RouteComponent() {
                       className="flex items-center h-[120px] gap-[24px] bg-[var(--color-background-15)] rounded-[20px] transition-colors overflow-hidden cursor-pointer hover:bg-[var(--color-background-17)]"
                       onClick={() => handleGameClick(game.slug)}
                     >
-                      <img
+                      <OptimizedImage
                         src={game.mainImage}
                         alt={game.name}
                         className="w-[320px] h-full object-cover"
+                        loading="lazy"
                       />
                       <div className="flex flex-col justify-between pr-[24px] gap-[8px] flex-1">
                         <h3 className="text-white text-[20px] font-bold font-manrope">
                           {game.name}
                         </h3>
-                        <div className="w-full flex items-center justify-between">
-                          <button className="h-[40px] w-[110px] flex items-center justify-center text-[16px] font-normal rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer">
-                            Download
-                          </button>
-                          <div className="flex flex-col">
-                            <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-                              Disk Size
-                            </p>
-                            <p className="text-[20px] font-bold text-white">
-                              10 GB
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-[8px]">
-                            <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
-                              <FaRegStar size={24} />
-                            </div>
-                            <div className="w-[40px] h-[40px] flex items-center justify-center text-white bg-[var(--color-background-16)] rounded-full">
-                              <BsThreeDots size={24} />
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   ),
                 )}
               </div>
+            )}
+            
+            {libraryData?.data && libraryData.data.totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={libraryData.data.totalPages}
+                onPageChange={setCurrentPage}
+                className="my-[24px]"
+              />
             )}
           </div>
         </div>
@@ -405,6 +442,12 @@ function RouteComponent() {
           }}
         />
       ))}
+
+      {/* Collection Creation Modal */}
+      <CollectionModal
+        isOpen={isCollectionModalOpen}
+        onClose={() => setIsCollectionModalOpen(false)}
+      />
     </div>
   )
 }

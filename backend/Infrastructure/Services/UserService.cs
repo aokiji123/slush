@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
@@ -383,6 +384,18 @@ public class UserService : IUserService
         var postsCount = await _db.Set<Post>()
             .CountAsync(p => p.AuthorId == userId);
 
+        // Get screenshots count (posts with media type Screenshot)
+        var screenshotsCount = await _db.Set<Post>()
+            .CountAsync(p => p.AuthorId == userId && p.Type == PostType.Screenshot);
+
+        // Get videos count (posts with media type Video)
+        var videosCount = await _db.Set<Post>()
+            .CountAsync(p => p.AuthorId == userId && p.Type == PostType.Video);
+
+        // Get guides count (posts with type Guide)
+        var guidesCount = await _db.Set<Post>()
+            .CountAsync(p => p.AuthorId == userId && p.Type == PostType.Guide);
+
         // Get badges count (will be calculated separately to avoid circular dependency)
         var badgesCount = 0;
 
@@ -404,6 +417,9 @@ public class UserService : IUserService
             FriendsCount = friendsCount,
             BadgesCount = badgesCount,
             PostsCount = postsCount,
+            ScreenshotsCount = screenshotsCount,
+            VideosCount = videosCount,
+            GuidesCount = guidesCount,
             Level = level,
             Experience = experience,
             NextLevelExperience = nextLevelExperience
@@ -443,40 +459,76 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId)
+    public async Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId, UserReviewsQueryParameters parameters)
     {
-        var reviews = await _db.Set<Review>()
+        var query = _db.Set<Review>()
             .Include(r => r.Game)
             .Include(r => r.User)
             .Where(r => r.UserId == userId)
-            .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReviewDto
-            {
-                Id = r.Id,
-                GameId = r.GameId,
-                UserId = r.UserId,
-                Content = r.Content,
-                Rating = r.Rating,
-                Username = r.User.Nickname ?? string.Empty,
-                UserAvatar = r.User.Avatar ?? string.Empty,
-                Likes = r.Likes,
-                IsLikedByCurrentUser = false, // Will be set by the calling code if needed
-                CreatedAt = r.CreatedAt
-            })
-            .ToListAsync();
+            .AsQueryable();
 
-        return reviews;
+        // Apply search
+        if (!string.IsNullOrWhiteSpace(parameters.Search))
+        {
+            query = query.Where(r => r.Content.ToLower().Contains(parameters.Search.ToLower()));
+        }
+
+        // Apply sorting using QueryableExtensions
+        query = query.ApplySorting(parameters);
+
+        // Apply pagination
+        query = query.ApplyPagination(parameters);
+
+        var reviews = await query.ToListAsync();
+
+        var reviewList = reviews.Select(r => new ReviewDto
+        {
+            Id = r.Id,
+            GameId = r.GameId,
+            UserId = r.UserId,
+            Content = r.Content,
+            Rating = r.Rating,
+            Username = r.User?.Nickname ?? string.Empty,
+            UserAvatar = r.User?.Avatar ?? string.Empty,
+            Likes = r.Likes,
+            IsLikedByCurrentUser = false, // Will be set by the calling code if needed
+            CreatedAt = r.CreatedAt,
+            CommentsCount = 0 // Reviews don't have separate comment count in the current schema
+        }).ToList();
+
+        return reviewList;
     }
 
-    public async Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId)
+    public async Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId, UserPostsQueryParameters parameters)
     {
-        var posts = await _db.Set<Post>()
+        var query = _db.Set<Post>()
             .Include(p => p.Author)
             .Include(p => p.Media)
             .Include(p => p.Likes)
             .Include(p => p.Comments)
             .Where(p => p.AuthorId == userId)
-            .OrderByDescending(p => p.CreatedAt)
+            .AsQueryable();
+
+        // Apply type filter if specified
+        if (parameters.Type.HasValue)
+        {
+            query = query.Where(p => p.Type == parameters.Type.Value);
+        }
+
+        // Apply search
+        if (!string.IsNullOrWhiteSpace(parameters.Search))
+        {
+            query = query.Where(p => (p.Title != null && p.Title.ToLower().Contains(parameters.Search.ToLower())) ||
+                                     (p.Content != null && p.Content.ToLower().Contains(parameters.Search.ToLower())));
+        }
+
+        // Apply sorting using QueryableExtensions
+        query = query.ApplySorting(parameters);
+
+        // Apply pagination
+        query = query.ApplyPagination(parameters);
+
+        var posts = await query
             .Select(p => new PostDto
             {
                 Id = p.Id,
@@ -502,6 +554,45 @@ public class UserService : IUserService
             .ToListAsync();
 
         return posts;
+    }
+
+    public async Task<IReadOnlyList<LibraryGameDto>> GetUserGamesAsync(Guid userId, UserGamesQueryParameters parameters)
+    {
+        var query = _db.Set<Library>()
+            .Include(l => l.Game)
+            .Where(l => l.UserId == userId)
+            .AsQueryable();
+
+        // Apply search on game name
+        if (!string.IsNullOrWhiteSpace(parameters.Search))
+        {
+            query = query.Where(l => l.Game.Name.ToLower().Contains(parameters.Search.ToLower()));
+        }
+
+        // Apply sorting using QueryableExtensions
+        query = query.ApplySorting(parameters);
+
+        // Apply pagination
+        query = query.ApplyPagination(parameters);
+
+        var libraryEntries = await query.ToListAsync();
+
+        var gameList = libraryEntries.Select(l => new LibraryGameDto
+        {
+            Id = l.Game.Id,
+            Name = l.Game.Name,
+            MainImage = l.Game.MainImage,
+            Price = (double)l.Game.Price,
+            SalePrice = (double)l.Game.SalePrice,
+            DiscountPercent = l.Game.DiscountPercent,
+            Rating = l.Game.Rating,
+            ReleaseDate = l.Game.ReleaseDate,
+            Genres = l.Game.Genre,
+            Platforms = l.Game.Platforms,
+            AddedAt = l.AddedAt
+        }).ToList();
+
+        return gameList;
     }
 }
 

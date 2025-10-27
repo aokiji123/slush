@@ -39,6 +39,8 @@ export interface PostDto {
   authorUsername: string
   authorAvatar: string
   gameMainImage: string
+  isLiked?: boolean
+  isLikedByCurrentUser?: boolean
 }
 
 export interface CreatePostDto {

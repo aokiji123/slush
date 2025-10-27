@@ -28,5 +28,6 @@ public class LibraryConfiguration : IEntityTypeConfiguration<Library>
         // Configure indexes
         builder.HasIndex(l => l.UserId);
         builder.HasIndex(l => l.GameId);
+        builder.HasIndex(l => new { l.UserId, l.IsFavorite });
     }
 }

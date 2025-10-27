@@ -6,6 +6,7 @@ import {
   useOnlineFriends,
   useBlockedUsers,
   useFriendRequests,
+  useFriendsWhoOwnGame
 } from '@/api/queries/useFriendship'
 import { FriendCard } from '@/components/FriendCard'
 import { FriendActivityCard } from '@/components/FriendActivityCard'
@@ -28,6 +29,7 @@ function FriendsAllPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const [searchValue, setSearchValue] = useState('')
   const [selectedGame, setSelectedGame] = useState<GameData | null>(null)
+  const [filterByGame, setFilterByGame] = useState(false)
   const [showAddFriendModal, setShowAddFriendModal] = useState(false)
 
   // Get current user
@@ -39,16 +41,21 @@ function FriendsAllPage() {
   const { data: blockedUsers, isLoading: isLoadingBlocked } = useBlockedUsers(currentUser?.id ?? '')
   const friendRequests = useFriendRequests(currentUser?.id ?? '')
 
+  // Fetch friends who own the selected game
+  const { data: friendsWithGame, isLoading: isLoadingFriendsWithGame } = useFriendsWhoOwnGame(
+    selectedGame?.id || '',
+    {
+      enabled: filterByGame && !!selectedGame?.id
+    }
+  )
+
   const todayActivities = mockActivities.filter((a) => a.date === 'today')
   const olderActivities = mockActivities.filter((a) => a.date !== 'today')
 
-  // Filter friends by search
-  // Note: Game-based filtering would require fetching each friend's library
-  // For optimal performance, this should be done on the backend
-  // For now, we'll only implement nickname search filtering
+  // Filter friends by search and game
   const getFilteredFriends = (friendsList: typeof friends) => {
     if (!friendsList) return []
-    
+
     let filtered = friendsList
 
     // Apply search filter
@@ -58,9 +65,11 @@ function FriendsAllPage() {
       )
     }
 
-    // TODO: Implement game-based filtering
-    // This requires backend support or optimized frontend caching
-    // to avoid making N API calls for N friends
+    // Apply game-based filtering
+    if (filterByGame && selectedGame && friendsWithGame) {
+      const friendsWithGameIds = new Set(friendsWithGame.map(f => f.userId))
+      filtered = filtered.filter(friend => friendsWithGameIds.has(friend.userId))
+    }
 
     return filtered
   }
@@ -84,9 +93,9 @@ function FriendsAllPage() {
   const getTabLoading = () => {
     switch (activeTab) {
       case 'all':
-        return isLoadingFriends
+        return isLoadingFriends || (filterByGame && selectedGame ? isLoadingFriendsWithGame : false)
       case 'online':
-        return isLoadingOnline
+        return isLoadingOnline || (filterByGame && selectedGame ? isLoadingFriendsWithGame : false)
       case 'blocked':
         return isLoadingBlocked
       case 'requests':
@@ -349,19 +358,32 @@ function FriendsAllPage() {
                 <div className="flex flex-col gap-[16px]">
                   {/* Only show search for all, online, and blocked tabs */}
                   {activeTab !== 'requests' && (
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="text"
-                        placeholder="Пошук за нікнеймом..."
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        className="bg-[var(--color-night-background)] bg-opacity-40 border border-[var(--color-background-16)] rounded-[22px] px-[16px] py-[10px] text-[16px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 leading-[1.25] tracking-[-0.16px] outline-none"
-                        style={{ width: '522px' }}
-                      />
-                      <GameSelector
-                        selectedGame={selectedGame}
-                        onSelectGame={setSelectedGame}
-                      />
+                    <div className="flex flex-col gap-[12px]">
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="text"
+                          placeholder="Пошук за нікнеймом..."
+                          value={searchValue}
+                          onChange={(e) => setSearchValue(e.target.value)}
+                          className="bg-[var(--color-night-background)] bg-opacity-40 border border-[var(--color-background-16)] rounded-[22px] px-[16px] py-[10px] text-[16px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 leading-[1.25] tracking-[-0.16px] outline-none"
+                          style={{ width: '522px' }}
+                        />
+                        <GameSelector
+                          selectedGame={selectedGame}
+                          onSelectGame={setSelectedGame}
+                        />
+                      </div>
+                      <label className="flex items-center gap-[8px] cursor-pointer w-fit">
+                        <input
+                          type="checkbox"
+                          checked={filterByGame}
+                          onChange={(e) => setFilterByGame(e.target.checked)}
+                          className="w-[24px] h-[24px] border border-[var(--color-primary)] rounded-[6px] bg-transparent"
+                        />
+                        <span className="text-[16px] font-medium text-[var(--color-background)]">
+                          Фільтрувати за грою
+                        </span>
+                      </label>
                     </div>
                   )}
 

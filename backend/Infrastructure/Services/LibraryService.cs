@@ -51,7 +51,7 @@ public class LibraryService : ILibraryService
             .Select(l => new OwnedGameDto
             {
                 GameId = l.GameId,
-                Title = l.Game.Title ?? string.Empty,
+                Name = l.Game.Name ?? string.Empty,
                 MainImage = l.Game.MainImage ?? string.Empty,
                 PurchasedAt = l.AddedAt,
                 PurchasePrice = (double)l.Game.Price
@@ -71,10 +71,19 @@ public class LibraryService : ILibraryService
         var libraries = await _libraryRepository.GetByUserIdAsync(userId);
         return libraries.Select(l => new LibraryGameDto
         {
-            GameId = l.GameId,
-            Title = l.Game.Name,
+            Id = l.Game.Id,
+            Name = l.Game.Name,
+            Slug = l.Game.Slug,
             MainImage = l.Game.MainImage,
-            AddedAt = l.AddedAt
+            Price = (double)l.Game.Price,
+            SalePrice = (double)l.Game.SalePrice,
+            DiscountPercent = l.Game.DiscountPercent,
+            Rating = l.Game.Rating,
+            ReleaseDate = l.Game.ReleaseDate,
+            Genres = l.Game.Genre,
+            Platforms = l.Game.Platforms,
+            AddedAt = l.AddedAt,
+            IsFavorite = l.IsFavorite
         });
     }
 
@@ -287,5 +296,21 @@ public class LibraryService : ILibraryService
             .Where(dto => dto != null)
             .Cast<GameDto>()
             .ToList();
+    }
+
+    public async Task<bool> ToggleFavoriteAsync(Guid userId, Guid gameId)
+    {
+        var library = await _context.Libraries
+            .FirstOrDefaultAsync(l => l.UserId == userId && l.GameId == gameId);
+
+        if (library == null)
+        {
+            throw new InvalidOperationException("Game is not in user's library");
+        }
+
+        library.IsFavorite = !library.IsFavorite;
+        await _context.SaveChangesAsync();
+
+        return library.IsFavorite;
     }
 }

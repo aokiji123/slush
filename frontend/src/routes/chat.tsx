@@ -7,6 +7,7 @@ import { ChatProfileSidebar } from '@/components/chat/ChatProfileSidebar'
 import { MessageBubble } from '@/components/chat/MessageBubble'
 import { MessageInput } from '@/components/chat/MessageInput'
 import { DateDivider } from '@/components/chat/DateDivider'
+import { ImageLightbox } from '@/components/chat/ImageLightbox'
 import { useSignalRContext } from '@/providers/SignalRProvider'
 import { uploadChatMedia } from '@/api/chatAPI'
 import { useConversationHistory } from '@/api/queries/useChat'
@@ -23,6 +24,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
   const [isUserScrolledUp, setIsUserScrolledUp] = useState(false)
   const [onlineFriends, setOnlineFriends] = useState<string[]>([])
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const loadedConversationRef = useRef<string | null>(null)
@@ -327,13 +329,21 @@ function ChatPage() {
   }, [])
 
   const handleImageClick = useCallback((url: string) => {
-    // TODO: Open image in modal/lightbox
-    console.log('Open image:', url)
+    setLightboxImage(url)
   }, [])
 
-  const handleFileDownload = useCallback((url: string, fileName: string) => {
-    // TODO: Download file
-    console.log('Download file:', url, fileName)
+  const handleFileDownload = useCallback(async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = fileName
+      link.click()
+      URL.revokeObjectURL(link.href)
+    } catch (error) {
+      console.error('Failed to download file:', error)
+    }
   }, [])
 
   const scrollToBottom = useCallback(() => {
@@ -442,6 +452,9 @@ function ChatPage() {
           </div>
         )}
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />
     </ErrorBoundary>
   )
 }

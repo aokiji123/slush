@@ -14,7 +14,6 @@ import {
 } from '@/components'
 import { PostType } from '@/types/community'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
-import { useFriendshipStatus, useSendFriendRequest, useCancelFriendRequest, useAcceptFriendRequest, useRemoveFriend } from '@/api/queries/useFriendship'
 import { 
   useUserStatistics, 
   useUserReviews, 
@@ -25,8 +24,9 @@ import {
   useFriendsWithDetails 
 } from '@/api/queries/useProfile'
 import { useUserBadges } from '@/api/queries/useBadges'
+import { useMyLibraryQuery } from '@/api/queries/useLibrary'
 import { useState } from 'react'
-import { mockGuides } from '@/data/mockGalleryData'
+import { useProfileActions } from '@/hooks'
 
 export const Route = createFileRoute('/profile/$nickname/')({
   component: ProfileHomePage,
@@ -35,7 +35,6 @@ export const Route = createFileRoute('/profile/$nickname/')({
 function ProfileHomePage() {
   const { nickname } = Route.useParams()
   const [newComment, setNewComment] = useState('')
-  const [, setIsEditModalOpen] = useState(false)
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -46,11 +45,13 @@ function ProfileHomePage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
@@ -61,53 +62,15 @@ function ProfileHomePage() {
   const { data: friendsWithDetails } = useFriendsWithDetails(
     isOwnProfile ? profileUser.id : ''
   )
-
-  // Friendship mutations
-  const sendFriendRequestMutation = useSendFriendRequest()
-  const cancelFriendRequestMutation = useCancelFriendRequest()
-  const acceptFriendRequestMutation = useAcceptFriendRequest()
-  const removeFriendMutation = useRemoveFriend()
+  
+  // Fetch user's library for game thumbnails
+  const { data: libraryData } = useMyLibraryQuery(
+    isOwnProfile ? { page: 1, limit: 4 } : { page: 1, limit: 0 }
+  )
 
   // Profile comment mutations
   const addProfileCommentMutation = useAddProfileComment()
   const deleteProfileCommentMutation = useDeleteProfileComment()
-
-  const handleEditProfile = () => {
-    setIsEditModalOpen(true)
-  }
-
-  const handleAddFriend = () => {
-    if (profileUser && friendshipStatus === 'none') {
-      sendFriendRequestMutation.mutate(profileUser.id)
-    }
-  }
-
-  const handleCancelRequest = () => {
-    if (currentUser && profileUser) {
-      cancelFriendRequestMutation.mutate({
-        senderId: currentUser.id,
-        receiverId: profileUser.id
-      })
-    }
-  }
-
-  const handleAcceptRequest = () => {
-    if (currentUser && profileUser) {
-      acceptFriendRequestMutation.mutate({
-        senderId: profileUser.id,
-        receiverId: currentUser.id
-      })
-    }
-  }
-
-  const handleRemoveFriend = () => {
-    if (currentUser && profileUser) {
-      removeFriendMutation.mutate({
-        senderId: currentUser.id,
-        receiverId: profileUser.id
-      })
-    }
-  }
 
   const handleAddComment = () => {
     if (newComment.trim() && profileUser) {
@@ -119,77 +82,8 @@ function ProfileHomePage() {
     }
   }
 
-  const gameThumbnails = [
-    '/baldurs-gate-3.png',
-    '/cyberpunk.png',
-    '/destiny-2.png',
-    '/ghost-of-tsushima.png',
-  ]
-
-  // Mock data for testing
-  const mockBadges = [
-    {
-      id: '1',
-      name: 'Silver Zubarik',
-      icon: '/badge-silver-zubarik.png',
-      description: 'Complete your first game',
-      requiredValue: 100,
-      earnedAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Warrior',
-      icon: '/badge-warrior.png',
-      description: 'Play 10 different games',
-      requiredValue: 500,
-      earnedAt: '2024-01-20T15:30:00Z'
-    },
-    {
-      id: '3',
-      name: 'Social Bird',
-      icon: '/badge-socialbird.png',
-      description: 'Make 50 friends',
-      requiredValue: 250,
-      earnedAt: '2024-01-10T08:00:00Z'
-    },
-    {
-      id: '4',
-      name: 'Card Player',
-      icon: '/badge-cardplayer.png',
-      description: 'Play 100 card games',
-      requiredValue: 300,
-      earnedAt: '2024-01-05T20:00:00Z'
-    },
-    {
-      id: '5',
-      name: 'Gamer',
-      icon: '/badge-gamer.png',
-      description: 'Play for 500 hours',
-      requiredValue: 800,
-      earnedAt: '2024-01-01T12:00:00Z'
-    }
-  ]
-
-  const mockPosts = [
-    {
-      id: '1',
-      type: PostType.Discussion,
-      title: 'Test Discussion',
-      content: 'This is a test discussion post',
-      authorNickname: 'TestUser',
-      authorUsername: 'testuser',
-      authorAvatar: '/avatar.png',
-      authorId: 'test-user-id',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z',
-      gameId: '',
-      gameMainImage: '',
-      likesCount: 0,
-      commentsCount: 0,
-      sharesCount: 0,
-      media: []
-    }
-  ]
+  // Get game thumbnails from user's library
+  const gameThumbnails = libraryData?.data?.items?.slice(0, 4).map(game => game.mainImage) || []
 
   // Loading state
   if (isLoadingProfile || isLoadingCurrentUser) {
@@ -234,9 +128,9 @@ function ProfileHomePage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
     friends: isOwnProfile ? (friendsWithDetails?.map(f => ({
@@ -296,12 +190,12 @@ function ProfileHomePage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={handleEditProfile}
-            onAddFriend={handleAddFriend}
-            onCancelRequest={handleCancelRequest}
-            onAcceptRequest={handleAcceptRequest}
-            onRemoveFriend={handleRemoveFriend}
+            friendshipStatus={profileActions.friendshipStatus}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">
@@ -309,10 +203,8 @@ function ProfileHomePage() {
             <div style={{ width: '1092px' }}>
               {/* Badge Gallery Preview */}
               <BadgeGalleryPreview 
-                badgesCount={statistics?.badgesCount || mockBadges.length}
-                topBadges={profileData.badges.length > 0 
-                  ? profileData.badges.slice(0, 5) 
-                  : mockBadges.slice(0, 5)}
+                badgesCount={statistics?.badgesCount || 0}
+                topBadges={profileData.badges.slice(0, 5)}
               />
 
               {/* Profile Stats */}
@@ -324,7 +216,7 @@ function ProfileHomePage() {
               />
 
               {/* Discussion Gallery */}
-              <DiscussionGallery posts={userPosts && userPosts.length > 0 ? userPosts : mockPosts} />
+              <DiscussionGallery posts={userPosts || []} />
 
               {/* Screenshot Gallery */}
               <ScreenshotGallery posts={userPosts || []} />
@@ -336,7 +228,7 @@ function ProfileHomePage() {
               <ReviewGallery reviews={userReviews} />
 
               {/* Guides Gallery */}
-              <GuideGallery guides={mockGuides} />
+              <GuideGallery guides={userPosts?.filter(p => p.type === PostType.Guide) || []} />
 
               {/* Comments Section */}
               <div className="bg-[var(--color-background-8)] rounded-[20px] p-[20px]">

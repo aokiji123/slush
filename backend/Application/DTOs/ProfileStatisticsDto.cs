@@ -9,6 +9,9 @@ public class ProfileStatisticsDto
     public int FriendsCount { get; set; }
     public int BadgesCount { get; set; }
     public int PostsCount { get; set; }
+    public int ScreenshotsCount { get; set; }
+    public int VideosCount { get; set; }
+    public int GuidesCount { get; set; }
     public int Level { get; set; }
     public int Experience { get; set; }
     public int NextLevelExperience { get; set; }

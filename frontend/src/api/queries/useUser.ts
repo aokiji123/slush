@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axiosInstance from '..'
 import type { User, UserUpdateRequest, NotificationsRequest, NotificationsSettings, DeleteAccountRequest, ResetPasswordRequest } from '../types/user'
+import type { CreateUserReportDto } from '../types/report'
 
 async function getAuthenticatedUser(): Promise<User> {
   const { data } = await axiosInstance.get(`/user/me`)
@@ -155,5 +156,12 @@ export function useUserByNickname(nickname: string) {
       return getUserByNickname(nickname)
     },
     enabled: !!nickname,
+  })
+}
+
+export function useReportUser() {
+  return useMutation({
+    mutationFn: (data: CreateUserReportDto) =>
+      axiosInstance.post('/user/report', data),
   })
 }

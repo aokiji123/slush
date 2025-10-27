@@ -24,8 +24,17 @@ public class LibraryMeRequestDto
 
 public class LibraryGameDto
 {
-    public Guid GameId { get; set; }
-    public string Title { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string MainImage { get; set; } = string.Empty;
+    public double Price { get; set; }
+    public double SalePrice { get; set; }
+    public int DiscountPercent { get; set; }
+    public double Rating { get; set; }
+    public DateTime ReleaseDate { get; set; }
+    public List<string> Genres { get; set; } = new();
+    public List<string> Platforms { get; set; } = new();
     public DateTime AddedAt { get; set; }
+    public bool IsFavorite { get; set; }
 }

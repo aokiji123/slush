@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Models;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -23,11 +24,13 @@ public class UserController : ControllerBase
     private const string UnexpectedErrorMessage = "An unexpected error occurred while processing the request.";
 
     private readonly IUserService _userService;
+    private readonly IUserReportService _userReportService;
     private readonly ILogger<UserController> _logger;
 
-    public UserController(IUserService userService, ILogger<UserController> logger)
+    public UserController(IUserService userService, IUserReportService userReportService, ILogger<UserController> logger)
     {
         _userService = userService;
+        _userReportService = userReportService;
         _logger = logger;
     }
 
@@ -461,7 +464,9 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ReviewDto>>>> GetUserReviewsAsync(Guid id)
+    public async Task<ActionResult<ApiResponse<IEnumerable<ReviewDto>>>> GetUserReviewsAsync(
+        Guid id, 
+        [FromQuery] UserReviewsQueryParameters parameters)
     {
         if (id == Guid.Empty)
         {
@@ -470,7 +475,7 @@ public class UserController : ControllerBase
 
         try
         {
-            var reviews = await _userService.GetUserReviewsAsync(id);
+            var reviews = await _userService.GetUserReviewsAsync(id, parameters);
             return Ok(new ApiResponse<IEnumerable<ReviewDto>>(reviews));
         }
         catch (Exception ex)
@@ -487,7 +492,9 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<PostDto>>>> GetUserPostsAsync(Guid id)
+    public async Task<ActionResult<ApiResponse<IEnumerable<PostDto>>>> GetUserPostsAsync(
+        Guid id, 
+        [FromQuery] UserPostsQueryParameters parameters)
     {
         if (id == Guid.Empty)
         {
@@ -496,13 +503,41 @@ public class UserController : ControllerBase
 
         try
         {
-            var posts = await _userService.GetUserPostsAsync(id);
+            var posts = await _userService.GetUserPostsAsync(id, parameters);
             return Ok(new ApiResponse<IEnumerable<PostDto>>(posts));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving posts for user {UserId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<PostDto>>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Gets user's library games
+    /// </summary>
+    [HttpGet("{id:guid}/games")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<LibraryGameDto>>>> GetUserGamesAsync(
+        Guid id, 
+        [FromQuery] UserGamesQueryParameters parameters)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<IEnumerable<LibraryGameDto>>("User identifier cannot be empty."));
+        }
+
+        try
+        {
+            var games = await _userService.GetUserGamesAsync(id, parameters);
+            return Ok(new ApiResponse<IEnumerable<LibraryGameDto>>(games));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving games for user {UserId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<IEnumerable<LibraryGameDto>>(UnexpectedErrorMessage));
         }
     }
 
@@ -580,6 +615,39 @@ public class UserController : ControllerBase
         {
             _logger.LogError(ex, "Error retrieving user {UserId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<UserDto>(UnexpectedErrorMessage));
+        }
+    }
+
+    /// <summary>
+    /// Reports a user for inappropriate behavior
+    /// </summary>
+    [Authorize]
+    [HttpPost("report")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserReportDto>>> ReportUser([FromBody] CreateUserReportDto dto)
+    {
+        if (!TryGetUserIdFromClaims(out var userId))
+        {
+            return Unauthorized(new ApiResponse<UserReportDto>("Unable to determine the current user."));
+        }
+
+        try
+        {
+            var report = await _userReportService.CreateReportAsync(userId, dto);
+            return Ok(ApiResponse<UserReportDto>.CreateSuccess(report, "Report submitted successfully"));
+        }
+        catch (Application.Common.Exceptions.ValidationException ex)
+        {
+            _logger.LogWarning(ex, "Validation error while reporting user {ReportedUserId}", dto.ReportedUserId);
+            return BadRequest(new ApiResponse<UserReportDto>(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reporting user {ReportedUserId}", dto.ReportedUserId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<UserReportDto>(UnexpectedErrorMessage));
         }
     }
 

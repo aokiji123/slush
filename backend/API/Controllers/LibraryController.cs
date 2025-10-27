@@ -426,4 +426,37 @@ public class LibraryController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<LibraryDto>("Unable to add to library."));
         }
     }
+
+    /// <summary>
+    /// Toggle favorite status for a game in authenticated user's library
+    /// </summary>
+    /// <param name="gameId">Game ID to toggle favorite status for</param>
+    /// <returns>New favorite status</returns>
+    [HttpPost("me/favorite/{gameId:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<bool>>> ToggleFavorite([FromRoute, Required] Guid gameId)
+    {
+        if (gameId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<bool>("Game ID cannot be empty."));
+        }
+
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isFavorite = await _libraryService.ToggleFavoriteAsync(userId, gameId);
+            return Ok(new ApiResponse<bool>(isFavorite));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ApiResponse<bool>(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to toggle favorite status for game {GameId} and user", gameId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<bool>("Unable to toggle favorite status."));
+        }
+    }
 }

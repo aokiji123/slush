@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { OptimizedImage } from './OptimizedImage'
 
 interface Badge {
   id: string
@@ -14,21 +15,17 @@ interface BadgeGalleryPreviewProps {
 export const BadgeGalleryPreview = ({ badgesCount, topBadges }: BadgeGalleryPreviewProps) => {
   const { t } = useTranslation()
 
-  // Mock badge icons as simple colored divs
-  const getBadgeIcon = (badge: Badge, index: number) => {
-    const colors = [
-      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-red-500'
-    ]
-    const icons = ['🎮', '⚔️', '❤️', '🃏', '🎯']
-    
+  // Render real badge icons
+  const getBadgeIcon = (badge: Badge) => {
     return (
-      <div 
-        key={badge.id} 
-        className={`w-[110px] h-[110px] ${colors[index % colors.length]} rounded-[12px] flex items-center justify-center text-[48px]`}
-        title={badge.name}
-      >
-        {icons[index % icons.length]}
-      </div>
+      <OptimizedImage
+        key={badge.id}
+        src={badge.icon}
+        alt={badge.name}
+        className="w-[110px] h-[110px] rounded-[12px] object-cover"
+        loading="lazy"
+        placeholder="/badge-placeholder.png"
+      />
     )
   }
 
@@ -55,7 +52,7 @@ export const BadgeGalleryPreview = ({ badgesCount, topBadges }: BadgeGalleryPrev
         
         {/* Badges Row */}
         <div className="flex gap-[40px] items-start justify-center flex-1">
-          {topBadges.slice(0, 5).map((badge, index) => getBadgeIcon(badge, index))}
+          {topBadges.slice(0, 5).map((badge) => getBadgeIcon(badge))}
         </div>
       </div>
     </div>

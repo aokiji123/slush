@@ -9,6 +9,7 @@ export type User = {
   balance: number
   isOnline?: boolean
   lastSeenAt?: string
+  level?: number
 }
 
 export type UserUpdateRequest = {

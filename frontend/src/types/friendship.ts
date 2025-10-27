@@ -51,6 +51,7 @@ export type UnblockUserDto = {
 
 export type FriendWithGame = {
   id: string
+  userId: string
   nickname: string
   avatar: string
 }

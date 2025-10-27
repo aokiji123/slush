@@ -1,5 +1,6 @@
 import type { PostDto } from '@/types/community'
 import { PostType } from '@/types/community'
+import { OptimizedImage } from './OptimizedImage'
 
 interface ScreenshotGalleryProps {
   posts: PostDto[]
@@ -32,10 +33,12 @@ export const ScreenshotGallery = ({ posts }: ScreenshotGalleryProps) => {
         {/* Featured Screenshot */}
         {featuredPost && (
           <div className="w-full h-[522px] bg-[var(--color-background-15)] rounded-[16px] overflow-hidden">
-            <img
+            <OptimizedImage
               src={getCoverImage(featuredPost)}
               alt={featuredPost.title}
               className="w-full h-full object-cover"
+              loading="lazy"
+              placeholder="/game-image.png"
             />
           </div>
         )}
@@ -47,10 +50,12 @@ export const ScreenshotGallery = ({ posts }: ScreenshotGalleryProps) => {
               key={post.id}
               className="w-[345px] h-[184px] bg-[var(--color-background-15)] rounded-[16px] overflow-hidden"
             >
-              <img
+              <OptimizedImage
                 src={getCoverImage(post)}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                placeholder="/game-image.png"
               />
             </div>
           ))}

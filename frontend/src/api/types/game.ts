@@ -17,6 +17,7 @@ export type GameData = {
   platforms: string[]
   isDlc: boolean
   baseGameId: string | null
+  isFavorite?: boolean
 }
 
 export type Game = {
@@ -54,6 +55,7 @@ export type Review = {
   createdAt: string
   likes: number
   isLikedByCurrentUser: boolean
+  commentsCount: number
 }
 
 export type CreateReviewRequest = {

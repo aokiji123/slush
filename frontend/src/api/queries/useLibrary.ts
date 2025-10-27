@@ -7,6 +7,7 @@ import {
   checkGameOwnership,
   getOwnedGames,
   getSharedGames,
+  toggleFavorite,
 } from '../libraryAPI'
 
 // Hook for simple library list (no filtering)
@@ -78,5 +79,18 @@ export function useSharedGames(userId1: string, userId2: string) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,
+  })
+}
+
+// Mutation hook for toggling favorite status
+export function useToggleFavorite() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (gameId: string) => toggleFavorite(gameId),
+    onSuccess: () => {
+      // Invalidate all library queries to refresh data with updated favorite status
+      queryClient.invalidateQueries({ queryKey: ['library'] })
+    },
   })
 }

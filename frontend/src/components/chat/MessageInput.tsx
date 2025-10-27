@@ -3,7 +3,7 @@ import { memo, useState, useRef, useCallback } from 'react'
 interface MessageInputProps {
   onSendMessage: (content: string) => void
   onSendFile: (file: File) => void
-  onSendVoice: () => void
+  onSendVoice?: () => void
   disabled?: boolean
   placeholder?: string
 }
@@ -17,6 +17,8 @@ export const MessageInput = memo<MessageInputProps>(({
 }) => {
   const [message, setMessage] = useState('')
   const [isRecording, setIsRecording] = useState(false)
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
@@ -51,18 +53,52 @@ export const MessageInput = memo<MessageInputProps>(({
     }
   }, [disabled])
 
-  const handleVoiceToggle = useCallback(() => {
+  const handleVoiceToggle = useCallback(async () => {
     if (!disabled) {
-      if (isRecording) {
+      if (isRecording && mediaRecorder) {
+        // Stop recording
+        mediaRecorder.stop()
         setIsRecording(false)
-        // TODO: Stop recording
       } else {
-        setIsRecording(true)
-        onSendVoice()
-        // TODO: Start recording
+        // Start recording
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          const recorder = new MediaRecorder(stream)
+          
+          recorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+              audioChunksRef.current.push(e.data)
+            }
+          }
+          
+          recorder.onstop = () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+            const audioFile = new File([audioBlob], `voice-${Date.now()}.webm`, { 
+              type: 'audio/webm' 
+            })
+            
+            // Send the audio file
+            onSendFile(audioFile)
+            
+            // Cleanup
+            audioChunksRef.current = []
+            stream.getTracks().forEach(track => track.stop())
+            setMediaRecorder(null)
+          }
+          
+          recorder.start()
+          setMediaRecorder(recorder)
+          setIsRecording(true)
+          
+          // Notify parent if provided
+          onSendVoice?.()
+        } catch (error) {
+          console.error('Failed to start recording:', error)
+          alert('Не вдалося отримати доступ до мікрофону')
+        }
       }
     }
-  }, [disabled, isRecording, onSendVoice])
+  }, [disabled, isRecording, mediaRecorder, onSendFile, onSendVoice])
 
   return (
     <>

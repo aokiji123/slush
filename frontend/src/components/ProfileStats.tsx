@@ -1,3 +1,5 @@
+import { OptimizedImage } from './OptimizedImage'
+
 interface ProfileStatsProps {
   games: number
   dlc: number
@@ -46,10 +48,12 @@ export const ProfileStats = ({ games, dlc, wishlist, gameThumbnails }: ProfileSt
             key={thumbnail}
             className="w-[257px] h-[124px] bg-[var(--color-background-15)] rounded-[20px] overflow-hidden"
           >
-            <img
+            <OptimizedImage
               src={thumbnail}
               alt="Game thumbnail"
               className="w-full h-full object-cover"
+              loading="lazy"
+              placeholder="/game-image.png"
             />
           </div>
         ))}

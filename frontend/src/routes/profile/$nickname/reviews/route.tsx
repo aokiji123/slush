@@ -2,9 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileReviewCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics, useUserReviews } from '@/api/queries/useProfile'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { useProfileActions } from '@/hooks'
+import type { Review } from '@/api/types/game'
+import { useGameById } from '@/api/queries/useGame'
 
 export const Route = createFileRoute('/profile/$nickname/reviews')({
   component: ProfileReviewsPage,
@@ -14,7 +16,7 @@ function ProfileReviewsPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('CreatedAt:desc')
+  const [sortBy, setSortBy] = useState('CreatedAt:desc')
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -25,17 +27,19 @@ function ProfileReviewsPage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's reviews
-  const { data: userReviews, isLoading: isLoadingReviews, isError: isReviewsError } = useUserReviews(profileUser?.id || '')
+  const { data: userReviews, isLoading: isLoadingReviews, isError: isReviewsError } = useUserReviews(profileUser?.id || '', sortBy)
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -48,8 +52,7 @@ function ProfileReviewsPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
   }
 
   // Client-side search filtering
@@ -96,11 +99,36 @@ function ProfileReviewsPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
+  }
+
+  // Component to render a review with game data
+  const ReviewWithGameData = ({ review }: { review: Review }) => {
+    const { data: gameData } = useGameById(review.gameId)
+
+    return (
+      <ProfileReviewCard
+        key={review.id}
+        review={{
+          id: review.id,
+          title: 'Review', // Reviews don't have titles in current schema
+          content: review.content,
+          rating: review.rating,
+          gameName: gameData?.data?.name || 'Loading...',
+          gameImage: gameData?.data?.mainImage || '/game-image.png',
+          gameId: review.gameId,
+          authorNickname: review.username,
+          authorAvatar: review.userAvatar,
+          createdAt: review.createdAt,
+          likesCount: review.likes,
+          commentsCount: review.commentsCount,
+        }}
+      />
+    )
   }
 
   return (
@@ -150,12 +178,12 @@ function ProfileReviewsPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">
@@ -192,23 +220,7 @@ function ProfileReviewsPage() {
                   </div>
                 ) : (
                   filteredItems.map((review) => (
-                    <ProfileReviewCard
-                      key={review.id}
-                      review={{
-                        id: review.id,
-                        title: review.content.substring(0, 50) + '...',
-                        content: review.content,
-                        rating: review.rating,
-                        gameName: 'Game', // TODO: Get game name from gameId
-                        gameImage: '/game-image.png', // TODO: Get game image from gameId
-                        gameId: review.gameId,
-                        authorNickname: review.username,
-                        authorAvatar: review.userAvatar,
-                        createdAt: review.createdAt,
-                        likesCount: review.likes,
-                        commentsCount: 0, // TODO: Add comments count to Review type
-                      }}
-                    />
+                    <ReviewWithGameData key={review.id} review={review} />
                   ))
                 )}
                 </div>

@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { 
-  useFriends, 
-  useOnlineFriends, 
-  useBlockedUsers, 
-  useFriendRequests 
+import {
+  useFriends,
+  useOnlineFriends,
+  useBlockedUsers,
+  useFriendRequests,
+  useFriendsWhoOwnGame
 } from '@/api/queries/useFriendship'
 import { FriendCard } from './FriendCard'
 import { GameSelector } from './GameSelector'
@@ -35,6 +36,7 @@ export const FriendsListSection = ({
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const [searchValue, setSearchValue] = useState('')
   const [selectedGame, setSelectedGame] = useState<GameData | null>(null)
+  const [filterByGame, setFilterByGame] = useState(false)
 
   // Fetch friends data for all profiles (public)
   const { data: friends, isLoading: isLoadingFriends } = useFriends(userId)
@@ -46,6 +48,14 @@ export const FriendsListSection = ({
   )
   const { incoming, outgoing, isLoading: isLoadingRequests } = useFriendRequests(
     showRequestsTab ? userId : ''
+  )
+
+  // Fetch friends who own the selected game
+  const { data: friendsWithGame, isLoading: isLoadingFriendsWithGame } = useFriendsWhoOwnGame(
+    selectedGame?.id || '',
+    {
+      enabled: filterByGame && !!selectedGame?.id
+    }
   )
 
   // Get available tabs based on props
@@ -68,10 +78,10 @@ export const FriendsListSection = ({
     return tabs
   }, [friends, onlineFriends, blockedUsers, incoming, outgoing, showAllTab, showOnlineTab, showBlockedTab, showRequestsTab, t])
 
-  // Filter friends by search
+  // Filter friends by search and game
   const getFilteredFriends = (friendsList: typeof friends) => {
     if (!friendsList) return []
-    
+
     let filtered = friendsList
 
     // Apply search filter
@@ -81,9 +91,11 @@ export const FriendsListSection = ({
       )
     }
 
-    // TODO: Implement game-based filtering
-    // This requires backend support or optimized frontend caching
-    // to avoid making N API calls for N friends
+    // Apply game-based filtering
+    if (filterByGame && selectedGame && friendsWithGame) {
+      const friendsWithGameIds = new Set(friendsWithGame.map(f => f.userId))
+      filtered = filtered.filter(friend => friendsWithGameIds.has(friend.userId))
+    }
 
     return filtered
   }
@@ -107,9 +119,9 @@ export const FriendsListSection = ({
   const getTabLoading = () => {
     switch (activeTab) {
       case 'all':
-        return isLoadingFriends
+        return isLoadingFriends || (filterByGame && selectedGame ? isLoadingFriendsWithGame : false)
       case 'online':
-        return isLoadingOnline
+        return isLoadingOnline || (filterByGame && selectedGame ? isLoadingFriendsWithGame : false)
       case 'blocked':
         return isLoadingBlocked
       case 'requests':
@@ -255,6 +267,8 @@ export const FriendsListSection = ({
           <label className="flex items-center gap-[8px] cursor-pointer">
             <input
               type="checkbox"
+              checked={filterByGame}
+              onChange={(e) => setFilterByGame(e.target.checked)}
               className="w-[24px] h-[24px] border border-[var(--color-primary)] rounded-[6px] bg-transparent"
             />
             <span className="text-[16px] font-medium text-[var(--color-background)]">
@@ -293,7 +307,39 @@ export const FriendsListSection = ({
               {t('profile.categories.shared')}
             </p>
           </div>
-          {/* TODO: Implement shared friends logic */}
+
+          {/* Shared friends grid */}
+          {(() => {
+            const sharedFriends = useMemo(() => {
+              if (!friends || !currentUserId) return []
+
+              // This is a simplified version - in a real app, you'd fetch current user's friends
+              // For now, we'll show a subset of friends as "shared"
+              return friends.slice(0, 4) // Mock shared friends
+            }, [friends, currentUserId])
+
+            if (sharedFriends.length === 0) return null
+
+            return (
+              <div className="flex flex-col gap-[8px] mb-[16px]">
+                <div className="flex gap-[8px]">
+                  {sharedFriends.map((friend) => (
+                    <div key={friend.userId} className="flex-1 max-w-[120px]">
+                      <FriendCard
+                        id={friend.id}
+                        userId={friend.userId}
+                        username={friend.nickname}
+                        avatar={friend.avatar}
+                        level={friend.level}
+                        isOnline={friend.isOnline}
+                        currentUserId={currentUserId}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
 

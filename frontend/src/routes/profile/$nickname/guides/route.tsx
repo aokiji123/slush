@@ -2,9 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileGuideCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics, useUserPosts } from '@/api/queries/useProfile'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { useProfileActions } from '@/hooks'
 import { PostType } from '@/types/community'
 
 export const Route = createFileRoute('/profile/$nickname/guides')({
@@ -15,7 +15,7 @@ function ProfileGuidesPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('CreatedAt:desc')
+  const [sortBy, setSortBy] = useState('CreatedAt:desc')
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -26,17 +26,19 @@ function ProfileGuidesPage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's posts (guides only)
-  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '')
+  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '', 'Guide', sortBy)
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -47,8 +49,7 @@ function ProfileGuidesPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
   }
 
   // Filter posts to only show guides
@@ -99,9 +100,9 @@ function ProfileGuidesPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }
@@ -153,12 +154,12 @@ function ProfileGuidesPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">

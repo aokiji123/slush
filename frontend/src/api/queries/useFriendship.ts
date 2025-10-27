@@ -12,7 +12,7 @@ const userToFriend = (user: User): Friend => ({
   avatar: user.avatar,
   banner: user.banner,
   isOnline: user.isOnline ?? false,
-  level: 1, // TODO: Implement level calculation based on user data
+  level: user.level || 1,
   lastSeenAt: user.lastSeenAt,
   bio: user.bio,
   email: user.email,
@@ -227,11 +227,11 @@ export function useUnblockUser() {
 }
 
 // Query: Get friends who own a specific game
-export function useFriendsWhoOwnGame(gameId: string) {
+export function useFriendsWhoOwnGame(gameId: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['friendsWhoOwnGame', gameId],
     queryFn: () => friendshipAPI.getFriendsWhoOwnGame(gameId),
-    enabled: !!gameId,
+    enabled: options?.enabled !== undefined ? options.enabled && !!gameId : !!gameId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
     refetchOnWindowFocus: false,

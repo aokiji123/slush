@@ -61,4 +61,9 @@ public interface IChatMessageRepository
     /// Gets the last message in a conversation
     /// </summary>
     Task<ChatMessage?> GetLastMessageAsync(Guid userId1, Guid userId2);
+
+    /// <summary>
+    /// Clears all messages in a conversation between two users
+    /// </summary>
+    Task ClearConversationAsync(Guid userId1, Guid userId2);
 }

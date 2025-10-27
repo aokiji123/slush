@@ -35,6 +35,7 @@ public class PostDto
 	public int LikesCount { get; set; }
 	public int CommentsCount { get; set; }
 	public string GameMainImage { get; set; } = string.Empty;
+	public bool IsLikedByCurrentUser { get; set; }
 }
 
 public class CreatePostDto

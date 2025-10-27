@@ -7,8 +7,8 @@ import type { RefObject } from 'react'
  * @param callback Function to call when clicking outside
  * @param enabled Whether the hook is enabled
  */
-export const useClickOutside = (
-  ref: RefObject<HTMLElement>, 
+export const useClickOutside = <T extends HTMLElement = HTMLDivElement>(
+  ref: RefObject<T>, 
   callback: () => void, 
   enabled = true
 ) => {

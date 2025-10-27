@@ -17,6 +17,8 @@ public class Library
 
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsFavorite { get; set; } = false;
+
     // Navigation properties
     [ForeignKey(nameof(UserId))]
     public virtual User User { get; set; } = null!;

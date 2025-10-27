@@ -16,6 +16,7 @@ export type LibraryGameDto = {
   title: string
   mainImage: string
   addedAt: string
+  isFavorite?: boolean
 }
 
 export type OwnedGameDto = {

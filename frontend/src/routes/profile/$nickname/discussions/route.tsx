@@ -15,7 +15,7 @@ function ProfileDiscussionsPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('CreatedAt:desc')
+  const [sortBy, setSortBy] = useState('CreatedAt:desc')
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -36,7 +36,7 @@ function ProfileDiscussionsPage() {
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's posts (discussions only)
-  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '')
+  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '', 'Discussion', sortBy)
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -47,8 +47,7 @@ function ProfileDiscussionsPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
   }
 
   // Filter posts to only show discussions
@@ -99,9 +98,9 @@ function ProfileDiscussionsPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }

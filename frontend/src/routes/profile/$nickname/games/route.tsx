@@ -2,10 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileTabSection, ProfileGameCard, ProfileFriendsPreview } from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics } from '@/api/queries/useProfile'
-import { useFriendshipStatus } from '@/api/queries/useFriendship'
 import { useMyLibraryQuery, useSharedGames } from '@/api/queries/useLibrary'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { useProfileActions } from '@/hooks'
 import type { LibraryQueryParams } from '@/api/types/library'
 
 export const Route = createFileRoute('/profile/$nickname/games')({
@@ -16,8 +16,8 @@ function ProfileGamesPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('AddedAtUtc:desc')
-  const [filters] = useState<LibraryQueryParams>({
+  const [sortBy, setSortBy] = useState('AddedAtUtc:desc')
+  const [filters, setFilters] = useState<LibraryQueryParams>({
     page: 1,
     limit: 20,
   })
@@ -31,11 +31,13 @@ function ProfileGamesPage() {
   // Determine if this is the user's own profile
   const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
 
-  // Get friendship status (only if not own profile)
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
-    currentUser?.id || '',
-    profileUser?.id || ''
-  )
+  // Use profile actions hook
+  const profileActions = useProfileActions({
+    currentUserId: currentUser?.id,
+    profileUserId: profileUser?.id,
+    nickname,
+    isOwnProfile: isOwnProfile || false
+  })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
@@ -66,8 +68,8 @@ function ProfileGamesPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
+    setFilters({ ...filters, sortBy: newSortBy })
   }
 
   // Client-side search filtering
@@ -134,9 +136,9 @@ function ProfileGamesPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }
@@ -188,12 +190,12 @@ function ProfileGamesPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={isOwnProfile ? 'none' : friendshipStatus}
-            onEditProfile={() => {}}
-            onAddFriend={() => {}}
-            onCancelRequest={() => {}}
-            onAcceptRequest={() => {}}
-            onRemoveFriend={() => {}}
+            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            onEditProfile={profileActions.handleEditProfile}
+            onAddFriend={profileActions.handleAddFriend}
+            onCancelRequest={profileActions.handleCancelRequest}
+            onAcceptRequest={profileActions.handleAcceptRequest}
+            onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
           <div className="flex gap-[24px]">
