@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { GridIcon, GridRowIcon } from '@/icons'
 import { Product } from '@/components/Product'
+import { Search } from '@/components'
 import { ErrorState } from '@/components/ErrorState'
 import { LoadingState } from '@/components/LoadingState'
 import { EmptyState } from '@/components/EmptyState'
@@ -48,11 +49,15 @@ function RouteComponent() {
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
       <div className="container mx-auto relative z-20 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[var(--color-background)] mt-[24px] sm:mt-[32px]">
+        <div className="flex items-center justify-center">
+          <Search className="my-[12px] sm:my-[16px] w-full" />
+        </div>
+
+        <h2 className="text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[var(--color-background)]">
           Нові ігри
         </h2>
 
-        <div className="w-full pb-[128px] sm:pb-[192px] lg:pb-[256px] mt-[12px] sm:mt-[16px]">
+        <div className="w-full pb-[128px] sm:pb-[192px] lg:pb-[256px]">
           <div className="flex items-center justify-end text-[var(--color-background)]">
             <div className="flex items-center gap-[8px] sm:gap-[16px]">
               <p className="text-[var(--color-background-25)] text-[12px] sm:text-[14px]">
