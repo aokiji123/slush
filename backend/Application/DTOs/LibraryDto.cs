@@ -26,6 +26,7 @@ public class LibraryGameDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string MainImage { get; set; } = string.Empty;
     public double Price { get; set; }
     public double SalePrice { get; set; }

@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
-import { BsThreeDots } from 'react-icons/bs'
+import { useRef } from 'react'
+import { useLikeToggle } from '@/hooks'
+import { PostAuthorBadge } from './PostAuthorBadge'
+import { OptimizedImage } from './OptimizedImage'
+import { formatSimpleDate } from '@/utils'
 import { CommentsIcon, FavoriteIcon, FavoriteFilledIcon } from '@/icons'
-import { useLikePost, useUnlikePost } from '@/api/queries/useCommunity'
-import { useAuthState } from '@/api/queries/useAuth'
 import { PostType, MediaType } from '@/types/community'
 import type { PostDto } from '@/types/community'
 
@@ -12,43 +13,16 @@ interface LibraryPostCardProps {
 }
 
 export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
-  const { user } = useAuthState()
-  const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(post.likesCount || 0)
+  const { isLiked, likesCount, handleLike } = useLikeToggle({
+    itemId: post.id,
+    initialLikesCount: post.likesCount || 0
+  })
   const videoRef = useRef<HTMLVideoElement>(null)
-
-  const likePostMutation = useLikePost()
-  const unlikePostMutation = useUnlikePost()
-
-  const handleLike = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    
-    if (!user) return
-
-    const wasLiked = isLiked
-    const previousLikesCount = likesCount
-
-    // Optimistic update
-    setIsLiked(!wasLiked)
-    setLikesCount(wasLiked ? likesCount - 1 : likesCount + 1)
-
-    try {
-      if (wasLiked) {
-        await unlikePostMutation.mutateAsync(post.id)
-      } else {
-        await likePostMutation.mutateAsync(post.id)
-      }
-    } catch (error) {
-      // Revert optimistic update on error
-      setIsLiked(wasLiked)
-      setLikesCount(previousLikesCount)
-      console.error('Failed to toggle like:', error)
-    }
-  }
 
   const handleVideoEnded = () => {
     // Video ended - can be used for analytics or other purposes
   }
+  
   // Helper function to get cover image from post media or game main image
   const getCoverImage = () => {
     if (post.media.length > 0) {
@@ -57,16 +31,6 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
     }
     // Use game's main image as fallback for posts without media
     return post.gameMainImage || '/cyberpunk-image.png'
-  }
-
-  // Helper function to format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('uk-UA', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
   }
 
   // Video type: Full media with play button, no text below
@@ -80,20 +44,11 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
         onClick={onClick}
       >
         <div className="flex flex-col gap-[16px] flex-1 min-h-0">
-          <div className="flex items-center justify-between">
-            <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit text-white">
-              <img
-                src={post.authorAvatar || "/avatar.png"}
-                alt={post.authorUsername}
-                className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-                loading="lazy"
-              />
-              <p className="text-right text-[16px] font-medium">
-                {post.authorUsername}
-              </p>
-            </div>
-            <BsThreeDots size={24} className="cursor-pointer text-white" />
-          </div>
+          <PostAuthorBadge
+            avatar={post.authorAvatar}
+            username={post.authorUsername}
+            showMenu={true}
+          />
           
           <div className="relative flex-1 min-h-0 rounded-[8px] overflow-hidden">
             {videoMedia ? (
@@ -120,10 +75,11 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
                 }}
               />
             ) : (
-              <img
+              <OptimizedImage
                 src={getCoverImage()}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             )}
           </div>
@@ -150,7 +106,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
             </div>
           </div>
           <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-            {formatDate(post.createdAt)}
+            {formatSimpleDate(post.createdAt)}
           </p>
         </div>
       </div>
@@ -165,27 +121,19 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
         onClick={onClick}
       >
         <div className="flex flex-col gap-[16px] flex-1 min-h-0">
-          <div className="flex items-center justify-between">
-            <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit text-white">
-              <img
-                src={post.authorAvatar || "/avatar.png"}
-                alt={post.authorUsername}
-                className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-                loading="lazy"
-              />
-              <p className="text-right text-[16px] font-medium">
-                {post.authorUsername}
-              </p>
-            </div>
-            <BsThreeDots size={24} className="cursor-pointer text-white" />
-          </div>
+          <PostAuthorBadge
+            avatar={post.authorAvatar}
+            username={post.authorUsername}
+            showMenu={true}
+          />
           
           <div className="flex flex-col gap-[8px] flex-1 min-h-0">
             <div className="flex-1 min-h-0 rounded-[8px] overflow-hidden">
-              <img
+              <OptimizedImage
                 src={getCoverImage()}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <p className="text-[16px] font-light text-white overflow-ellipsis overflow-hidden whitespace-nowrap">
@@ -215,7 +163,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
             </div>
           </div>
           <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-            {formatDate(post.createdAt)}
+            {formatSimpleDate(post.createdAt)}
           </p>
         </div>
       </div>
@@ -230,27 +178,19 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
         onClick={onClick}
       >
         <div className="flex flex-col gap-[16px] flex-1 min-h-0">
-          <div className="flex items-center justify-between">
-            <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit text-white">
-              <img
-                src={post.authorAvatar || "/avatar.png"}
-                alt={post.authorUsername}
-                className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-                loading="lazy"
-              />
-              <p className="text-right text-[16px] font-medium">
-                {post.authorUsername}
-              </p>
-            </div>
-            <BsThreeDots size={24} className="cursor-pointer text-white" />
-          </div>
+          <PostAuthorBadge
+            avatar={post.authorAvatar}
+            username={post.authorUsername}
+            showMenu={true}
+          />
           
           <div className="flex flex-col gap-[8px] flex-1 min-h-0">
             <div className="flex-1 min-h-0 rounded-[8px] overflow-hidden">
-              <img
+              <OptimizedImage
                 src={getCoverImage()}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <div className="flex flex-col gap-[4px]">
@@ -285,7 +225,7 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
             </div>
           </div>
           <p className="text-[14px] font-normal text-[var(--color-background-25)]">
-            {formatDate(post.createdAt)}
+            {formatSimpleDate(post.createdAt)}
           </p>
         </div>
       </div>
@@ -298,25 +238,17 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
       className="w-[475px] h-[400px] flex flex-col gap-[16px] rounded-[20px] overflow-hidden bg-[var(--color-background-15)] p-[20px] cursor-pointer hover:opacity-90 transition-opacity"
       onClick={onClick}
     >
-      <div className="flex items-center justify-between">
-        <div className="relative bg-[var(--color-background-8)] pl-[36px] pr-[12px] h-[28px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer text-white">
-          <img
-            src={post.authorAvatar || "/avatar.png"}
-            alt={post.authorUsername}
-            className="w-[28px] h-[28px] object-cover rounded-full absolute top-0 left-0"
-            loading="lazy"
-          />
-          <p className="text-right text-[16px] font-medium">
-            {post.authorUsername}
-          </p>
-        </div>
-        <BsThreeDots size={24} className="cursor-pointer text-white" />
-      </div>
+      <PostAuthorBadge
+        avatar={post.authorAvatar}
+        username={post.authorUsername}
+        showMenu={true}
+      />
       
-      <img
+      <OptimizedImage
         src={getCoverImage()}
         alt={post.title}
         className="w-full h-[180px] rounded-[20px]"
+        loading="lazy"
       />
       
       <div className="flex flex-col gap-[16px] rounded-[0px_0px_20px_20px]">
@@ -349,11 +281,10 @@ export const LibraryPostCard = ({ post, onClick }: LibraryPostCardProps) => {
             </div>
           </div>
           <p className="text-[16px] font-normal text-[var(--color-background-25)]">
-            {formatDate(post.createdAt)}
+            {formatSimpleDate(post.createdAt)}
           </p>
         </div>
       </div>
     </div>
   )
 }
-

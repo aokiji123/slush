@@ -73,6 +73,7 @@ public class LibraryService : ILibraryService
         {
             Id = l.Game.Id,
             Name = l.Game.Name,
+            Slug = l.Game.Slug,
             MainImage = l.Game.MainImage,
             Price = (double)l.Game.Price,
             SalePrice = (double)l.Game.SalePrice,
