@@ -95,6 +95,7 @@ export const mockReviews: Review[] = [
     likes: 42,
     isLikedByCurrentUser: false,
     createdAt: '2024-01-15T10:30:00Z',
+    commentsCount: 0,
   },
   {
     id: '2',
@@ -107,6 +108,7 @@ export const mockReviews: Review[] = [
     likes: 128,
     isLikedByCurrentUser: true,
     createdAt: '2024-01-10T14:20:00Z',
+    commentsCount: 0,
   },
 ]
 

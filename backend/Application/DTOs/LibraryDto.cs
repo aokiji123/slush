@@ -36,4 +36,5 @@ public class LibraryGameDto
     public List<string> Genres { get; set; } = new();
     public List<string> Platforms { get; set; } = new();
     public DateTime AddedAt { get; set; }
+    public bool IsFavorite { get; set; }
 }

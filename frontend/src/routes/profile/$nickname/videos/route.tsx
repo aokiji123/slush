@@ -15,7 +15,7 @@ function ProfileVideosPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('CreatedAt:desc')
+  const [sortBy, setSortBy] = useState('CreatedAt:desc')
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)

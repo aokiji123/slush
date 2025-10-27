@@ -16,8 +16,8 @@ function ProfileGamesPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('AddedAtUtc:desc')
-  const [filters] = useState<LibraryQueryParams>({
+  const [sortBy, setSortBy] = useState('AddedAtUtc:desc')
+  const [filters, setFilters] = useState<LibraryQueryParams>({
     page: 1,
     limit: 20,
   })

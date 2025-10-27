@@ -333,7 +333,6 @@ export const FriendsListSection = ({
                         level={friend.level}
                         isOnline={friend.isOnline}
                         currentUserId={currentUserId}
-                        compact={true}
                       />
                     </div>
                   ))}

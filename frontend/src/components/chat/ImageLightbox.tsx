@@ -1,4 +1,4 @@
-import { memo, useEffect, useCallback } from 'react'
+import { memo, useEffect, useCallback, useRef } from 'react'
 import { useClickOutside } from '@/hooks'
 
 interface ImageLightboxProps {
@@ -7,6 +7,8 @@ interface ImageLightboxProps {
 }
 
 export const ImageLightbox = memo<ImageLightboxProps>(({ imageUrl, onClose }) => {
+  const lightboxRef = useRef<HTMLDivElement>(null)
+  
   // Handle ESC key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -28,7 +30,7 @@ export const ImageLightbox = memo<ImageLightboxProps>(({ imageUrl, onClose }) =>
   }, [imageUrl, onClose])
 
   // Handle click outside
-  const lightboxRef = useClickOutside<HTMLDivElement>(onClose)
+  useClickOutside(lightboxRef as React.RefObject<HTMLElement>, onClose)
 
   // Handle download
   const handleDownload = useCallback(async () => {
@@ -51,11 +53,8 @@ export const ImageLightbox = memo<ImageLightboxProps>(({ imageUrl, onClose }) =>
   if (!imageUrl) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90">
-      <div 
-        ref={lightboxRef}
-        className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center"
-      >
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" ref={lightboxRef as React.Ref<HTMLDivElement>}>
+      <div className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center">
         {/* Close button */}
         <button
           onClick={onClose}

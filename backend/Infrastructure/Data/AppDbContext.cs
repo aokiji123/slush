@@ -33,6 +33,8 @@ public class AppDbContext : DbContext
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatMessageAttachment> ChatMessageAttachments { get; set; }
     public DbSet<UserReport> UserReports { get; set; }
+    public DbSet<GameCollection> Collections { get; set; }
+    public DbSet<CollectionGame> CollectionGames { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +52,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ChatMessageConfiguration());
         modelBuilder.ApplyConfiguration(new ChatMessageAttachmentConfiguration());
         modelBuilder.ApplyConfiguration(new UserReportConfiguration());
+        modelBuilder.ApplyConfiguration(new CollectionConfiguration());
+        modelBuilder.ApplyConfiguration(new CollectionGameConfiguration());
         
         // UserRole configuration
         modelBuilder.Entity<UserRole>()

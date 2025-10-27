@@ -17,6 +17,7 @@ export type GameData = {
   platforms: string[]
   isDlc: boolean
   baseGameId: string | null
+  isFavorite?: boolean
 }
 
 export type Game = {

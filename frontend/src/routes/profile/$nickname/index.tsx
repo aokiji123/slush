@@ -50,7 +50,7 @@ function ProfileHomePage() {
     currentUserId: currentUser?.id,
     profileUserId: profileUser?.id,
     nickname,
-    isOwnProfile
+    isOwnProfile: isOwnProfile || false
   })
 
   // Fetch profile data

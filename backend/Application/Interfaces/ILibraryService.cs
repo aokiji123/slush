@@ -18,4 +18,5 @@ public interface ILibraryService
     Task<LibraryDto> AddToLibraryAsync(AddToLibraryDto dto);
     Task<bool> IsInLibraryAsync(Guid userId, Guid gameId);
     Task<IEnumerable<GameDto>> GetSharedGamesAsync(Guid userId1, Guid userId2);
+    Task<bool> ToggleFavoriteAsync(Guid userId, Guid gameId);
 }

@@ -58,3 +58,8 @@ export async function getSharedGames(userId1: string, userId2: string): Promise<
   const { data } = await axiosInstance.get(`/library/shared/${userId1}/${userId2}`)
   return data
 }
+
+export async function toggleFavorite(gameId: string): Promise<ApiResponse<boolean>> {
+  const { data } = await axiosInstance.post(`/library/me/favorite/${gameId}`)
+  return data
+}

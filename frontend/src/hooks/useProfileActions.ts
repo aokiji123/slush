@@ -18,10 +18,12 @@ export const useProfileActions = ({
   const { success, error } = useToastStore()
 
   // Get friendship status
-  const { data: friendshipStatus = 'none' } = useFriendshipStatus(
+  const { data: friendshipStatusRaw = 'none' } = useFriendshipStatus(
     currentUserId || '',
     profileUserId || ''
   )
+  
+  const friendshipStatus = (friendshipStatusRaw as 'none' | 'friends' | 'pending_incoming' | 'pending_outgoing') || 'none'
 
   // Mutations
   const sendFriendRequestMutation = useSendFriendRequest()
@@ -38,7 +40,7 @@ export const useProfileActions = ({
 
   // Add friend handler
   const handleAddFriend = useCallback(() => {
-    if (profileUserId && friendshipStatus === 'none') {
+    if (profileUserId && friendshipStatusRaw === 'none') {
       sendFriendRequestMutation.mutate(profileUserId, {
         onSuccess: () => {
           success('Friend request sent')
@@ -48,7 +50,7 @@ export const useProfileActions = ({
         }
       })
     }
-  }, [profileUserId, friendshipStatus, sendFriendRequestMutation, success, error])
+  }, [profileUserId, friendshipStatusRaw, sendFriendRequestMutation, success, error])
 
   // Cancel friend request handler
   const handleCancelRequest = useCallback(() => {

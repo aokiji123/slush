@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027131234_AddIsFavoriteToLibrary")]
+    partial class AddIsFavoriteToLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,26 +180,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("MessageId");
 
                     b.ToTable("ChatMessageAttachments");
-                });
-
-            modelBuilder.Entity("Domain.Entities.CollectionGame", b =>
-                {
-                    b.Property<Guid>("CollectionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CollectionId", "GameId");
-
-                    b.HasIndex("AddedAt");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("CollectionGames");
                 });
 
             modelBuilder.Entity("Domain.Entities.Comment", b =>
@@ -492,39 +475,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("GameCharacteristics");
                 });
 
-            modelBuilder.Entity("Domain.Entities.GameCollection", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Collections");
-                });
-
             modelBuilder.Entity("Domain.Entities.GameConsoleFeature", b =>
                 {
                     b.Property<Guid>("Id")
@@ -605,8 +555,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId", "GameId")
                         .IsUnique();
-
-                    b.HasIndex("UserId", "IsFavorite");
 
                     b.ToTable("Libraries");
                 });
@@ -1180,25 +1128,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("Domain.Entities.CollectionGame", b =>
-                {
-                    b.HasOne("Domain.Entities.GameCollection", "Collection")
-                        .WithMany("Games")
-                        .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Collection");
-
-                    b.Navigation("Game");
-                });
-
             modelBuilder.Entity("Domain.Entities.Comment", b =>
                 {
                     b.HasOne("Domain.Entities.User", "Author")
@@ -1283,17 +1212,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameCollection", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.GameConsoleFeature", b =>
@@ -1570,11 +1488,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("GameCharacteristics");
 
                     b.Navigation("Reviews");
-                });
-
-            modelBuilder.Entity("Domain.Entities.GameCollection", b =>
-                {
-                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post", b =>

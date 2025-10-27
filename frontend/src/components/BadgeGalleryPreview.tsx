@@ -16,7 +16,7 @@ export const BadgeGalleryPreview = ({ badgesCount, topBadges }: BadgeGalleryPrev
   const { t } = useTranslation()
 
   // Render real badge icons
-  const getBadgeIcon = (badge: Badge, index: number) => {
+  const getBadgeIcon = (badge: Badge) => {
     return (
       <OptimizedImage
         key={badge.id}
@@ -25,7 +25,6 @@ export const BadgeGalleryPreview = ({ badgesCount, topBadges }: BadgeGalleryPrev
         className="w-[110px] h-[110px] rounded-[12px] object-cover"
         loading="lazy"
         placeholder="/badge-placeholder.png"
-        title={badge.name}
       />
     )
   }
@@ -53,7 +52,7 @@ export const BadgeGalleryPreview = ({ badgesCount, topBadges }: BadgeGalleryPrev
         
         {/* Badges Row */}
         <div className="flex gap-[40px] items-start justify-center flex-1">
-          {topBadges.slice(0, 5).map((badge, index) => getBadgeIcon(badge, index))}
+          {topBadges.slice(0, 5).map((badge) => getBadgeIcon(badge))}
         </div>
       </div>
     </div>

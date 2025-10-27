@@ -82,7 +82,8 @@ public class LibraryService : ILibraryService
             ReleaseDate = l.Game.ReleaseDate,
             Genres = l.Game.Genre,
             Platforms = l.Game.Platforms,
-            AddedAt = l.AddedAt
+            AddedAt = l.AddedAt,
+            IsFavorite = l.IsFavorite
         });
     }
 
@@ -295,5 +296,21 @@ public class LibraryService : ILibraryService
             .Where(dto => dto != null)
             .Cast<GameDto>()
             .ToList();
+    }
+
+    public async Task<bool> ToggleFavoriteAsync(Guid userId, Guid gameId)
+    {
+        var library = await _context.Libraries
+            .FirstOrDefaultAsync(l => l.UserId == userId && l.GameId == gameId);
+
+        if (library == null)
+        {
+            throw new InvalidOperationException("Game is not in user's library");
+        }
+
+        library.IsFavorite = !library.IsFavorite;
+        await _context.SaveChangesAsync();
+
+        return library.IsFavorite;
     }
 }

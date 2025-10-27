@@ -1,5 +1,4 @@
 import { memo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useReportUser } from '@/api/queries/useUser'
 import { useToastStore } from '@/lib/toast-store'
 import type { ReportReason } from '@/api/types/report'
@@ -25,7 +24,6 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
   reportedUserId,
   reportedUserNickname,
 }) => {
-  const { t } = useTranslation('common')
   const { success: showSuccess, error: showError } = useToastStore()
   const reportUserMutation = useReportUser()
 

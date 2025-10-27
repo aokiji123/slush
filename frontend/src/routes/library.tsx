@@ -3,7 +3,7 @@ import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
 import { FiPlusCircle } from 'react-icons/fi'
-import { Search, LibraryPostCard, LibraryNewsCard, OptimizedImage, Pagination } from '@/components'
+import { Search, LibraryPostCard, LibraryNewsCard, OptimizedImage, Pagination, CollectionModal } from '@/components'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { useMyLibraryQuery } from '@/api/queries/useLibrary'
 import { useLibraryPosts } from '@/api/queries/useCommunity'
@@ -54,6 +54,7 @@ function RouteComponent() {
   const [searchText, setSearchText] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | 'myCollection'>('all')
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false)
   const debouncedSearchText = useDebounce(searchText, 300)
 
   // Swiper refs
@@ -89,10 +90,8 @@ function RouteComponent() {
   const filteredGames = (libraryData?.data?.items ?? []).filter(game => {
     const matchesSearch = game.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
     
-    // TODO: Implement actual favorites logic when backend supports it
     if (activeFilter === 'favorites') {
-      // For now, return all games - will be implemented when backend supports favorites
-      return matchesSearch
+      return matchesSearch && game.isFavorite === true
     }
     
     // TODO: Implement collections when backend supports it
@@ -349,10 +348,7 @@ function RouteComponent() {
               </p>
               <div 
                 className="cursor-pointer text-[var(--color-background-21)] hover:opacity-80 transition-opacity"
-                onClick={() => {
-                  // TODO: Implement collection creation modal
-                  console.log('Collection creation clicked')
-                }}
+                onClick={() => setIsCollectionModalOpen(true)}
               >
                 <FiPlusCircle size={24} />
               </div>
@@ -446,6 +442,12 @@ function RouteComponent() {
           }}
         />
       ))}
+
+      {/* Collection Creation Modal */}
+      <CollectionModal
+        isOpen={isCollectionModalOpen}
+        onClose={() => setIsCollectionModalOpen(false)}
+      />
     </div>
   )
 }
