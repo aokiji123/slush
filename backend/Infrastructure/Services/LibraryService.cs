@@ -51,7 +51,7 @@ public class LibraryService : ILibraryService
             .Select(l => new OwnedGameDto
             {
                 GameId = l.GameId,
-                Title = l.Game.Title ?? string.Empty,
+                Name = l.Game.Name ?? string.Empty,
                 MainImage = l.Game.MainImage ?? string.Empty,
                 PurchasedAt = l.AddedAt,
                 PurchasePrice = (double)l.Game.Price
@@ -71,9 +71,16 @@ public class LibraryService : ILibraryService
         var libraries = await _libraryRepository.GetByUserIdAsync(userId);
         return libraries.Select(l => new LibraryGameDto
         {
-            GameId = l.GameId,
-            Title = l.Game.Name,
+            Id = l.Game.Id,
+            Name = l.Game.Name,
             MainImage = l.Game.MainImage,
+            Price = (double)l.Game.Price,
+            SalePrice = (double)l.Game.SalePrice,
+            DiscountPercent = l.Game.DiscountPercent,
+            Rating = l.Game.Rating,
+            ReleaseDate = l.Game.ReleaseDate,
+            Genres = l.Game.Genre,
+            Platforms = l.Game.Platforms,
             AddedAt = l.AddedAt
         });
     }

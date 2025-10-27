@@ -6,6 +6,9 @@ export interface ProfileStatistics {
   friendsCount: number
   badgesCount: number
   postsCount: number
+  screenshotsCount: number
+  videosCount: number
+  guidesCount: number
   level: number
   experience: number
   nextLevelExperience: number

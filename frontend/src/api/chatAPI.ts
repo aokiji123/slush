@@ -120,3 +120,14 @@ export const sendMediaMessage = async (dto: SendMediaMessageDto): Promise<ChatMe
   
   return data.data
 }
+
+// Clear conversation history between the current user and a friend
+export const clearConversationHistory = async (friendId: string): Promise<void> => {
+  const { data } = await axiosInstance.delete<ChatApiResponse<object>>(
+    `/chat/conversations/${friendId}`
+  )
+  
+  if (!data.success) {
+    throw new Error(data.message || 'Failed to clear conversation history')
+  }
+}

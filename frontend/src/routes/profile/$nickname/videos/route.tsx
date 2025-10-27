@@ -36,7 +36,7 @@ function ProfileVideosPage() {
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's posts (videos only)
-  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '')
+  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '', 'Video', sortBy)
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -47,8 +47,7 @@ function ProfileVideosPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
   }
 
   // Filter posts to only show videos
@@ -99,9 +98,9 @@ function ProfileVideosPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }

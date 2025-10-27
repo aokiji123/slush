@@ -52,4 +52,9 @@ public interface IChatService
     /// Gets the last message in a conversation
     /// </summary>
     Task<ChatMessageDto?> GetLastMessageAsync(Guid userId1, Guid userId2);
+
+    /// <summary>
+    /// Clears conversation history between two users
+    /// </summary>
+    Task ClearConversationHistoryAsync(Guid userId, Guid friendId);
 }

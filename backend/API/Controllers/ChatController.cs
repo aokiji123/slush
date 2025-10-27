@@ -328,4 +328,39 @@ public class ChatController : ControllerBase
             return StatusCode(500, ApiResponse<FileUploadDto>.CreateError("Failed to upload file"));
         }
     }
+
+    /// <summary>
+    /// Clears all messages in a conversation between the current user and a friend
+    /// </summary>
+    /// <param name="friendId">Friend's user ID</param>
+    /// <returns>Success response</returns>
+    [HttpDelete("conversations/{friendId}")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<object>>> ClearConversationHistory(Guid friendId)
+    {
+        try
+        {
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
+            _logger.LogInformation("Clearing conversation history between {UserId} and {FriendId}", userId, friendId);
+
+            await _chatService.ClearConversationHistoryAsync(userId, friendId);
+            _logger.LogInformation("Conversation history cleared successfully");
+
+            return Ok(ApiResponse<object>.CreateSuccess(null, "Conversation history cleared successfully"));
+        }
+        catch (UnauthorizedException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access to clear conversation history between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return Unauthorized(ApiResponse<object>.CreateError(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error clearing conversation history between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return StatusCode(500, ApiResponse<object>.CreateError("Failed to clear conversation history"));
+        }
+    }
 }

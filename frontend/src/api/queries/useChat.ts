@@ -7,6 +7,7 @@ import {
   getMessage,
   sendTextMessage,
   sendMediaMessage,
+  clearConversationHistory,
 } from '../chatAPI'
 import type {
   ChatMessageDto,
@@ -199,4 +200,20 @@ export const useUpdateMessageInCache = () => {
       }
     )
   }
+}
+
+// Clear conversation history mutation
+export const useClearConversationHistory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (friendId: string) => clearConversationHistory(friendId),
+    onSuccess: (_, friendId) => {
+      // Invalidate conversation history for this friend
+      queryClient.invalidateQueries({ queryKey: chatKeys.conversationHistory(friendId) })
+      
+      // Invalidate conversations list
+      queryClient.invalidateQueries({ queryKey: chatKeys.conversations() })
+    },
+  })
 }

@@ -98,6 +98,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProfileCommentRepository, ProfileCommentRepository>();
         services.AddScoped<IBadgeRepository, BadgeRepository>();
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+        services.AddScoped<IUserReportRepository, UserReportRepository>();
 
         // Register application services
         services.AddScoped<IAuthService, AuthService>();
@@ -117,6 +118,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProfileCommentService, ProfileCommentService>();
         services.AddScoped<IBadgeService, BadgeService>();
         services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IUserReportService, UserReportService>();
 
         return services;
     }

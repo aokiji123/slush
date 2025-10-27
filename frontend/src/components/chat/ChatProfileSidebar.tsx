@@ -1,5 +1,10 @@
 import { memo, useState } from 'react'
 import type { ChatConversationDto } from '@/api/types/chat'
+import { useAuthenticatedUser } from '@/api/queries/useUser'
+import { useRemoveFriend, useBlockUser } from '@/api/queries/useFriendship'
+import { useClearConversationHistory } from '@/api/queries/useChat'
+import { useToastStore } from '@/lib/toast-store'
+import { ReportUserModal } from '@/components/modals/ReportUserModal'
 
 interface ChatProfileSidebarProps {
   conversation: ChatConversationDto | null
@@ -12,25 +17,68 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
 }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [activeTab, setActiveTab] = useState<'photos' | 'files' | 'voice'>('photos')
+  const [showReportModal, setShowReportModal] = useState(false)
 
-  const handleRemoveFriend = () => {
-    // TODO: Implement remove friend functionality
-    console.log('Remove friend:', conversation?.friendId)
+  const { data: currentUser } = useAuthenticatedUser()
+  const { success: showSuccess, error: showError } = useToastStore()
+
+  const removeFriendMutation = useRemoveFriend()
+  const blockUserMutation = useBlockUser()
+  const clearHistoryMutation = useClearConversationHistory()
+
+  const handleRemoveFriend = async () => {
+    if (!conversation?.friendId || !currentUser) return
+    
+    if (!confirm('Ви впевнені, що хочете видалити цього користувача з друзів?')) {
+      return
+    }
+
+    try {
+      await removeFriendMutation.mutateAsync({
+        senderId: currentUser.id,
+        receiverId: conversation.friendId
+      })
+      showSuccess('Користувача видалено з друзів')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося видалити друга'
+      showError(errorMessage)
+    }
   }
 
-  const handleClearHistory = () => {
-    // TODO: Implement clear history functionality
-    console.log('Clear history:', conversation?.friendId)
+  const handleClearHistory = async () => {
+    if (!conversation?.friendId) return
+    
+    if (!confirm('Ви впевнені, що хочете видалити історію чату?')) {
+      return
+    }
+
+    try {
+      await clearHistoryMutation.mutateAsync(conversation.friendId)
+      showSuccess('Історію чату очищено')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося очистити історію'
+      showError(errorMessage)
+    }
   }
 
-  const handleBlockUser = () => {
-    // TODO: Implement block user functionality
-    console.log('Block user:', conversation?.friendId)
+  const handleBlockUser = async () => {
+    if (!conversation?.friendId) return
+    
+    if (!confirm('Ви впевнені, що хочете заблокувати цього користувача?')) {
+      return
+    }
+
+    try {
+      await blockUserMutation.mutateAsync(conversation.friendId)
+      showSuccess('Користувача заблоковано')
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Не вдалося заблокувати користувача'
+      showError(errorMessage)
+    }
   }
 
   const handleReportUser = () => {
-    // TODO: Implement report user functionality
-    console.log('Report user:', conversation?.friendId)
+    setShowReportModal(true)
   }
 
   if (!conversation) {
@@ -303,6 +351,14 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
           </button>
         </div>
       </div>
+
+      {/* Report User Modal */}
+      <ReportUserModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportedUserId={conversation.friendId}
+        reportedUserNickname={conversation.friendNickname || 'Користувач'}
+      />
     </div>
   )
 })

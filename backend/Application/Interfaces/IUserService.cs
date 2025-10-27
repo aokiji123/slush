@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Application.Common.Query;
 using Application.DTOs;
 using Microsoft.AspNetCore.Http;
 
@@ -30,6 +31,7 @@ public interface IUserService
     Task<ProfileStatisticsDto> GetUserStatisticsAsync(Guid userId);
     
     // User content methods
-    Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId);
-    Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId);
+    Task<IReadOnlyList<ReviewDto>> GetUserReviewsAsync(Guid userId, UserReviewsQueryParameters parameters);
+    Task<IReadOnlyList<PostDto>> GetUserPostsAsync(Guid userId, UserPostsQueryParameters parameters);
+    Task<IReadOnlyList<LibraryGameDto>> GetUserGamesAsync(Guid userId, UserGamesQueryParameters parameters);
 }

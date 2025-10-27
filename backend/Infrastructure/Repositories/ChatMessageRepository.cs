@@ -138,4 +138,21 @@ public class ChatMessageRepository : IChatMessageRepository
             .OrderByDescending(m => m.CreatedAt)
             .FirstOrDefaultAsync();
     }
+
+    public async Task ClearConversationAsync(Guid userId1, Guid userId2)
+    {
+        var messages = await _context.ChatMessages
+            .Where(m => !m.IsDeleted && 
+                       ((m.SenderId == userId1 && m.ReceiverId == userId2) ||
+                        (m.SenderId == userId2 && m.ReceiverId == userId1)))
+            .ToListAsync();
+
+        foreach (var message in messages)
+        {
+            message.IsDeleted = true;
+            message.DeletedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+    }
 }

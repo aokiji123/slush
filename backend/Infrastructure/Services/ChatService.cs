@@ -249,4 +249,16 @@ public class ChatService : IChatService
         var message = await _chatMessageRepository.GetLastMessageAsync(userId1, userId2);
         return message != null ? _mapper.Map<ChatMessageDto>(message) : null;
     }
+
+    public async Task ClearConversationHistoryAsync(Guid userId, Guid friendId)
+    {
+        _logger.LogInformation("Clearing conversation history between {UserId} and {FriendId}", userId, friendId);
+
+        // Validate friendship
+        await ValidateFriendshipAsync(userId, friendId);
+
+        await _chatMessageRepository.ClearConversationAsync(userId, friendId);
+        
+        _logger.LogInformation("Conversation history cleared successfully between {UserId} and {FriendId}", userId, friendId);
+    }
 }

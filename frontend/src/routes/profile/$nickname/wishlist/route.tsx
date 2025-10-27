@@ -3,7 +3,9 @@ import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileGameCard, Profile
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics } from '@/api/queries/useProfile'
 import { useFriendshipStatus } from '@/api/queries/useFriendship'
-import { useWishlistQuery } from '@/api/queries/useWishlist'
+import { useWishlistQuery, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import { useToastStore } from '@/lib/toast-store'
+import { useCartStore } from '@/lib/cartStore'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import type { WishlistQueryParams } from '@/api/types/wishlist'
@@ -16,11 +18,15 @@ function ProfileWishlistPage() {
   const { nickname } = Route.useParams()
   const { t } = useTranslation('common')
   const [searchText, setSearchText] = useState('')
-  const [sortBy] = useState('AddedAtUtc:desc')
-  const [filters] = useState<WishlistQueryParams>({
+  const [sortBy, setSortBy] = useState('AddedAtUtc:desc')
+  const [filters, setFilters] = useState<WishlistQueryParams>({
     page: 1,
     limit: 20,
   })
+  
+  const { success: showSuccess, error: showError } = useToastStore()
+  const { addToCart } = useCartStore()
+  const removeFromWishlistMutation = useRemoveFromWishlist()
 
   // Fetch profile user data
   const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
@@ -57,8 +63,8 @@ function ProfileWishlistPage() {
   ]
 
   const handleSortChange = (newSortBy: string) => {
-    // TODO: Implement sort change logic
-    console.log('Sort changed to:', newSortBy)
+    setSortBy(newSortBy)
+    setFilters({ ...filters, sortBy: newSortBy })
   }
 
   // Client-side search filtering
@@ -82,13 +88,17 @@ function ProfileWishlistPage() {
       status="inWishlist"
       statusText={t('profile.status.inWishlist')}
       isInWishlist={true}
-      onWishlistToggle={() => {
-        // TODO: Implement wishlist toggle
-        console.log('Toggle wishlist for game:', game.id)
+      onWishlistToggle={async () => {
+        try {
+          await removeFromWishlistMutation.mutateAsync({ gameId: game.id })
+          showSuccess(t('wishlist.removed'))
+        } catch (error: any) {
+          showError(error?.response?.data?.message || t('wishlist.removeFailed'))
+        }
       }}
       onAddToCart={() => {
-        // TODO: Implement add to cart
-        console.log('Add to cart:', game.id)
+        addToCart(game)
+        showSuccess(t('cart.added'))
       }}
     />
   )
@@ -128,9 +138,9 @@ function ProfileWishlistPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }

@@ -54,6 +54,7 @@ export type Review = {
   createdAt: string
   likes: number
   isLikedByCurrentUser: boolean
+  commentsCount: number
 }
 
 export type CreateReviewRequest = {

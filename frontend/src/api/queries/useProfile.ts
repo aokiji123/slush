@@ -3,6 +3,7 @@ import {
   getUserStatistics, 
   getUserReviews, 
   getUserPosts, 
+  getUserGames,
   getProfileComments, 
   addProfileComment, 
   deleteProfileComment,
@@ -20,19 +21,28 @@ export function useUserStatistics(userId: string) {
 }
 
 // Get user reviews
-export function useUserReviews(userId: string) {
+export function useUserReviews(userId: string, sortBy?: string) {
   return useQuery({
-    queryKey: ['user-reviews', userId],
-    queryFn: () => getUserReviews(userId),
+    queryKey: ['user-reviews', userId, sortBy],
+    queryFn: () => getUserReviews(userId, sortBy),
     enabled: !!userId,
   })
 }
 
 // Get user posts
-export function useUserPosts(userId: string) {
+export function useUserPosts(userId: string, type?: string, sortBy?: string) {
   return useQuery({
-    queryKey: ['user-posts', userId],
-    queryFn: () => getUserPosts(userId),
+    queryKey: ['user-posts', userId, type, sortBy],
+    queryFn: () => getUserPosts(userId, type, sortBy),
+    enabled: !!userId,
+  })
+}
+
+// Get user games
+export function useUserGames(userId: string, sortBy?: string) {
+  return useQuery({
+    queryKey: ['user-games', userId, sortBy],
+    queryFn: () => getUserGames(userId, sortBy),
     enabled: !!userId,
   })
 }

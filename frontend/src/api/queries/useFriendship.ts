@@ -12,7 +12,7 @@ const userToFriend = (user: User): Friend => ({
   avatar: user.avatar,
   banner: user.banner,
   isOnline: user.isOnline ?? false,
-  level: 1, // TODO: Implement level calculation based on user data
+  level: user.level || 1,
   lastSeenAt: user.lastSeenAt,
   bio: user.bio,
   email: user.email,

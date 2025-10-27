@@ -10,14 +10,38 @@ export async function getUserStatistics(userId: string): Promise<ProfileStatisti
 }
 
 // Get user reviews
-export async function getUserReviews(userId: string): Promise<Review[]> {
-  const { data } = await axiosInstance.get(`/user/${userId}/reviews`)
+export async function getUserReviews(userId: string, sortBy?: string): Promise<Review[]> {
+  const params = new URLSearchParams()
+  if (sortBy) {
+    params.append('sortBy', sortBy)
+  }
+  const queryString = params.toString()
+  const { data } = await axiosInstance.get(`/user/${userId}/reviews${queryString ? `?${queryString}` : ''}`)
   return data.data
 }
 
 // Get user posts
-export async function getUserPosts(userId: string): Promise<PostDto[]> {
-  const { data } = await axiosInstance.get(`/user/${userId}/posts`)
+export async function getUserPosts(userId: string, type?: string, sortBy?: string): Promise<PostDto[]> {
+  const params = new URLSearchParams()
+  if (type) {
+    params.append('type', type)
+  }
+  if (sortBy) {
+    params.append('sortBy', sortBy)
+  }
+  const queryString = params.toString()
+  const { data } = await axiosInstance.get(`/user/${userId}/posts${queryString ? `?${queryString}` : ''}`)
+  return data.data
+}
+
+// Get user games
+export async function getUserGames(userId: string, sortBy?: string): Promise<any[]> {
+  const params = new URLSearchParams()
+  if (sortBy) {
+    params.append('sortBy', sortBy)
+  }
+  const queryString = params.toString()
+  const { data } = await axiosInstance.get(`/user/${userId}/games${queryString ? `?${queryString}` : ''}`)
   return data.data
 }
 

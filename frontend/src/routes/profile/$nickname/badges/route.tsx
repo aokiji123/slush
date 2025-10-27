@@ -112,9 +112,9 @@ function ProfileBadgesPage() {
       dlc: statistics?.dlcCount || 0,
       wishlist: statistics?.wishlistCount || 0,
       discussions: statistics?.postsCount || 0,
-      screenshots: 0, // TODO: Add screenshots count to statistics
-      videos: 0, // TODO: Add videos count to statistics
-      guides: 0, // TODO: Add guides count to statistics
+      screenshots: statistics?.screenshotsCount || 0,
+      videos: statistics?.videosCount || 0,
+      guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
   }
