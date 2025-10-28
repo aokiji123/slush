@@ -22,9 +22,11 @@ export const CardActions = ({
   justify = 'start' 
 }: CardActionsProps) => {
   const justifyClass = justifyClasses[justify]
-  
+
   return (
-    <div className={`flex items-center gap-3 ${justifyClass} ${className}`}>
+    <div
+      className={`flex items-center flex-wrap gap-2 md:gap-3 ${justifyClass} ${className}`}
+    >
       {children}
     </div>
   )

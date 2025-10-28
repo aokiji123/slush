@@ -57,7 +57,6 @@ export interface FriendDetails {
   friendshipCreatedAt: string
 }
 
-// Profile Tab Components Types
 export interface ProfileTabToolbarProps {
   searchText: string
   onSearchChange: (text: string) => void

@@ -4,11 +4,21 @@ import {
   FaChevronRight,
   FaChevronUp,
   FaCheck,
+  FaStar,
+  FaApple,
+  FaWindows,
+  FaPlaystation,
+  FaXbox,
 } from 'react-icons/fa'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MasonryLayout, SortDropdown, GameComment } from '@/components'
+import {
+  MasonryLayout,
+  SortDropdown,
+  GameComment,
+  PurchaseConfirmationModal,
+} from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
 import {
   useGameById,
@@ -21,6 +31,18 @@ import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
 import { useCartStore } from '@/lib/cartStore'
 import { useGameOwnership } from '@/api/queries/useLibrary'
+import {
+  useFriendsWhoOwnGame,
+  useFriendsWhoWishlistGame,
+} from '@/api/queries/useFriendship'
+import {
+  useWishlist,
+  useAddToWishlist,
+  useRemoveFromWishlist,
+} from '@/api/queries/useWishlist'
+import { usePurchaseGame } from '@/api/queries/usePurchase'
+import { useWalletBalance } from '@/api/queries/useWallet'
+import { FavoriteIcon, FavoriteFilledIcon } from '@/icons'
 import type { Review } from '@/api/types/game'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation } from 'swiper/modules'
@@ -52,36 +74,79 @@ function RouteComponent() {
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug' })
   const { data: game, isLoading, isError } = useGameById(slug)
-  const { data: baseGame } = useBaseGame(
-    game?.data?.isDlc ? game.data.id : null,
-  )
-  // Fetch DLCs from base game if this is a DLC, otherwise fetch from current game
+  const { data: baseGame } = useBaseGame(game?.data.isDlc ? game.data.id : null)
   const { data: gameDlcs } = useGameDlcs(
-    game?.data?.isDlc ? baseGame?.data?.slug || slug : slug,
+    game?.data.isDlc ? baseGame?.data.slug || slug : slug,
   )
 
-  // Filter out current DLC from the list if viewing a DLC
-  const otherDlcs = game?.data?.isDlc
-    ? gameDlcs?.data?.filter((dlc) => dlc.id !== game.data.id) || []
+  const otherDlcs = game?.data.isDlc
+    ? gameDlcs?.data.filter((dlc) => dlc.id !== game.data.id) || []
     : gameDlcs?.data || []
   const {
     data: reviews,
     isLoading: reviewsLoading,
     refetch: refetchReviews,
-  } = useGameReviews(game?.data?.id || '', selectedSort)
+  } = useGameReviews(game?.data.id || '', selectedSort)
   const { user: authUser } = useAuthState()
   const { data: authenticatedUser } = useAuthenticatedUser()
   const translateGenre = useGenreTranslation()
   const sortOptions = getSortOptions(t)
   const { addToCart, isInCart } = useCartStore()
-  const { data: isOwned } = useGameOwnership(game?.data?.id || '')
+  const { data: isOwned } = useGameOwnership(game?.data.id || '')
   const swiperRef = useRef<SwiperType | null>(null)
   const [selectedImage, setSelectedImage] = useState<string>('')
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0)
 
   const gameInCart = game?.data ? isInCart(game.data.id) : false
 
-  // Create combined images array with mainImage as first element, avoiding duplicates
+  // Purchase and wishlist functionality
+  const { data: wishlistData } = useWishlist()
+  const addToWishlistMutation = useAddToWishlist()
+  const removeFromWishlistMutation = useRemoveFromWishlist()
+  const purchaseGameMutation = usePurchaseGame()
+  const { data: walletBalance } = useWalletBalance()
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false)
+
+  const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(
+    game?.data.id || '',
+  )
+  const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data.id || '')
+
+  const isInWishlist =
+    wishlistData?.data.some(
+      (wishlistGame) => wishlistGame.id === game?.data.id,
+    ) || false
+
+  const handleWishlistToggle = () => {
+    if (!game?.data.id) return
+
+    if (isInWishlist) {
+      removeFromWishlistMutation.mutate({ gameId: game.data.id })
+    } else {
+      addToWishlistMutation.mutate({ gameId: game.data.id })
+    }
+  }
+
+  const handleConfirmPurchase = async () => {
+    if (!game?.data.id) return
+
+    try {
+      const result = await purchaseGameMutation.mutateAsync({
+        gameId: game.data.id,
+        title: `Purchase: ${game.data.name}`,
+      })
+
+      if (!result.success) {
+        throw new Error(result.message || 'Purchase failed')
+      }
+
+      setIsPurchaseModalOpen(false)
+      navigate({ to: '/library' })
+    } catch (error) {
+      console.error('Purchase failed:', error)
+    }
+  }
+
   const allImages = game?.data
     ? [
         game.data.mainImage,
@@ -91,22 +156,17 @@ function RouteComponent() {
       ]
     : []
 
-  // Get valid selected image
-  const validSelectedImage = selectedImage || game?.data?.mainImage || ''
+  const validSelectedImage = selectedImage || game?.data.mainImage || ''
 
-  // Initialize selected image when game data loads
   useEffect(() => {
     if (game?.data) {
-      // Always use mainImage as the default selected image
       setSelectedImage(game.data.mainImage)
       setActiveImageIndex(0)
     }
   }, [game?.data])
 
-  // Find user's existing review
-  // Try to get user ID from authenticated user first, then fallback to auth state
   const userId = authenticatedUser?.id || (authUser as any)?.id
-  const userReview = reviews?.data?.find(
+  const userReview = reviews?.data.find(
     (review: Review) => review.userId === userId,
   )
 
@@ -238,6 +298,28 @@ function RouteComponent() {
           loading="lazy"
         />
       )}
+      {/* Rating - only visible on screens smaller than lg */}
+      <div className="lg:hidden flex items-center gap-[12px] sm:gap-[15px] justify-start sm:justify-end h-[48px] mb-[8px]">
+        <p className="text-[20px] sm:text-[24px] font-bold text-[var(--color-background)] font-manrope">
+          {game.data.rating.toFixed(1) || '0.0'}
+        </p>
+        <div className="flex items-center gap-[4px] sm:gap-[8px]">
+          {Array.from({ length: 5 }).map((_, index) => {
+            const isFilled = index < Math.floor(game.data.rating)
+            return (
+              <FaStar
+                key={index}
+                size={20}
+                className={
+                  isFilled
+                    ? 'text-[var(--color-background-10)]'
+                    : 'text-[var(--color-background-25)]'
+                }
+              />
+            )
+          })}
+        </div>
+      </div>
       <div className="w-full relative mb-[24px]">
         <Swiper
           modules={[Navigation]}
@@ -295,6 +377,269 @@ function RouteComponent() {
         )}
       </div>
 
+      {/* Price and purchase buttons - only visible on small screens */}
+      <div className="lg:hidden flex flex-col gap-[20px] mb-[24px]">
+        <div className="flex items-center gap-[6px] sm:gap-[8px]">
+          {game.data.salePrice && game.data.salePrice > 0 ? (
+            <>
+              <p className="text-[24px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                {game.data.salePrice}₴
+              </p>
+              <p className="text-[18px] sm:text-[20px] lg:text-[24px] font-normal text-[var(--color-background-25)] line-through font-manrope">
+                {game.data.price}₴
+              </p>
+            </>
+          ) : (
+            <p className="text-[24px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
+              {game.data.price ? `${game.data.price}₴` : t('game:actions.free')}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-[12px]">
+          {isOwned ? (
+            <button
+              disabled
+              className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-bold rounded-[20px] bg-[#F1FDFF] text-[var(--color-background-16)] cursor-default"
+            >
+              <p>Owned</p>
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsPurchaseModalOpen(true)}
+              disabled={purchaseGameMutation.isPending || !walletBalance}
+              className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] transition-colors ${
+                purchaseGameMutation.isPending || !walletBalance
+                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                  : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
+              }`}
+            >
+              <p>
+                {purchaseGameMutation.isPending
+                  ? 'Processing...'
+                  : walletBalance &&
+                      walletBalance.amount <
+                        (game.data.salePrice > 0
+                          ? game.data.salePrice
+                          : game.data.price)
+                    ? 'Insufficient Funds'
+                    : t('game:actions.buy')}
+              </p>
+            </button>
+          )}
+          {!isOwned && (
+            <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-[8px]">
+              <button
+                onClick={handleAddToCart}
+                disabled={gameInCart}
+                className={`h-[48px] flex-1 flex items-center justify-center py-[12px] px-[20px] sm:px-[26px] text-[16px] sm:text-[18px] lg:text-[20px] font-medium rounded-[20px] transition-colors ${
+                  gameInCart
+                    ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
+                    : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
+                }`}
+              >
+                {gameInCart ? (
+                  <div className="flex items-center gap-[8px]">
+                    <FaCheck size={14} />
+                    <p>{t('game:actions.inCart')}</p>
+                  </div>
+                ) : (
+                  <p>{t('game:actions.addToCart')}</p>
+                )}
+              </button>
+              <button
+                onClick={handleWishlistToggle}
+                disabled={
+                  addToWishlistMutation.isPending ||
+                  removeFromWishlistMutation.isPending
+                }
+                className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                  isInWishlist
+                    ? 'bg-[#F1FDFF]'
+                    : 'bg-[var(--color-background-16)]'
+                }`}
+              >
+                {isInWishlist ? (
+                  <FavoriteFilledIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background-16)]" />
+                ) : (
+                  <FavoriteIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background)]" />
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Metadata section */}
+        <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
+          <div className="flex items-center justify-between">
+            <p className="text-[16px] font-bold">
+              {t('game:sidebar.releaseDate')}
+            </p>
+            <p className="text-[16px] font-normal">
+              {game.data.releaseDate
+                ? new Date(game.data.releaseDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                : 'N/A'}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-[16px] font-bold">
+              {t('game:sidebar.developer')}
+            </p>
+            <p className="text-[16px] font-normal">{game.data.developer}</p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-[16px] font-bold">
+              {t('game:sidebar.publisher')}
+            </p>
+            <p className="text-[16px] font-normal">{game.data.publisher}</p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-[16px] font-bold">
+              {t('game:sidebar.platforms')}
+            </p>
+            <div className="flex items-center gap-[12px]">
+              {(() => {
+                const platforms = game.data.platforms
+                const hasPlatforms =
+                  Array.isArray(platforms) && platforms.length > 0
+
+                if (!hasPlatforms) {
+                  return (
+                    <p className="text-[14px] text-[var(--color-background-25)]">
+                      N/A
+                    </p>
+                  )
+                }
+
+                return (
+                  <>
+                    {platforms.some((p) => {
+                      const lower = p.toLowerCase()
+                      return (
+                        lower === 'windows' ||
+                        lower === 'pc' ||
+                        lower.includes('windows')
+                      )
+                    }) && <FaWindows size={24} />}
+                    {platforms.some((p) => {
+                      const lower = p.toLowerCase()
+                      return (
+                        lower === 'apple' ||
+                        lower === 'mac' ||
+                        lower === 'macos' ||
+                        lower.includes('mac')
+                      )
+                    }) && <FaApple size={24} />}
+                    {platforms.some((p) => {
+                      const lower = p.toLowerCase()
+                      return (
+                        lower === 'playstation' ||
+                        lower === 'ps' ||
+                        lower.includes('ps') ||
+                        lower.includes('playstation')
+                      )
+                    }) && <FaPlaystation size={24} />}
+                    {platforms.some((p) => {
+                      const lower = p.toLowerCase()
+                      return lower === 'xbox' || lower.includes('xbox')
+                    }) && <FaXbox size={24} />}
+                  </>
+                )
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[20px] bg-[var(--color-background-15)] p-[16px] sm:p-[20px] flex flex-col gap-[16px] sm:gap-[20px] text-[var(--color-background)]">
+          <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold">
+            {friendsWhoWishlist && friendsWhoWishlist.length > 0
+              ? friendsWhoWishlist.length === 1
+                ? t('game:sidebar.friendWantsThis')
+                : t('game:sidebar.friendsWantThis')
+              : t('game:sidebar.noFriendsWantThis')}
+          </p>
+          <div className="w-full sm:w-[155px] flex flex-col gap-[8px]">
+            {friendsWhoWishlist && friendsWhoWishlist.length > 0 ? (
+              friendsWhoWishlist.slice(0, 2).map((friend) => (
+                <div
+                  key={friend.id}
+                  className="relative bg-[var(--color-background-8)] pl-[40px] sm:pl-[48px] pr-[12px] h-[32px] sm:h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                >
+                  <img
+                    src={friend.avatar || `/avatar.png`}
+                    alt="avatar"
+                    className="w-[32px] h-[32px] sm:w-[36px] sm:h-[36px] object-cover rounded-full absolute top-0 left-0"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = '/avatar.png'
+                    }}
+                  />
+                  <p className="text-right text-[14px] sm:text-[16px] font-medium">
+                    {friend.nickname}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-[14px] text-[var(--color-background-25)]">
+                {t('game:sidebar.noFriendsWantThis')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-[20px] bg-[var(--color-background-15)] p-[16px] sm:p-[20px] flex flex-col gap-[16px] sm:gap-[20px] text-[var(--color-background)]">
+          <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold">
+            {friendsWhoOwn && friendsWhoOwn.length > 0
+              ? friendsWhoOwn.length === 1
+                ? t('game:sidebar.friendHasThis')
+                : t('game:sidebar.friendsHaveThis')
+              : t('game:sidebar.noFriendsHaveThis')}
+          </p>
+          <div className="flex gap-[6px] sm:gap-[8px] flex-wrap">
+            {friendsWhoOwn && friendsWhoOwn.length > 0 ? (
+              <React.Fragment key="friends-who-own">
+                {friendsWhoOwn.slice(0, 7).map((friend) => (
+                  <div
+                    key={friend.id}
+                    className="relative bg-[var(--color-background-8)] pl-[36px] sm:pl-[48px] pr-[8px] sm:pr-[12px] h-[28px] sm:h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                  >
+                    <img
+                      src={friend.avatar || `/avatar.png`}
+                      alt="avatar"
+                      className="w-[28px] h-[28px] sm:w-[36px] sm:h-[36px] object-cover rounded-full absolute top-0 left-0"
+                      loading="lazy"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.src = '/avatar.png'
+                      }}
+                    />
+                    <p className="text-right text-[12px] sm:text-[14px] lg:text-[16px] font-medium">
+                      {friend.nickname}
+                    </p>
+                  </div>
+                ))}
+                {friendsWhoOwn.length > 7 && (
+                  <div className="w-[28px] h-[28px] sm:w-[36px] sm:h-[36px] flex items-center justify-center bg-[var(--color-background-18)] rounded-full text-[12px] sm:text-[14px] lg:text-[16px] font-extralight text-[var(--color-background-25)] cursor-pointer">
+                    +{friendsWhoOwn.length - 7}
+                  </div>
+                )}
+              </React.Fragment>
+            ) : (
+              <p className="text-[14px] text-[var(--color-background-25)]">
+                {t('game:sidebar.noFriendsHaveThis')}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center gap-[8px] mb-[24px]">
         {game.data.genre.map((tag) => {
           return (
@@ -318,7 +663,6 @@ function RouteComponent() {
         <FaChevronDown size={24} />
       </div>
 
-      {/* Base Game Section - Only for DLCs */}
       {game.data.isDlc && baseGame?.data && (
         <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
           <div
@@ -377,11 +721,11 @@ function RouteComponent() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-center sm:justify-end">
             <div className="flex items-center gap-[18px]">
               {game.data.salePrice > 0 ? (
                 <>
-                  <div className="flex items-center gap-[8px]">
+                  <div className="flex flex-col sm:flex-row items-center gap-[8px]">
                     <p className="px-[8px] py-[4px] rounded-[20px] bg-[var(--color-background-10)] text-[var(--color-night-background)]">
                       -{game.data.discountPercent}%
                     </p>
@@ -438,7 +782,7 @@ function RouteComponent() {
               <p className="text-[32px] font-bold font-manrope">
                 {t('game:dlc.otherDlc')}
               </p>
-              {baseGame?.data?.slug && (
+              {baseGame?.data.slug && (
                 <p
                   className="text-[16px] flex items-center gap-[8px] cursor-pointer text-[var(--color-background)]"
                   onClick={() => navigate({ to: `/${baseGame.data.slug}/dlc` })}
@@ -528,19 +872,19 @@ function RouteComponent() {
         )}
       </div>
 
-      <div className="w-full flex flex-col gap-[24px]">
+      <div className="w-full flex flex-col gap-[16px] sm:gap-[24px]">
         <div className="flex items-center justify-between">
-          <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+          <p className="text-[20px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
             {t('game:reviews.title')}
           </p>
         </div>
 
         <div className="flex items-center gap-[10px] relative">
-          <p className="text-[16px] font-normal text-[var(--color-background-25)]">
+          <p className="text-[14px] sm:text-[16px] font-normal text-[var(--color-background-25)]">
             {t('game:reviews.sorting')}
           </p>
           <button
-            className="flex items-center gap-[8px] text-[16px] font-normal text-[var(--color-background)] cursor-pointer"
+            className="flex items-center gap-[8px] text-[14px] sm:text-[16px] font-normal text-[var(--color-background)] cursor-pointer"
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
           >
             {getCurrentSortLabel()}{' '}
@@ -555,13 +899,13 @@ function RouteComponent() {
           )}
         </div>
 
-        <div className="flex flex-col gap-[32px]">
+        <div className="flex flex-col gap-[24px] sm:gap-[32px]">
           {/* Write Review Button - Only show if user owns the game */}
           {isOwned && (
             <div className="flex justify-end">
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
+                className="h-[40px] sm:h-[48px] flex items-center justify-center py-[8px] px-[16px] sm:px-[20px] text-[14px] sm:text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
               >
                 {userReview
                   ? t('game:actions.editReview')
@@ -570,13 +914,10 @@ function RouteComponent() {
             </div>
           )}
 
-          <MasonryLayout
-            columns={2}
-            gap="16px"
-            className="text-[var(--color-background)]"
-          >
+          {/* Single column layout on mobile, MasonryLayout on larger screens */}
+          <div className="flex flex-col lg:hidden gap-[16px] text-white">
             {reviewsLoading ? (
-              <div className="col-span-2 text-center py-8">
+              <div className="text-center py-8">
                 <p className="text-[var(--color-background-25)]">
                   {t('common.loading')}
                 </p>
@@ -593,19 +934,55 @@ function RouteComponent() {
                 />
               ))
             ) : (
-              <div className="col-span-2 text-center py-8">
+              <div className="text-center py-8">
                 <p className="text-[var(--color-background-25)]">
                   {t('game.review.noReviews')}
                 </p>
               </div>
             )}
-          </MasonryLayout>
+          </div>
+
+          {/* MasonryLayout for larger screens */}
+          <div className="hidden lg:block">
+            <MasonryLayout
+              columns={2}
+              gap="16px"
+              className="text-[var(--color-background)]"
+            >
+              {reviewsLoading ? (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-[var(--color-background-25)]">
+                    {t('common.loading')}
+                  </p>
+                </div>
+              ) : reviews?.data &&
+                Array.isArray(reviews.data) &&
+                reviews.data.length > 0 ? (
+                reviews.data.map((review: Review, index: number) => (
+                  <GameComment
+                    key={review.id || index}
+                    review={review}
+                    onLikeToggle={() => refetchReviews()}
+                    isCurrentUserReview={review.userId === userId}
+                  />
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-[var(--color-background-25)]">
+                    {t('game.review.noReviews')}
+                  </p>
+                </div>
+              )}
+            </MasonryLayout>
+          </div>
 
           <div className="flex items-center justify-center cursor-pointer">
-            <FaChevronDown
-              size={24}
-              className="text-[var(--color-background)]"
-            />
+            {reviews?.data && reviews.data.length > 0 && (
+              <FaChevronDown
+                size={24}
+                className="text-[var(--color-background)]"
+              />
+            )}
           </div>
         </div>
 
@@ -613,7 +990,7 @@ function RouteComponent() {
         <ReviewModal
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
-          gameId={game?.data?.id || ''}
+          gameId={game.data.id || ''}
           existingReview={userReview}
           onReviewCreated={() => {
             refetchReviews()
@@ -621,6 +998,18 @@ function RouteComponent() {
           }}
         />
       </div>
+
+      {/* Purchase Confirmation Modal */}
+      {game?.data && walletBalance && (
+        <PurchaseConfirmationModal
+          isOpen={isPurchaseModalOpen}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          game={game.data}
+          walletBalance={walletBalance.amount}
+          onConfirmPurchase={handleConfirmPurchase}
+          isPurchasing={purchaseGameMutation.isPending}
+        />
+      )}
     </>
   )
 }

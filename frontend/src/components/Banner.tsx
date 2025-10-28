@@ -41,8 +41,10 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
         }}
       >
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-[1]" />
-        <div className="container mx-auto h-full flex flex-col items-center justify-center relative z-[2]">
-          <Search className="md:px-0 px-[4px] absolute top-[16px] left-1/2 -translate-x-1/2 z-[3]" />
+        <div className="container h-full flex flex-col items-center justify-center relative z-[2]">
+          <div className="absolute top-[16px] left-0 right-0 flex justify-center px-[4px] md:px-[16px] z-[3]">
+            <Search className="md:px-0 px-[4px]" />
+          </div>
           <div className="flex flex-col items-left absolute bottom-[32px] left-1/2 -translate-x-1/2 max-w-[1460px] w-full z-[3] text-white">
             <p className="text-[20px] font-light opacity-60">
               {t('home.dlcFor')}
@@ -58,13 +60,11 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
     <div className="h-[520px] bg-[var(--color-background-15)] relative z-10">
       {/* Search component moved outside Swiper to persist across banner changes */}
       <div className="absolute top-0 left-0 right-0 z-[100]">
-        <div className="container mx-auto max-w-[1460px]">
-          <div className="w-[500px] sm:w-[600px] lg:w-[800px] xl:w-[1400px] absolute top-[16px] left-1/2 -translate-x-1/2">
-            <Search className="md:px-0 px-[4px]" />
-          </div>
+        <div className="absolute top-[16px] left-0 right-0 flex justify-center px-[4px] md:px-[16px]">
+          <Search className="md:px-0 px-[4px]" />
         </div>
       </div>
-      
+
       <style>
         {`
           .swiper-pagination {
@@ -125,7 +125,8 @@ export const Banner = ({ isDlc }: { isDlc?: boolean }) => {
                     />
                     {game.saleDate && game.discountPercent > 0 && (
                       <p className="text-[16px] text-[var(--color-background-25)] font-normal text-left md:text-center">
-                        {t('home.discountValidUntil')} {formatSimpleDate(String(game.saleDate))}
+                        {t('home.discountValidUntil')}{' '}
+                        {formatSimpleDate(String(game.saleDate))}
                       </p>
                     )}
                   </div>

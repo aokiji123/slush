@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { IoFilter } from 'react-icons/io5'
 import {
   CartIcon,
   CartFilledIcon,
@@ -55,12 +54,12 @@ export const Search = ({
   return (
     <div className={`flex items-center gap-[8px] w-full ${className}`}>
       <div
-        className="bg-[var(--color-background-16)] h-[52px] flex-1 rounded-[20px] flex sm:gap-[8px] gap-[0px] items-center justify-between"
+        className="bg-[var(--color-background-16)] flex-1 h-[52px] rounded-[20px] flex sm:gap-[8px] gap-[0px] items-center justify-between"
         style={{
           padding: '4px 26px 4px 4px',
         }}
       >
-        <div className="search-input-container w-[190px] sm:w-[320px] lg:w-[590px] xl:w-[800px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative z-[101]">
+        <div className="search-input-container w-[170px] sm:w-[250px] lg:w-[500px] xl:w-[700px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[4px] md:px-[16px] relative z-[101]">
           <input
             type="text"
             placeholder={t('search.placeholder')}
@@ -85,7 +84,7 @@ export const Search = ({
         {location.pathname !== '/library' ? (
           <div className="flex items-center sm:gap-[26px] gap-[16px]">
             <p
-              className={`text-[]14px sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              className={`text-[14px] sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
                 location.pathname === '/catalog'
                   ? 'text-[var(--color-background-23)]'
                   : 'text-white'
@@ -111,10 +110,6 @@ export const Search = ({
           </div>
         ) : (
           <div className="pl-[24px] flex items-center justify-between w-full text-white">
-            <div className="flex items-center gap-[8px]">
-              <IoFilter size={24} />
-              <p className="text-[16px]">{t('filters.title')}</p>
-            </div>
             <div className="flex items-center gap-[12px]">
               <p className="text-[16px] mr-1">{t('filters.view')}</p>
               <div onClick={() => onViewModeChange?.('grid')}>

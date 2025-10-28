@@ -29,19 +29,23 @@ const activeStyles: Record<ActionButtonVariant, string> = {
 }
 
 export const ActionButton = forwardRef<HTMLButtonElement, ActionButtonProps>(
-  ({ 
-    icon, 
-    count, 
-    label, 
-    variant = 'like', 
-    isActive = false, 
-    className = '', 
-    ...props 
-  }, ref) => {
-    const baseStyles = 'flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer rounded-[8px] transition-colors'
+  (
+    {
+      icon,
+      count,
+      label,
+      variant = 'like',
+      isActive = false,
+      className = '',
+      ...props
+    },
+    ref,
+  ) => {
+    const baseStyles =
+      'flex items-center gap-[8px] py-[4px] px-[8px] cursor-pointer rounded-[8px] transition-colors'
     const variantStyle = variantStyles[variant]
     const activeStyle = isActive ? activeStyles[variant] : ''
-    
+
     return (
       <button
         ref={ref}
@@ -49,11 +53,13 @@ export const ActionButton = forwardRef<HTMLButtonElement, ActionButtonProps>(
         {...props}
       >
         {icon}
-        {count !== undefined && <p>{formatCount(count)}</p>}
-        {label && <p>{label}</p>}
+        {count !== undefined && (
+          <p className="text-[14px] md:text-[16px]">{formatCount(count)}</p>
+        )}
+        {label && <p className="text-[14px] md:text-[16px]">{label}</p>}
       </button>
     )
-  }
+  },
 )
 
 ActionButton.displayName = 'ActionButton'

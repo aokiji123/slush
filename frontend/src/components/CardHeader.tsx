@@ -10,9 +10,9 @@ interface CardHeaderProps {
 }
 
 const avatarSizes = {
-  sm: 'w-6 h-6',
-  md: 'w-9 h-9',
-  lg: 'w-12 h-12',
+  sm: 'w-5 h-5 md:w-6 md:h-6',
+  md: 'w-8 h-8 md:w-9 md:h-9',
+  lg: 'w-10 h-10 md:w-12 md:h-12',
 }
 
 export const CardHeader = ({ 
@@ -21,12 +21,12 @@ export const CardHeader = ({
   date, 
   className = '', 
   avatarSize = 'md',
-  isOnline = false 
+  isOnline = false,
 }: CardHeaderProps) => {
   const sizeClass = avatarSizes[avatarSize]
-  
+
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 md:gap-3 ${className}`}>
       <div className="relative">
         <img
           src={avatar || '/avatar.png'}
@@ -40,21 +40,28 @@ export const CardHeader = ({
               height="12"
               viewBox="0 0 12 12"
               fill="none"
-              xmlns="http://www.w3.org/200vg"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <circle cx="6" cy="6" r="5" fill="#8EFF72" stroke="#002F3D" strokeWidth="2" />
+              <circle
+                cx="6"
+                cy="6"
+                r="5"
+                fill="#8EFF72"
+                stroke="#002F3D"
+                strokeWidth="2"
+              />
             </svg>
           </div>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        <div className="bg-[#004252] rounded-[20px] flex items-center gap-3 pr-4">
-          <span className="text-[16px] font-bold text-[#f1fdff]">
+      <div className="flex items-center gap-2 md:gap-3">
+        <div className="bg-[#004252] rounded-[16px] md:rounded-[20px] flex items-center gap-2 md:gap-3 pr-2 md:pr-4">
+          <span className="text-[14px] md:text-[16px] font-bold text-[#f1fdff] truncate max-w-[120px] sm:max-w-none">
             {username}
           </span>
         </div>
         {date && (
-          <span className="text-[14px] text-[rgba(204,248,255,0.65)]">
+          <span className="text-[12px] md:text-[14px] text-[rgba(204,248,255,0.65)] whitespace-nowrap">
             {formatSimpleDate(date)}
           </span>
         )}

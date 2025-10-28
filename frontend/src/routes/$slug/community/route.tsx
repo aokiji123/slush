@@ -45,8 +45,12 @@ function RouteComponent() {
 
   const { slug } = useParams({ from: '/$slug/community' })
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedPostType, setSelectedPostType] = useState<PostType | undefined>(undefined)
-  const [selectedSort, setSelectedSort] = useState<'popular' | 'newest' | 'rating' | 'comments'>('popular')
+  const [selectedPostType, setSelectedPostType] = useState<
+    PostType | undefined
+  >(undefined)
+  const [selectedSort, setSelectedSort] = useState<
+    'popular' | 'newest' | 'rating' | 'comments'
+  >('popular')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -61,10 +65,11 @@ function RouteComponent() {
   }
 
   // Get posts data
-  const { data: posts, isLoading: postsLoading, error: postsError } = useGamePosts(
-    game?.data?.id || '',
-    filters
-  )
+  const {
+    data: posts,
+    isLoading: postsLoading,
+    error: postsError,
+  } = useGamePosts(game?.data?.id ?? '', filters)
 
   // Ensure posts is always an array
   const postsData = posts || []
@@ -72,7 +77,10 @@ function RouteComponent() {
   // Handle clicks outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false)
       }
     }
@@ -92,7 +100,9 @@ function RouteComponent() {
     setSearchQuery(e.target.value)
   }
 
-  const handleSortChange = (sortValue: 'popular' | 'newest' | 'rating' | 'comments') => {
+  const handleSortChange = (
+    sortValue: 'popular' | 'newest' | 'rating' | 'comments',
+  ) => {
     setSelectedSort(sortValue)
     setIsDropdownOpen(false)
   }
@@ -122,23 +132,25 @@ function RouteComponent() {
     )
   }
   return (
-    <div className="w-full flex flex-row gap-[24px]">
-      <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px] justify-start">
-        <p className="text-[32px] font-bold text-[#f1fdff] font-manrope">
+    <div className="w-full flex flex-col md:flex-row gap-[24px] px-4 md:px-0">
+      <div className="w-full md:w-[75%] lg:w-[75%] flex flex-col gap-[8px] min-w-0 mb-[64px] md:mb-[256px] justify-start">
+        <p className="text-[20px] md:text-[24px] lg:text-[32px] font-bold text-[#f1fdff] font-manrope">
           {game.data.name}
         </p>
         <div className="w-full flex items-center justify-start mb-[14px]">
-          <span className="text-[#f1fdff] mr-[8px]">
+          <span className="text-[14px] md:text-[16px] text-[#f1fdff] mr-[8px]">
             10 000
           </span>
-          <span className="text-[#f1fdff] opacity-60 mr-[32px]">
+          <span className="text-[14px] md:text-[16px] text-[#f1fdff] opacity-60 mr-[12px] md:mr-[32px]">
             підписників
           </span>
-          <span className="text-[#f1fdff] mr-[6px]">5 267</span>
-          <div className="w-[8px] h-[8px] bg-[#24e5c2] rounded-[100px]"></div>
+          <span className="text-[14px] md:text-[16px] text-[#f1fdff] mr-[6px]">
+            5 267
+          </span>
+          <div className="w-[6px] h-[6px] md:w-[8px] md:h-[8px] bg-[#24e5c2] rounded-[100px]"></div>
         </div>
 
-        <div className="w-full flex flex-col gap-[24px]">
+        <div className="w-full flex flex-col gap-[16px] md:gap-[24px]">
           {postsLoading ? (
             <div className="flex justify-center items-center h-32">
               <div className="text-[#f1fdff]">Завантаження постів...</div>
@@ -147,23 +159,25 @@ function RouteComponent() {
             <div className="flex justify-center items-center h-32">
               <div className="text-red-400">Помилка завантаження постів</div>
             </div>
-          ) : postsData && postsData.length > 0 ? (
+          ) : postsData.length > 0 ? (
             postsData.map((post) => (
               <CommunityPostCard key={post.id} post={post} />
             ))
           ) : (
             <div className="flex justify-center items-center h-32">
-              <div className="text-[#f1fdff] opacity-60">Постів не знайдено</div>
+              <div className="text-[#f1fdff] opacity-60">
+                Постів не знайдено
+              </div>
             </div>
           )}
         </div>
       </div>
-      <div className="w-[25%] flex flex-col gap-[42px] min-w-[338px] mb-[256px]">
+      <div className="w-full md:w-[25%] lg:w-[25%] flex flex-col gap-[24px] md:gap-[42px] mb-[64px] md:mb-[256px] md:min-w-[280px] lg:min-w-[338px]">
         {user && (
-          <div className="flex gap-[12px] mt-[12px] items-center">
+          <div className="flex flex-col sm:flex-row gap-[12px] mt-[12px] items-stretch sm:items-center">
             <button
               onClick={handleCreatePost}
-              className="max-h-[48px] flex items-center rounded-[20px] gap-[12px] p-[16px] pl-[25px] pr-[25px] bg-[#24e5c2] hover:bg-[#1fd1a8] transition-colors"
+              className="max-h-[48px] flex items-center justify-center rounded-[20px] gap-[12px] p-[16px] pl-[25px] pr-[25px] bg-[#24e5c2] hover:bg-[#1fd1a8] transition-colors"
             >
               <svg
                 viewBox="0 0 16 16"
@@ -178,65 +192,81 @@ function RouteComponent() {
                   fillRule="nonzero"
                 />
               </svg>
-              <p className="text-[#00141f] text-[20px] font-medium">
+              <p className="text-[#00141f] text-[16px] md:text-[20px] font-medium whitespace-nowrap">
                 Створити пост
               </p>
             </button>
 
-            <div className="w-[48px] h-[48px] bg-[#046075] rounded-[100px] flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4.87664 6.74052C5.37664 5.54052 6.17664 4.44052 7.27664 3.84052C7.77664 3.64052 7.97664 3.04052 7.67664 2.54052C7.37664 2.04052 6.77664 1.94052 6.27664 2.14052C4.77664 3.04052 3.67664 4.44052 3.07664 6.04052C2.87664 6.54052 3.07664 7.14052 3.57664 7.34052C4.07664 7.54052 4.67664 7.34052 4.87664 6.74052Z"
-                  fill="#F1FDFF"
-                />
-                <path
-                  d="M13.8774 19.4412C13.3774 19.8412 12.6774 20.0412 11.9774 20.0412C11.2774 20.0412 10.5774 19.8412 10.0774 19.4412C9.67739 19.1412 8.97739 19.1412 8.67739 19.6412C8.37739 20.0412 8.37739 20.7412 8.87739 21.0412C9.67739 21.6412 10.7774 22.0412 11.9774 22.0412C13.1774 22.0412 14.2774 21.6412 15.0774 20.9412C15.4774 20.6412 15.5774 19.9412 15.2774 19.5412C14.8774 19.1412 14.2774 19.0412 13.8774 19.4412Z"
-                  fill="#F1FDFF"
-                />
-                <path
-                  d="M19.3758 11.2412C19.3758 6.94121 16.1758 3.24121 11.9758 3.24121C7.87577 3.24121 4.67577 6.84121 4.67577 11.0412V13.0412C4.67577 14.2412 4.27577 15.1412 3.77577 15.8412C3.37577 16.3412 3.47577 16.9412 3.57577 17.3412C3.77577 17.7412 4.17577 18.3412 4.97577 18.3412H18.9758C19.7758 18.3412 20.1758 17.7412 20.3758 17.3412C20.5758 16.9412 20.5758 16.3412 20.2758 15.8412C19.7758 15.1412 19.3758 14.1412 19.3758 13.0412V11.2412ZM6.67577 11.1412C6.67577 7.84121 9.07577 5.24121 11.9758 5.24121C14.8758 5.24121 17.3758 7.84121 17.3758 11.2412V13.1412C17.3758 14.4412 17.7758 15.6412 18.2758 16.4412H5.77577C6.27577 15.5412 6.67577 14.4412 6.67577 13.1412"
-                  fill="#F1FDFF"
-                />
-                <path
-                  d="M20.8762 6.04095C20.2762 4.34095 19.0762 3.04095 17.5762 2.14095C17.0762 1.84095 16.4763 2.04095 16.1763 2.54095C15.9763 3.04095 16.1763 3.64095 16.6763 3.94095C17.7763 4.54095 18.6762 5.54095 19.0762 6.74095C19.2762 7.24095 19.8762 7.54095 20.3762 7.34095C20.8762 7.14095 21.0762 6.54095 20.8762 6.04095Z"
-                  fill="#F1FDFF"
-                />
-              </svg>
-            </div>
+            <div className="flex gap-[12px] sm:flex-row">
+              <div className="w-full sm:w-[48px] sm:h-[48px] bg-[#046075] rounded-[100px] flex items-center justify-center h-[48px]">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="w-6 h-6"
+                >
+                  <path
+                    d="M4.87664 6.74052C5.37664 5.54052 6.17664 4.44052 7.27664 3.84052C7.77664 3.64052 7.97664 3.04052 7.67664 2.54052C7.37664 2.04052 6.77664 1.94052 6.27664 2.14052C4.77664 3.04052 3.67664 4.44052 3.07664 6.04052C2.87664 6.54052 3.07664 7.14052 3.57664 7.34052C4.07664 7.54052 4.67664 7.34052 4.87664 6.74052Z"
+                    fill="#F1FDFF"
+                  />
+                  <path
+                    d="M13.8774 19.4412C13.3774 19.8412 12.6774 20.0412 11.9774 20.0412C11.2774 20.0412 10.5774 19.8412 10.0774 19.4412C9.67739 19.1412 8.97739 19.1412 8.67739 19.6412C8.37739 20.0412 8.37739 20.7412 8.87739 21.0412C9.67739 21.6412 10.7774 22.0412 11.9774 22.0412C13.1774 22.0412 14.2774 21.6412 15.0774 20.9412C15.4774 20.6412 15.5774 19.9412 15.2774 19.5412C14.8774 19.1412 14.2774 19.0412 13.8774 19.4412Z"
+                    fill="#F1FDFF"
+                  />
+                  <path
+                    d="M19.3758 11.2412C19.3758 6.94121 16.1758 3.24121 11.9758 3.24121C7.87577 3.24121 4.67577 6.84121 4.67577 11.0412V13.0412C4.67577 14.2412 4.27577 15.1412 3.77577 15.8412C3.37577 16.3412 3.47577 16.9412 3.57577 17.3412C3.77577 17.7412 4.17577 18.3412 4.97577 18.3412H18.9758C19.7758 18.3412 20.1758 17.7412 20.3758 17.3412C20.5758 16.9412 20.5758 16.3412 20.2758 15.8412C19.7758 15.1412 19.3758 14.1412 19.3758 13.0412V11.2412ZM6.67577 11.1412C6.67577 7.84121 9.07577 5.24121 11.9758 5.24121C14.8758 5.24121 17.3758 7.84121 17.3758 11.2412V13.1412C17.3758 14.4412 17.7758 15.6412 18.2758 16.4412H5.77577C6.27577 15.5412 6.67577 14.4412 6.67577 13.1412"
+                    fill="#F1FDFF"
+                  />
+                  <path
+                    d="M20.8762 6.04095C20.2762 4.34095 19.0762 3.04095 17.5762 2.14095C17.0762 1.84095 16.4763 2.04095 16.1763 2.54095C15.9763 3.04095 16.1763 3.64095 16.6763 3.94095C17.7763 4.54095 18.6762 5.54095 19.0762 6.74095C19.2762 7.24095 19.8762 7.54095 20.3762 7.34095C20.8762 7.14095 21.0762 6.54095 20.8762 6.04095Z"
+                    fill="#F1FDFF"
+                  />
+                </svg>
+              </div>
 
-            <div className="w-[48px] h-[48px] bg-[#046075] rounded-[100px] flex items-center justify-center">
-              <svg width="18" height="4" viewBox="0 0 18 4" fill="none">
-                <path
-                  d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z"
-                  fill="#F1FDFF"
-                />
-                <path
-                  d="M9 4C10.1046 4 11 3.10457 11 2C11 0.895431 10.1046 0 9 0C7.89543 0 7 0.895431 7 2C7 3.10457 7.89543 4 9 4Z"
-                  fill="#F1FDFF"
-                />
-                <path
-                  d="M16 4C17.1046 4 18 3.10457 18 2C18 0.895431 17.1046 0 16 0C14.8954 0 14 0.895431 14 2C14 3.10457 14.8954 4 16 4Z"
-                  fill="#F1FDFF"
-                />
-              </svg>
+              <div className="w-full sm:w-[48px] sm:h-[48px] bg-[#046075] rounded-[100px] flex items-center justify-center h-[48px]">
+                <svg
+                  width="18"
+                  height="4"
+                  viewBox="0 0 18 4"
+                  fill="none"
+                  className="w-4 h-2"
+                >
+                  <path
+                    d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z"
+                    fill="#F1FDFF"
+                  />
+                  <path
+                    d="M9 4C10.1046 4 11 3.10457 11 2C11 0.895431 10.1046 0 9 0C7.89543 0 7 0.895431 7 2C7 3.10457 7.89543 4 9 4Z"
+                    fill="#F1FDFF"
+                  />
+                  <path
+                    d="M16 4C17.1046 4 18 3.10457 18 2C18 0.895431 17.1046 0 16 0C14.8954 0 14 0.895431 14 2C14 3.10457 14.8954 4 16 4Z"
+                    fill="#F1FDFF"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         )}
-        <div className="w-full flex flex-col p-[20px] bg-[#004252] rounded-[20px]">
-          <div className="flex items-center gap-[6px] relative mb-4">
-            <p className="text-[rgba(204,248,255,0.65)] text-[16px]">
+        <div className="w-full flex flex-col p-[16px] md:p-[20px] bg-[#004252] rounded-[16px] md:rounded-[20px]">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-[8px] sm:gap-[6px] relative mb-4">
+            <p className="text-[rgba(204,248,255,0.65)] text-[14px] md:text-[16px]">
               Сортування:
             </p>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-[10px] bg-transparent text-[#f1fdff] text-[16px] cursor-pointer"
+                className="flex items-center gap-[10px] bg-transparent text-[#f1fdff] text-[14px] md:text-[16px] cursor-pointer"
               >
-                <span>{sortOptions.find(opt => opt.value === selectedSort)?.label}</span>
-                <svg 
-                  width="12" 
-                  height="7" 
-                  viewBox="0 0 12 7" 
+                <span>
+                  {sortOptions.find((opt) => opt.value === selectedSort)?.label}
+                </span>
+                <svg
+                  width="12"
+                  height="7"
+                  viewBox="0 0 12 7"
                   fill="none"
                   className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                 >
@@ -246,9 +276,9 @@ function RouteComponent() {
                   />
                 </svg>
               </button>
-              
+
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-[#004252] border border-[#046075] rounded-[8px] overflow-hidden z-10 min-w-[280px]">
+                <div className="absolute top-full left-0 mt-2 bg-[#004252] border border-[#046075] rounded-[8px] overflow-hidden z-10 min-w-[200px] md:min-w-[280px]">
                   <div className="flex flex-col gap-[2px] p-[10px]">
                     {sortOptions.map((option) => (
                       <button
@@ -260,7 +290,7 @@ function RouteComponent() {
                             : 'hover:bg-[rgba(55,195,255,0.1)]'
                         }`}
                       >
-                        <p className="text-[#f1fdff] text-[16px] leading-[1.25] tracking-[-0.16px] font-artifakt whitespace-nowrap">
+                        <p className="text-[#f1fdff] text-[14px] md:text-[16px] leading-[1.25] tracking-[-0.16px] font-artifakt whitespace-nowrap">
                           {option.label}
                         </p>
                       </button>
@@ -270,22 +300,22 @@ function RouteComponent() {
               )}
             </div>
           </div>
-          
+
           <input
-            className="w-full bg-[rgba(0,20,31,0.4)] border border-[#046075] rounded-[22px] px-4 py-2.5 text-[#f1fdff] placeholder-[rgba(204,248,255,0.65)] text-[16px] mb-4"
-            placeholder={`Пошук: ${postTypeOptions.find(opt => opt.value === selectedPostType)?.label || 'Усі розділи'}`}
+            className="w-full bg-[rgba(0,20,31,0.4)] border border-[#046075] rounded-[22px] px-4 py-2.5 text-[#f1fdff] placeholder-[rgba(204,248,255,0.65)] text-[14px] md:text-[16px] mb-4"
+            placeholder={`Пошук: ${postTypeOptions.find((opt) => opt.value === selectedPostType)?.label || 'Усі розділи'}`}
             value={searchQuery}
             onChange={handleSearchChange}
           />
-          
-          <div className="w-full flex flex-col gap-[8px]">
+
+          <div className="w-full flex flex-col gap-[6px] md:gap-[8px]">
             {postTypeOptions.map((option) => (
               <button
                 key={option.label}
                 onClick={() => handlePostTypeChange(option.value)}
-                className={`rounded-[12px] p-[9px] pl-[12px] pr-[12px] text-[#f1fdff] text-[20px] font-bold text-left transition-colors ${
-                  option.value === selectedPostType 
-                    ? 'bg-[rgba(55,195,255,0.25)]' 
+                className={`rounded-[12px] p-[8px] md:p-[9px] pl-[12px] pr-[12px] text-[#f1fdff] text-[16px] md:text-[20px] font-bold text-left transition-colors ${
+                  option.value === selectedPostType
+                    ? 'bg-[rgba(55,195,255,0.25)]'
                     : 'hover:bg-[rgba(55,195,255,0.1)]'
                 }`}
               >

@@ -98,7 +98,7 @@ function RouteComponent() {
 
   // Get game data
   const { data: game, isLoading: gameLoading } = useGameById(slug)
-  
+
   // Mutations
   const createPostMutation = useCreatePost()
   const uploadMediaMutation = useUploadMedia()
@@ -120,7 +120,7 @@ function RouteComponent() {
   const handleFileChange = (file: File) => {
     setFile(file)
     setFileType(file.type)
-    
+
     // Create preview URL
     const previewUrl = URL.createObjectURL(file)
     setFilePreview(previewUrl)
@@ -149,15 +149,20 @@ function RouteComponent() {
     // Validate file if provided
     if (file) {
       const maxSize = 10 * 1024 * 1024 // 10MB
-      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+      const allowedImageTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+      ]
       const allowedVideoTypes = ['video/mp4', 'video/webm']
       const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes]
-      
+
       if (file.size > maxSize) {
         setError('Розмір файлу не повинен перевищувати 10MB')
         return
       }
-      
+
       if (!allowedTypes.includes(file.type)) {
         setError('Дозволені типи файлів: JPG, PNG, GIF, WEBP, MP4, WEBM')
         return
@@ -171,9 +176,10 @@ function RouteComponent() {
       // Prepare post data
       const postData: CreatePostDto = {
         title: title.trim(),
-        content: typePost.postType === PostType.Guide 
-          ? `${description.trim()}\n\n${text.trim()}`.trim()
-          : text.trim(),
+        content:
+          typePost.postType === PostType.Guide
+            ? `${description.trim()}\n\n${text.trim()}`.trim()
+            : text.trim(),
         type: typePost.postType,
       }
 
@@ -197,30 +203,33 @@ function RouteComponent() {
             name: file.name,
             size: file.size,
             type: file.type,
-            lastModified: file.lastModified
+            lastModified: file.lastModified,
           })
-          
+
           await uploadMediaMutation.mutateAsync({
             postId: createdPost.id,
             file: file,
           })
-          
+
           console.log('Media uploaded successfully')
         } catch (uploadError: any) {
           console.error('Failed to upload media:', uploadError)
           console.error('Upload error details:', {
             status: uploadError?.response?.status,
             data: uploadError?.response?.data,
-            message: uploadError?.message
+            message: uploadError?.message,
           })
-          
+
           // Don't fail the entire operation if media upload fails
-          toast.error(`Пост створено, але не вдалося завантажити медіа: ${uploadError?.response?.data?.message || uploadError?.message || 'Невідома помилка'}`, { duration: 5000 })
+          toast.error(
+            `Пост створено, але не вдалося завантажити медіа: ${uploadError?.response?.data?.message || uploadError?.message || 'Невідома помилка'}`,
+            { duration: 5000 },
+          )
         }
       }
 
       toast.success('Пост успішно створено!')
-      
+
       // Navigate back to community
       navigate({
         to: '/$slug/community',
@@ -228,7 +237,10 @@ function RouteComponent() {
       })
     } catch (error: any) {
       console.error('Failed to create post:', error)
-      const errorMessage = error?.message || error?.response?.data?.message || 'Помилка створення поста'
+      const errorMessage =
+        error?.message ||
+        error?.response?.data?.message ||
+        'Помилка створення поста'
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -322,8 +334,8 @@ function RouteComponent() {
       case 'Гайд':
         return (
           <>
-            <div className="w-full flex flex-row gap-[12px]">
-              <div className="w-[50%] flex flex-col gap-[8px]">
+            <div className="w-full flex flex-col sm:flex-row gap-[12px]">
+              <div className="w-full sm:w-[50%] flex flex-col gap-[8px]">
                 <FilePole
                   classContainer=""
                   classTitle=""
@@ -334,7 +346,7 @@ function RouteComponent() {
                   accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
                 />
               </div>
-              <div className="w-[50%] flex flex-col gap-[12px]">
+              <div className="w-full sm:w-[50%] flex flex-col gap-[12px]">
                 <DescriptionPole
                   classTitle=""
                   classInput="p-[12px] h-[72px] rounded-[12px] bg-[var(--color-background-15)] text-[var(--color-background)]"
@@ -347,7 +359,7 @@ function RouteComponent() {
                 <DescriptionPole
                   classContainer=""
                   classTitle=""
-                  classInput="h-[188px] p-[12px] rounded-[12px] bg-[var(--color-background-15)] text-[var(--color-background)]"
+                  classInput="h-[150px] sm:h-[188px] p-[12px] rounded-[12px] bg-[var(--color-background-15)] text-[var(--color-background)]"
                   onChange={setDescription}
                   placeholder={typePost.description?.placeholder || ''}
                   title={typePost.description?.title || ''}
@@ -373,17 +385,17 @@ function RouteComponent() {
   }, [typePost, title, text, description, file])
 
   return (
-    <div className="w-full items-start flex flex-row gap-[24px]">
-      <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px] justify-center">
-        <h1 className="text-[32px] font-bold text-[var(--color-background)] mb-[20px]">
+    <div className="w-full items-start flex flex-col md:flex-row gap-[24px] px-4 md:px-0">
+      <div className="w-full md:w-[75%] lg:w-[75%] flex flex-col gap-[8px] min-w-0 mb-[64px] md:mb-[256px] justify-center">
+        <h1 className="text-[24px] md:text-[32px] font-bold text-[var(--color-background)] mb-[16px] md:mb-[20px]">
           Створення поста
         </h1>
-        <div className="rounded-[12px] w-full p-[12px] bg-[var(--color-background-15)] pb-[20px]">
-          <div className="w-full flex gap-[20px] mb-[20px]">
+        <div className="rounded-[12px] w-full p-[12px] bg-[var(--color-background-15)] pb-[16px] md:pb-[20px]">
+          <div className="w-full flex flex-wrap gap-[8px] md:gap-[20px] mb-[16px] md:mb-[20px]">
             {typePosts.map((el) => (
               <div
                 className={
-                  'type-create-text-btn cursor-pointer p-[8px] rounded-[12px] text-[18px] text-[var(--color-background)] ' +
+                  'type-create-text-btn cursor-pointer p-[8px] rounded-[10px] md:rounded-[12px] text-[14px] md:text-[18px] text-[var(--color-background)] ' +
                   (typePost.type === el.type ? 'active' : '')
                 }
                 onClick={() => setTypePost(el)}
@@ -399,19 +411,19 @@ function RouteComponent() {
               {error}
             </div>
           )}
-          
-          <div className="w-full flex justify-end mt-[20px] gap-3">
+
+          <div className="w-full flex flex-col sm:flex-row justify-end mt-[16px] md:mt-[20px] gap-3">
             <button
               onClick={onCancel}
               disabled={isSubmitting}
-              className="px-[24px] py-[8px] rounded-[20px] text-[16px] font-bold text-[#f1fdff] hover:text-[#24e5c2] transition-colors disabled:opacity-50"
+              className="px-[24px] py-[8px] rounded-[20px] text-[14px] md:text-[16px] font-bold text-[#f1fdff] hover:text-[#24e5c2] transition-colors disabled:opacity-50"
             >
               Відхилити
             </button>
             <button
               onClick={onPublish}
               disabled={isSubmitting || (!title.trim() && !text.trim())}
-              className="px-[24px] py-[8px] bg-[#24e5c2] rounded-[20px] text-[16px] font-bold text-[#00141f] hover:bg-[#1fd1a8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-[24px] py-[8px] bg-[#24e5c2] rounded-[20px] text-[14px] md:text-[16px] font-bold text-[#00141f] hover:bg-[#1fd1a8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="mt-[2px] flex">
                 {isSubmitting ? 'Публікація...' : 'Опублікувати'}
@@ -420,38 +432,40 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <div className="w-[25%] flex flex-col min-w-[338px] mb-[256px]">
+      <div className="w-full md:w-[25%] lg:w-[25%] flex flex-col mb-[64px] md:mb-[256px] md:min-w-[280px] lg:min-w-[338px]">
         {gameLoading ? (
           <div className="text-[#f1fdff]">Завантаження...</div>
         ) : game?.data ? (
           <>
-            <h2 className="mt-[6px] text-[16px] font-bold text-[#f1fdff] mb-[6px]">
+            <h2 className="mt-[6px] text-[14px] md:text-[16px] font-bold text-[#f1fdff] mb-[6px]">
               {game.data.name}
             </h2>
-            <div className="w-full flex items-center justify-start mb-[20px]">
-              <span className="text-[#f1fdff] mr-[8px]">
+            <div className="w-full flex items-center justify-start mb-[16px] md:mb-[20px]">
+              <span className="text-[14px] md:text-[16px] text-[#f1fdff] mr-[8px]">
                 10 000
               </span>
-              <span className="text-[#f1fdff] opacity-60 mr-[32px]">
+              <span className="text-[14px] md:text-[16px] text-[#f1fdff] opacity-60 mr-[12px] md:mr-[32px]">
                 підписників
               </span>
-              <span className="text-[#f1fdff] mr-[6px]">5 267</span>
-              <div className="w-[8px] h-[8px] bg-[#24e5c2] rounded-[100px]"></div>
+              <span className="text-[14px] md:text-[16px] text-[#f1fdff] mr-[6px]">
+                5 267
+              </span>
+              <div className="w-[6px] h-[6px] md:w-[8px] md:h-[8px] bg-[#24e5c2] rounded-[100px]"></div>
             </div>
           </>
         ) : (
           <div className="text-[#f1fdff] opacity-60">Гра не знайдена</div>
         )}
-        <h1 className="text-[20px] font-bold text-[var(--color-background)] mb-[14px]">
+        <h1 className="text-[18px] md:text-[20px] font-bold text-[var(--color-background)] mb-[12px] md:mb-[14px]">
           Правила спільноти
         </h1>
 
-        <div className="w-full p-[16px] bg-[var(--color-background-24)] rounded-[20px]">
+        <div className="w-full p-[12px] md:p-[16px] bg-[var(--color-background-24)] rounded-[16px] md:rounded-[20px]">
           <ol className="list-rool-c">
             {rools.map((el, i) => (
               <>
                 <li
-                  className="ml-[16px] w-full text-[var(--color-background)] opacity-80"
+                  className="ml-[12px] md:ml-[16px] w-full text-[14px] md:text-[16px] text-[var(--color-background)] opacity-80"
                   key={el + i}
                 >
                   {el}
