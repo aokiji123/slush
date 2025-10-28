@@ -17,17 +17,17 @@ export const Route = createFileRoute('/settings/wallet')({
 
 function RouteComponent() {
   const { t } = useTranslation('settings')
+  const [amount, setAmount] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
   const { data: user } = useAuthenticatedUser()
   const { data: balance, isLoading: balanceLoading } = useWalletBalance()
   const addBalanceMutation = useAddBalance()
   const { data: paymentHistory, isLoading: historyLoading } = usePaymentHistory(
     user?.id || '',
-    1,
+    currentPage,
     10,
   )
-
-  const [amount, setAmount] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -92,15 +92,13 @@ function RouteComponent() {
     if (!paymentHistory) return null
 
     const totalPages = paymentHistory.totalPages
-    const pages = []
+    const pages: (number | string)[] = []
 
-    // Show first page
     if (currentPage > 3) {
       pages.push(1)
       if (currentPage > 4) pages.push('...')
     }
 
-    // Show pages around current page
     const start = Math.max(1, currentPage - 2)
     const end = Math.min(totalPages, currentPage + 2)
 
@@ -108,7 +106,6 @@ function RouteComponent() {
       pages.push(i)
     }
 
-    // Show last page
     if (currentPage < totalPages - 2) {
       if (currentPage < totalPages - 3) pages.push('...')
       pages.push(totalPages)

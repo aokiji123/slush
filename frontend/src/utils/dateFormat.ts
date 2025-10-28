@@ -1,4 +1,10 @@
-import { format, formatDistanceToNow, isBefore, subDays, type Locale } from 'date-fns'
+import {
+  format,
+  formatDistanceToNow,
+  isBefore,
+  subDays,
+  type Locale,
+} from 'date-fns'
 import { enUS, uk } from 'date-fns/locale'
 
 const locales: { [key: string]: Locale } = {
@@ -6,7 +12,10 @@ const locales: { [key: string]: Locale } = {
   uk: uk,
 }
 
-export const formatReviewDate = (dateString: string, lang: string = 'en'): string => {
+export const formatReviewDate = (
+  dateString: string,
+  lang: string = 'en',
+): string => {
   const date = new Date(dateString)
   const now = new Date()
   const locale = locales[lang] || enUS

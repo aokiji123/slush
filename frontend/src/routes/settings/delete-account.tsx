@@ -23,7 +23,6 @@ function RouteComponent() {
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }))
     }
@@ -75,7 +74,6 @@ function RouteComponent() {
         },
       })
 
-      // Clear local storage and redirect
       localStorage.clear()
       sessionStorage.clear()
       window.location.href = '/'
@@ -182,7 +180,6 @@ function RouteComponent() {
           </button>
         </div>
 
-        {/* Confirmation Modal */}
         {showConfirmation && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[var(--color-background-15)] rounded-[20px] p-[24px] max-w-md w-full mx-4">

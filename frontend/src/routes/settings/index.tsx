@@ -47,7 +47,6 @@ function RouteComponent() {
   const [originalData, setOriginalData] = useState(formData)
   const [isDirty, setIsDirty] = useState(false)
 
-  // Map backend language codes to frontend language codes
   const mapBackendLanguageCode = (backendLang: string): string => {
     const mapping: Record<string, string> = {
       UA: 'uk',
@@ -56,11 +55,8 @@ function RouteComponent() {
     return mapping[backendLang] || 'uk'
   }
 
-  // Initialize form data when user data loads
   useEffect(() => {
     if (user) {
-      // Use i18n.language as the source of truth (from localStorage),
-      // but fallback to user.lang if i18n.language is not set
       const currentLang =
         i18n.language && ['uk', 'en'].includes(i18n.language)
           ? i18n.language
@@ -77,7 +73,6 @@ function RouteComponent() {
     }
   }, [user, i18n.language])
 
-  // Check if form is dirty
   useEffect(() => {
     const dirty = JSON.stringify(formData) !== JSON.stringify(originalData)
     setIsDirty(dirty)
@@ -91,15 +86,11 @@ function RouteComponent() {
     if (!user) return
 
     try {
-      // Update i18n language
       await changeLanguage(value)
 
-      // Update form data to keep Select in sync
       setFormData((prev) => ({ ...prev, lang: value }))
-      // Also update originalData to keep form state clean
       setOriginalData((prev) => ({ ...prev, lang: value }))
 
-      // Also update backend directly with full user data
       const updateRequest: UserUpdateRequest = {
         id: user.id,
         nickname: user.nickname || '',
@@ -149,7 +140,6 @@ function RouteComponent() {
     }
   }
 
-  // Map frontend language codes to backend language codes
   const mapLanguageCode = (frontendLang: string): string => {
     const mapping: Record<string, string> = {
       uk: 'UA',
@@ -161,7 +151,6 @@ function RouteComponent() {
   const handleSave = async () => {
     if (!user) return
 
-    // Client-side validation
     if (!formData.nickname || formData.nickname.trim().length < 2) {
       toast.error('Nickname must be at least 2 characters long')
       return
@@ -172,7 +161,6 @@ function RouteComponent() {
       return
     }
 
-    // Check nickname format (only letters, numbers, underscores, and hyphens)
     const nicknameRegex = /^[a-zA-Z0-9_-]+$/
     if (!nicknameRegex.test(formData.nickname.trim())) {
       toast.error(
@@ -212,7 +200,6 @@ function RouteComponent() {
     } catch (error) {
       console.error('Update user error:', error)
 
-      // Try to extract the actual error message from the backend
       let errorMessage = t('general.error')
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any

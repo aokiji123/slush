@@ -16,13 +16,25 @@ import {
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import { Search, PurchaseConfirmationModal } from '@/components'
-import { ComplaintIcon, FavoriteIcon, FavoriteFilledIcon, RepostIcon } from '@/icons'
+import {
+  ComplaintIcon,
+  FavoriteIcon,
+  FavoriteFilledIcon,
+  RepostIcon,
+} from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
-import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/api/queries/useWishlist'
+import {
+  useWishlist,
+  useAddToWishlist,
+  useRemoveFromWishlist,
+} from '@/api/queries/useWishlist'
 import { usePurchaseGame } from '@/api/queries/usePurchase'
 import { useWalletBalance } from '@/api/queries/useWallet'
 import { useGameOwnership } from '@/api/queries/useLibrary'
-import { useFriendsWhoOwnGame, useFriendsWhoWishlistGame } from '@/api/queries/useFriendship'
+import {
+  useFriendsWhoOwnGame,
+  useFriendsWhoWishlistGame,
+} from '@/api/queries/useFriendship'
 import { useCartStore } from '@/lib/cartStore'
 
 export const Route = createFileRoute('/$slug')({
@@ -67,7 +79,6 @@ function getTabs(slug: string, t: any) {
   ]
 }
 
-
 const TYPE_PAGE = {
   community: 'community',
   dlc: 'dlc',
@@ -89,26 +100,31 @@ function RouteComponent() {
   // Purchase functionality
   const purchaseGameMutation = usePurchaseGame()
   const { data: walletBalance } = useWalletBalance()
-  const { data: isOwned } = useGameOwnership(game?.data?.id || '')
+  const { data: isOwned } = useGameOwnership(game?.data.id || '')
 
   // Friends data
-  const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(game?.data?.id || '')
-  const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data?.id || '')
-  
+  const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(
+    game?.data.id || '',
+  )
+  const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data.id || '')
+
   // Cart functionality
   const { addToCart, isInCart } = useCartStore()
-  const gameInCart = game?.data?.id ? isInCart(game.data.id) : false
+  const gameInCart = game?.data.id ? isInCart(game.data.id) : false
 
   // Check if current game is in wishlist
-  const isInWishlist = wishlistData?.data?.some((wishlistGame) => wishlistGame.id === game?.data?.id) || false
+  const isInWishlist =
+    wishlistData?.data.some(
+      (wishlistGame) => wishlistGame.id === game?.data.id,
+    ) || false
 
   // Modal state
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false)
 
   // Handle wishlist toggle
   const handleWishlistToggle = () => {
-    if (!game?.data?.id) return
-    
+    if (!game?.data.id) return
+
     if (isInWishlist) {
       removeFromWishlistMutation.mutate({ gameId: game.data.id })
     } else {
@@ -118,30 +134,34 @@ function RouteComponent() {
 
   // Handle purchase confirmation from modal
   const handleConfirmPurchase = async () => {
-    if (!game?.data?.id) return
+    if (!game?.data.id) return
 
     try {
       const result = await purchaseGameMutation.mutateAsync({
         gameId: game.data.id,
-        title: `Purchase: ${game.data.name}`
+        title: `Purchase: ${game.data.name}`,
       })
-      
+
       // Check if purchase was successful
       if (!result.success) {
         throw new Error(result.message || 'Purchase failed')
       }
-      
+
       // Close modal
       setIsPurchaseModalOpen(false)
-      
+
       // Note: Wishlist removal is handled automatically by the backend purchase service
-      
+
       // Show success message and navigate to library
-      toast.success('Purchase successful! The game has been added to your library.')
+      toast.success(
+        'Purchase successful! The game has been added to your library.',
+      )
       navigate({ to: '/library' })
     } catch (error) {
       console.error('Purchase failed:', error)
-      toast.error(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(
+        `Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
       // Keep modal open on error so user can try again
     }
   }
@@ -149,7 +169,7 @@ function RouteComponent() {
   // Handle add to cart
   const handleAddToCart = () => {
     if (!game?.data) return
-    
+
     addToCart(game.data)
     toast.success('Game added to cart!')
   }
@@ -281,16 +301,18 @@ function RouteComponent() {
                   </div>
                   <div className="flex flex-col gap-[12px]">
                     {isOwned ? (
-                      <button 
+                      <button
                         disabled
                         className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-bold rounded-[20px] bg-[#F1FDFF] text-[var(--color-background-16)] cursor-default"
                       >
                         <p>Owned</p>
                       </button>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => setIsPurchaseModalOpen(true)}
-                        disabled={purchaseGameMutation.isPending || !walletBalance}
+                        disabled={
+                          purchaseGameMutation.isPending || !walletBalance
+                        }
                         className={`h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-normal rounded-[20px] transition-colors ${
                           purchaseGameMutation.isPending || !walletBalance
                             ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
@@ -298,12 +320,15 @@ function RouteComponent() {
                         }`}
                       >
                         <p>
-                          {purchaseGameMutation.isPending 
-                            ? 'Processing...' 
-                            : walletBalance && walletBalance.amount < (game.data.salePrice > 0 ? game.data.salePrice : game.data.price)
-                            ? 'Insufficient Funds'
-                            : t('actions.buy')
-                          }
+                          {purchaseGameMutation.isPending
+                            ? 'Processing...'
+                            : walletBalance &&
+                                walletBalance.amount <
+                                  (game.data.salePrice > 0
+                                    ? game.data.salePrice
+                                    : game.data.price)
+                              ? 'Insufficient Funds'
+                              : t('actions.buy')}
                         </p>
                       </button>
                     )}
@@ -327,12 +352,15 @@ function RouteComponent() {
                             <p>{t('actions.addToCart')}</p>
                           )}
                         </button>
-                        <button 
+                        <button
                           onClick={handleWishlistToggle}
-                          disabled={addToWishlistMutation.isPending || removeFromWishlistMutation.isPending}
+                          disabled={
+                            addToWishlistMutation.isPending ||
+                            removeFromWishlistMutation.isPending
+                          }
                           className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                            isInWishlist 
-                              ? 'bg-[#F1FDFF]' 
+                            isInWishlist
+                              ? 'bg-[#F1FDFF]'
                               : 'bg-[var(--color-background-16)]'
                           }`}
                         >
@@ -361,7 +389,9 @@ function RouteComponent() {
                   </div>
                   <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">{t('sidebar.releaseDate')}</p>
+                      <p className="text-[16px] font-bold">
+                        {t('sidebar.releaseDate')}
+                      </p>
                       <p className="text-[16px] font-normal">
                         {game.data.releaseDate
                           ? new Date(game.data.releaseDate).toLocaleDateString(
@@ -377,56 +407,75 @@ function RouteComponent() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">{t('sidebar.developer')}</p>
+                      <p className="text-[16px] font-bold">
+                        {t('sidebar.developer')}
+                      </p>
                       <p className="text-[16px] font-normal">
                         {game.data.developer}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">{t('sidebar.publisher')}</p>
+                      <p className="text-[16px] font-bold">
+                        {t('sidebar.publisher')}
+                      </p>
                       <p className="text-[16px] font-normal">
                         {game.data.publisher}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-[16px] font-bold">{t('sidebar.platforms')}</p>
+                      <p className="text-[16px] font-bold">
+                        {t('sidebar.platforms')}
+                      </p>
                       <div className="flex items-center gap-[12px]">
                         {(() => {
                           const platforms = game.data.platforms
-                          const hasPlatforms = Array.isArray(platforms) && platforms.length > 0
-                          
+                          const hasPlatforms =
+                            Array.isArray(platforms) && platforms.length > 0
+
                           if (!hasPlatforms) {
-                            return <p className="text-[14px] text-[var(--color-background-25)]">N/A</p>
+                            return (
+                              <p className="text-[14px] text-[var(--color-background-25)]">
+                                N/A
+                              </p>
+                            )
                           }
-                          
+
                           return (
                             <>
-                              {platforms.some(p => {
+                              {platforms.some((p) => {
                                 const lower = p.toLowerCase()
-                                return lower === 'windows' || lower === 'pc' || lower.includes('windows')
-                              }) && (
-                                <FaWindows size={24} />
-                              )}
-                              {platforms.some(p => {
+                                return (
+                                  lower === 'windows' ||
+                                  lower === 'pc' ||
+                                  lower.includes('windows')
+                                )
+                              }) && <FaWindows size={24} />}
+                              {platforms.some((p) => {
                                 const lower = p.toLowerCase()
-                                return lower === 'apple' || lower === 'mac' || lower === 'macos' || lower.includes('mac')
-                              }) && (
-                                <FaApple size={24} />
-                              )}
-                              {platforms.some(p => {
+                                return (
+                                  lower === 'apple' ||
+                                  lower === 'mac' ||
+                                  lower === 'macos' ||
+                                  lower.includes('mac')
+                                )
+                              }) && <FaApple size={24} />}
+                              {platforms.some((p) => {
                                 const lower = p.toLowerCase()
-                                return lower === 'playstation' || lower === 'ps' || lower.includes('ps') || lower.includes('playstation')
-                              }) && (
-                                <FaPlaystation size={24} />
-                              )}
-                              {platforms.some(p => {
+                                return (
+                                  lower === 'playstation' ||
+                                  lower === 'ps' ||
+                                  lower.includes('ps') ||
+                                  lower.includes('playstation')
+                                )
+                              }) && <FaPlaystation size={24} />}
+                              {platforms.some((p) => {
                                 const lower = p.toLowerCase()
-                                return lower === 'xbox' || lower.includes('xbox')
-                              }) && (
-                                <FaXbox size={24} />
-                              )}
+                                return (
+                                  lower === 'xbox' || lower.includes('xbox')
+                                )
+                              }) && <FaXbox size={24} />}
                             </>
                           )
                         })()}
@@ -436,12 +485,11 @@ function RouteComponent() {
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      {friendsWhoWishlist && friendsWhoWishlist.length > 0 
-                        ? (friendsWhoWishlist.length === 1 
-                            ? t('sidebar.friendWantsThis')
-                            : t('sidebar.friendsWantThis'))
-                        : t('sidebar.noFriendsWantThis')
-                      }
+                      {friendsWhoWishlist && friendsWhoWishlist.length > 0
+                        ? friendsWhoWishlist.length === 1
+                          ? t('sidebar.friendWantsThis')
+                          : t('sidebar.friendsWantThis')
+                        : t('sidebar.noFriendsWantThis')}
                     </p>
                     <div className="w-[155px] flex flex-col gap-[8px]">
                       {friendsWhoWishlist && friendsWhoWishlist.length > 0 ? (
@@ -456,8 +504,8 @@ function RouteComponent() {
                               className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
                               loading="lazy"
                               onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/avatar.png';
+                                const target = e.target as HTMLImageElement
+                                target.src = '/avatar.png'
                               }}
                             />
                             <p className="text-right text-[16px] font-medium">
@@ -475,12 +523,11 @@ function RouteComponent() {
 
                   <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
                     <p className="text-[20px] font-bold">
-                      {friendsWhoOwn && friendsWhoOwn.length > 0 
-                        ? (friendsWhoOwn.length === 1 
-                            ? t('sidebar.friendHasThis')
-                            : t('sidebar.friendsHaveThis'))
-                        : t('sidebar.noFriendsHaveThis')
-                      }
+                      {friendsWhoOwn && friendsWhoOwn.length > 0
+                        ? friendsWhoOwn.length === 1
+                          ? t('sidebar.friendHasThis')
+                          : t('sidebar.friendsHaveThis')
+                        : t('sidebar.noFriendsHaveThis')}
                     </p>
                     <div className="flex gap-[8px] flex-wrap">
                       {friendsWhoOwn && friendsWhoOwn.length > 0 ? (
@@ -496,8 +543,8 @@ function RouteComponent() {
                                 className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
                                 loading="lazy"
                                 onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = '/avatar.png';
+                                  const target = e.target as HTMLImageElement
+                                  target.src = '/avatar.png'
                                 }}
                               />
                               <p className="text-right text-[16px] font-medium">

@@ -21,19 +21,20 @@ function RouteComponent() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validatePassword = (password: string) => {
-    const errors = []
-    if (password.length < 7) errors.push(t('password.validation.minLength'))
+    const validationErrors: string[] = []
+    if (password.length < 7)
+      validationErrors.push(t('password.validation.minLength'))
     if (!/[a-zA-Z]/.test(password))
-      errors.push(t('password.validation.atLeastOneLetter'))
+      validationErrors.push(t('password.validation.atLeastOneLetter'))
     if (!/\d/.test(password))
-      errors.push(t('password.validation.atLeastOneDigit'))
-    if (/\s/.test(password)) errors.push(t('password.validation.noSpaces'))
-    return errors
+      validationErrors.push(t('password.validation.atLeastOneDigit'))
+    if (/\s/.test(password))
+      validationErrors.push(t('password.validation.noSpaces'))
+    return validationErrors
   }
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }))
     }
@@ -103,10 +104,12 @@ function RouteComponent() {
   }
 
   const getPasswordStrength = (password: string) => {
-    const errors = validatePassword(password)
+    const validationErrors = validatePassword(password)
     if (password.length === 0) return { strength: 0, color: 'bg-gray-400' }
-    if (errors.length === 0) return { strength: 100, color: 'bg-green-500' }
-    if (errors.length <= 2) return { strength: 60, color: 'bg-yellow-500' }
+    if (validationErrors.length === 0)
+      return { strength: 100, color: 'bg-green-500' }
+    if (validationErrors.length <= 2)
+      return { strength: 60, color: 'bg-yellow-500' }
     return { strength: 30, color: 'bg-red-500' }
   }
 
