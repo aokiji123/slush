@@ -48,9 +48,9 @@ function RouteComponent() {
 
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
-      <div className="container mx-auto relative z-20 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 md:px-0 relative z-20">
         <div className="flex items-center justify-center">
-          <Search className="my-[12px] sm:my-[16px] w-full" />
+          <Search className="my-[12px] md:my-[16px] w-full" />
         </div>
 
         <h2 className="text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[var(--color-background)]">

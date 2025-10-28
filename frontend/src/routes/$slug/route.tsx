@@ -16,12 +16,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import { Search, PurchaseConfirmationModal } from '@/components'
-import {
-  ComplaintIcon,
-  FavoriteIcon,
-  FavoriteFilledIcon,
-  RepostIcon,
-} from '@/icons'
+import { FavoriteIcon, FavoriteFilledIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
 import {
   useWishlist,
@@ -80,6 +75,7 @@ function getTabs(slug: string, t: any) {
 }
 
 const TYPE_PAGE = {
+  characteristics: 'characteristics',
   community: 'community',
   dlc: 'dlc',
 }
@@ -92,36 +88,29 @@ function RouteComponent() {
 
   const { data: game, isLoading, isError } = useGameById(slug)
 
-  // Fetch user's wishlist
   const { data: wishlistData } = useWishlist()
   const addToWishlistMutation = useAddToWishlist()
   const removeFromWishlistMutation = useRemoveFromWishlist()
 
-  // Purchase functionality
   const purchaseGameMutation = usePurchaseGame()
   const { data: walletBalance } = useWalletBalance()
   const { data: isOwned } = useGameOwnership(game?.data.id || '')
 
-  // Friends data
   const { data: friendsWhoWishlist } = useFriendsWhoWishlistGame(
     game?.data.id || '',
   )
   const { data: friendsWhoOwn } = useFriendsWhoOwnGame(game?.data.id || '')
 
-  // Cart functionality
   const { addToCart, isInCart } = useCartStore()
   const gameInCart = game?.data.id ? isInCart(game.data.id) : false
 
-  // Check if current game is in wishlist
   const isInWishlist =
     wishlistData?.data.some(
       (wishlistGame) => wishlistGame.id === game?.data.id,
     ) || false
 
-  // Modal state
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false)
 
-  // Handle wishlist toggle
   const handleWishlistToggle = () => {
     if (!game?.data.id) return
 
@@ -132,7 +121,6 @@ function RouteComponent() {
     }
   }
 
-  // Handle purchase confirmation from modal
   const handleConfirmPurchase = async () => {
     if (!game?.data.id) return
 
@@ -142,17 +130,12 @@ function RouteComponent() {
         title: `Purchase: ${game.data.name}`,
       })
 
-      // Check if purchase was successful
       if (!result.success) {
         throw new Error(result.message || 'Purchase failed')
       }
 
-      // Close modal
       setIsPurchaseModalOpen(false)
 
-      // Note: Wishlist removal is handled automatically by the backend purchase service
-
-      // Show success message and navigate to library
       toast.success(
         'Purchase successful! The game has been added to your library.',
       )
@@ -162,11 +145,9 @@ function RouteComponent() {
       toast.error(
         `Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
-      // Keep modal open on error so user can try again
     }
   }
 
-  // Handle add to cart
   const handleAddToCart = () => {
     if (!game?.data) return
 
@@ -199,7 +180,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="bg-[var(--color-night-background)] relative overflow-hidden">
+    <div className="bg-[var(--color-night-background)] relative overflow-hidden px-1">
       {currentPage === TYPE_PAGE.dlc ? (
         <div className="relative z-20">
           <Outlet />
@@ -216,7 +197,7 @@ function RouteComponent() {
               return (
                 <li
                   key={tab.name}
-                  className={`text-[25px] font-bold relative border-b-2 transition-colors font-manrope ${
+                  className={`md:text-[25px] text-[18px] font-bold relative border-b-2 transition-colors font-manrope ${
                     isActive
                       ? 'text-[var(--color-background-21)] border-[var(--color-background-21)]'
                       : 'border-transparent hover:text-[var(--color-background-21)] hover:border-[var(--color-background-21)]'
@@ -234,33 +215,34 @@ function RouteComponent() {
           {currentPage === TYPE_PAGE.community ? (
             <Outlet />
           ) : (
-            <div className="w-full flex gap-[24px]">
-              <div className="w-[75%] flex flex-col gap-[8px] min-w-0 mb-[256px]">
-                <div className="flex items-center gap-[16px]">
+            <div className="w-full flex flex-col lg:flex-row gap-[24px]">
+              <div className="w-full lg:w-[75%] flex flex-col gap-[8px] min-w-0 mb-[24px] lg:mb-[256px]">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-[8px] sm:gap-[16px]">
                   {game.data.isDlc && (
-                    <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[16px] font-bold">
+                    <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[14px] sm:text-[16px] font-bold self-start">
                       {t('dlc.badge')}
                     </div>
                   )}
-                  <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                  <p className="text-[24px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
                     {game.data.name}
                   </p>
                 </div>
                 <Outlet />
               </div>
 
-              <div className="w-[25%] flex flex-col gap-[8px] flex-shrink-0">
-                <div className="flex items-center gap-[15px] justify-end h-[48px]">
-                  <p className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
+              {/* Sidebar - only visible on lg screens and larger */}
+              <div className="hidden lg:flex lg:w-[25%] flex-col gap-[8px] flex-shrink-0">
+                <div className="flex items-center gap-[12px] sm:gap-[15px] justify-start sm:justify-end h-[48px]">
+                  <p className="text-[20px] justify-start sm:text-[24px] font-bold text-[var(--color-background)] font-manrope">
                     {game.data.rating.toFixed(1) || '0.0'}
                   </p>
-                  <div className="flex items-center gap-[8px]">
+                  <div className="flex items-center gap-[4px] sm:gap-[8px]">
                     {Array.from({ length: 5 }).map((_, index) => {
                       const isFilled = index < Math.floor(game.data.rating)
                       return (
                         <FaStar
                           key={index}
-                          size={24}
+                          size={20}
                           className={
                             isFilled
                               ? 'text-[var(--color-background-10)]'
@@ -281,18 +263,18 @@ function RouteComponent() {
                       loading="lazy"
                     />
                   )}
-                  <div className="flex items-center gap-[8px]">
+                  <div className="flex items-center gap-[6px] sm:gap-[8px]">
                     {game.data.salePrice && game.data.salePrice > 0 ? (
                       <>
-                        <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                        <p className="text-[24px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
                           {game.data.salePrice}₴
                         </p>
-                        <p className="text-[24px] font-normal text-[var(--color-background-25)] line-through font-manrope">
+                        <p className="text-[18px] sm:text-[20px] lg:text-[24px] font-normal text-[var(--color-background-25)] line-through font-manrope">
                           {game.data.price}₴
                         </p>
                       </>
                     ) : (
-                      <p className="text-[32px] font-bold text-[var(--color-background)] font-manrope">
+                      <p className="text-[24px] sm:text-[28px] lg:text-[32px] font-bold text-[var(--color-background)] font-manrope">
                         {game.data.price
                           ? `${game.data.price}₴`
                           : t('actions.free')}
@@ -333,11 +315,11 @@ function RouteComponent() {
                       </button>
                     )}
                     {!isOwned && (
-                      <div className="w-full flex items-center gap-[8px]">
+                      <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-[8px]">
                         <button
                           onClick={handleAddToCart}
                           disabled={gameInCart}
-                          className={`h-[48px] w-full flex items-center justify-center py-[12px] px-[26px] text-[20px] font-medium rounded-[20px] transition-colors ${
+                          className={`h-[48px] flex-1 flex items-center justify-center py-[12px] px-[20px] sm:px-[26px] text-[16px] sm:text-[18px] lg:text-[20px] font-medium rounded-[20px] transition-colors ${
                             gameInCart
                               ? 'bg-[var(--color-background-16)] text-[var(--color-background)] cursor-default'
                               : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-22)] cursor-pointer'
@@ -345,7 +327,7 @@ function RouteComponent() {
                         >
                           {gameInCart ? (
                             <div className="flex items-center gap-[8px]">
-                              <FaCheck size={16} />
+                              <FaCheck size={14} />
                               <p>{t('actions.inCart')}</p>
                             </div>
                           ) : (
@@ -358,34 +340,34 @@ function RouteComponent() {
                             addToWishlistMutation.isPending ||
                             removeFromWishlistMutation.isPending
                           }
-                          className={`h-[48px] w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                          className={`h-[48px] w-[48px] sm:w-[48px] flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
                             isInWishlist
                               ? 'bg-[#F1FDFF]'
                               : 'bg-[var(--color-background-16)]'
                           }`}
                         >
                           {isInWishlist ? (
-                            <FavoriteFilledIcon className="w-[24px] h-[24px] text-[var(--color-background-16)]" />
+                            <FavoriteFilledIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background-16)]" />
                           ) : (
-                            <FavoriteIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                            <FavoriteIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background)]" />
                           )}
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-[12px] w-full">
-                      <button className="flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer w-[40%] gap-[12px]">
-                        <RepostIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                    {/* <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[8px] sm:gap-[12px] w-full">
+                      <button className="flex items-center justify-center p-[12px] text-[16px] sm:text-[18px] lg:text-[20px] font-normal rounded-[20px] cursor-pointer flex-1 gap-[8px] sm:gap-[12px] hover:bg-[var(--color-background-16)] transition-colors">
+                        <RepostIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background)]" />
                         <span className="text-[var(--color-background-21)]">
                           {t('actions.repost')}
                         </span>
                       </button>
-                      <button className="flex items-center justify-center p-[12px] text-[20px] font-normal rounded-[20px] cursor-pointer w-[60%] gap-[12px]">
-                        <ComplaintIcon className="w-[24px] h-[24px] text-[var(--color-background)]" />
+                      <button className="flex items-center justify-center p-[12px] text-[16px] sm:text-[18px] lg:text-[20px] font-normal rounded-[20px] cursor-pointer flex-1 gap-[8px] sm:gap-[12px] hover:bg-[var(--color-background-16)] transition-colors">
+                        <ComplaintIcon className="w-[20px] sm:w-[24px] h-[20px] sm:h-[24px] text-[var(--color-background)]" />
                         <span className="text-[var(--color-background-19)]">
                           {t('actions.report')}
                         </span>
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                     <div className="flex items-center justify-between">
@@ -483,32 +465,32 @@ function RouteComponent() {
                     </div>
                   </div>
 
-                  <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
-                    <p className="text-[20px] font-bold">
+                  <div className="rounded-[20px] bg-[var(--color-background-15)] p-[16px] sm:p-[20px] flex flex-col gap-[16px] sm:gap-[20px] text-[var(--color-background)]">
+                    <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold">
                       {friendsWhoWishlist && friendsWhoWishlist.length > 0
                         ? friendsWhoWishlist.length === 1
                           ? t('sidebar.friendWantsThis')
                           : t('sidebar.friendsWantThis')
                         : t('sidebar.noFriendsWantThis')}
                     </p>
-                    <div className="w-[155px] flex flex-col gap-[8px]">
+                    <div className="w-full sm:w-[155px] flex flex-col gap-[8px]">
                       {friendsWhoWishlist && friendsWhoWishlist.length > 0 ? (
                         friendsWhoWishlist.slice(0, 2).map((friend) => (
                           <div
                             key={friend.id}
-                            className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                            className="relative bg-[var(--color-background-8)] pl-[40px] sm:pl-[48px] pr-[12px] h-[32px] sm:h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
                           >
                             <img
                               src={friend.avatar || `/avatar.png`}
                               alt="avatar"
-                              className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
+                              className="w-[32px] h-[32px] sm:w-[36px] sm:h-[36px] object-cover rounded-full absolute top-0 left-0"
                               loading="lazy"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement
                                 target.src = '/avatar.png'
                               }}
                             />
-                            <p className="text-right text-[16px] font-medium">
+                            <p className="text-right text-[14px] sm:text-[16px] font-medium">
                               {friend.nickname}
                             </p>
                           </div>
@@ -521,39 +503,39 @@ function RouteComponent() {
                     </div>
                   </div>
 
-                  <div className="rounded-[20px] bg-[var(--color-background-15)] p-[20px] flex flex-col gap-[20px] text-[var(--color-background)]">
-                    <p className="text-[20px] font-bold">
+                  <div className="rounded-[20px] bg-[var(--color-background-15)] p-[16px] sm:p-[20px] flex flex-col gap-[16px] sm:gap-[20px] text-[var(--color-background)]">
+                    <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold">
                       {friendsWhoOwn && friendsWhoOwn.length > 0
                         ? friendsWhoOwn.length === 1
                           ? t('sidebar.friendHasThis')
                           : t('sidebar.friendsHaveThis')
                         : t('sidebar.noFriendsHaveThis')}
                     </p>
-                    <div className="flex gap-[8px] flex-wrap">
+                    <div className="flex gap-[6px] sm:gap-[8px] flex-wrap">
                       {friendsWhoOwn && friendsWhoOwn.length > 0 ? (
                         <React.Fragment key="friends-who-own">
                           {friendsWhoOwn.slice(0, 7).map((friend) => (
                             <div
                               key={friend.id}
-                              className="relative bg-[var(--color-background-8)] pl-[48px] pr-[12px] h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
+                              className="relative bg-[var(--color-background-8)] pl-[36px] sm:pl-[48px] pr-[8px] sm:pr-[12px] h-[28px] sm:h-[36px] rounded-[20px] flex items-center justify-end w-fit cursor-pointer"
                             >
                               <img
                                 src={friend.avatar || `/avatar.png`}
                                 alt="avatar"
-                                className="w-[36px] h-[36px] object-cover rounded-full absolute top-0 left-0"
+                                className="w-[28px] h-[28px] sm:w-[36px] sm:h-[36px] object-cover rounded-full absolute top-0 left-0"
                                 loading="lazy"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement
                                   target.src = '/avatar.png'
                                 }}
                               />
-                              <p className="text-right text-[16px] font-medium">
+                              <p className="text-right text-[12px] sm:text-[14px] lg:text-[16px] font-medium">
                                 {friend.nickname}
                               </p>
                             </div>
                           ))}
                           {friendsWhoOwn.length > 7 && (
-                            <div className="w-[36px] h-[36px] flex items-center justify-center bg-[var(--color-background-18)] rounded-full text-[16px] font-extralight text-[var(--color-background-25)] cursor-pointer">
+                            <div className="w-[28px] h-[28px] sm:w-[36px] sm:h-[36px] flex items-center justify-center bg-[var(--color-background-18)] rounded-full text-[12px] sm:text-[14px] lg:text-[16px] font-extralight text-[var(--color-background-25)] cursor-pointer">
                               +{friendsWhoOwn.length - 7}
                             </div>
                           )}

@@ -22,7 +22,7 @@ const justifyClasses: Record<JustifyContent, string> = {
 /**
  * A container component for action buttons in cards.
  * Provides consistent spacing and layout for action groups.
- * 
+ *
  * @example
  * ```tsx
  * <CardActions justify="between">
@@ -32,15 +32,17 @@ const justifyClasses: Record<JustifyContent, string> = {
  * </CardActions>
  * ```
  */
-export const CardActions = ({ 
-  children, 
-  className = '', 
-  justify = 'start' 
+export const CardActions = ({
+  children,
+  className = '',
+  justify = 'start',
 }: CardActionsProps) => {
   const justifyClass = justifyClasses[justify]
-  
+
   return (
-    <div className={`flex items-center gap-3 ${justifyClass} ${className}`}>
+    <div
+      className={`flex items-center flex-wrap gap-2 md:gap-3 ${justifyClass} ${className}`}
+    >
       {children}
     </div>
   )
