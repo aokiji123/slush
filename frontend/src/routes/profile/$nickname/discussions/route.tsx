@@ -1,5 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileDiscussionCard, ProfileFriendsPreview } from '@/components'
+import {
+  ProfileTabs,
+  ProfileHeader,
+  ProfileTabToolbar,
+  ProfileDiscussionCard,
+  ProfileFriendsPreview,
+} from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics, useUserPosts } from '@/api/queries/useProfile'
 import { useFriendshipStatus } from '@/api/queries/useFriendship'
@@ -18,25 +24,35 @@ function ProfileDiscussionsPage() {
   const [sortBy, setSortBy] = useState('CreatedAt:desc')
 
   // Fetch profile user data
-  const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
-  
+  const {
+    data: profileUser,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useUserByNickname(nickname)
+
   // Fetch current authenticated user
-  const { data: currentUser, isLoading: isLoadingCurrentUser } = useAuthenticatedUser()
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useAuthenticatedUser()
 
   // Determine if this is the user's own profile
-  const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
+  const isOwnProfile =
+    currentUser && profileUser && currentUser.id === profileUser.id
 
   // Get friendship status (only if not own profile)
   const { data: friendshipStatus = 'none' } = useFriendshipStatus(
     currentUser?.id || '',
-    profileUser?.id || ''
+    profileUser?.id || '',
   )
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's posts (discussions only)
-  const { data: userPosts, isLoading: isLoadingPosts, isError: isPostsError } = useUserPosts(profileUser?.id || '', 'Discussion', sortBy)
+  const {
+    data: userPosts,
+    isLoading: isLoadingPosts,
+    isError: isPostsError,
+  } = useUserPosts(profileUser?.id || '', 'Discussion', sortBy)
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -51,7 +67,8 @@ function ProfileDiscussionsPage() {
   }
 
   // Filter posts to only show discussions
-  const discussionPosts = userPosts?.filter(post => post.type === PostType.Discussion) || []
+  const discussionPosts =
+    userPosts?.filter((post) => post.type === PostType.Discussion) || []
 
   // Client-side search filtering
   const filteredItems = discussionPosts.filter((post) => {
@@ -67,7 +84,9 @@ function ProfileDiscussionsPage() {
   if (isLoadingProfile || isLoadingCurrentUser) {
     return (
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
-        <div className="text-[var(--color-background)] text-[18px]">{t('loading')}</div>
+        <div className="text-[var(--color-background)] text-[18px]">
+          {t('loading')}
+        </div>
       </div>
     )
   }
@@ -110,8 +129,18 @@ function ProfileDiscussionsPage() {
       {/* Background decorative elements */}
       <div className="absolute w-[497px] h-[459px] left-[-131px] top-[14px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient1)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient1)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient1">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -121,11 +150,21 @@ function ProfileDiscussionsPage() {
           </svg>
         </div>
       </div>
-      
+
       <div className="absolute w-[497px] h-[459px] right-[-136px] top-[829px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient2)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient2)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient2">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -136,14 +175,8 @@ function ProfileDiscussionsPage() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto" style={{ 
-        paddingLeft: '228px', 
-        paddingRight: '228px', 
-        paddingTop: '121px', 
-        paddingBottom: '100px', 
-        maxWidth: '1920px' 
-      }}>
-        <div style={{ width: '1464px' }}>
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[228px] pt-8 sm:pt-16 md:pt-24 lg:pt-[121px] pb-8 sm:pb-16 md:pb-20 lg:pb-[100px] max-w-[1920px]">
+        <div className="w-full max-w-[1464px]">
           {/* Profile Header */}
           <ProfileHeader
             username={profileUser.nickname}
@@ -160,16 +193,18 @@ function ProfileDiscussionsPage() {
             onRemoveFriend={() => {}}
           />
 
-          <div className="flex gap-[24px]">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-[24px]">
             {/* Main Content */}
-            <div style={{ width: '1092px' }}>
+            <div className="w-full lg:w-[calc(75%-12px)] xl:w-[1092px]">
               {/* Main Container */}
-              <div className="bg-[#004252] p-[20px] rounded-[20px] flex flex-col gap-[12px]">
+              <div className="bg-[#004252] p-3 sm:p-4 lg:p-[20px] rounded-[20px] flex flex-col gap-3 sm:gap-[12px]">
                 {/* Toolbar */}
                 <ProfileTabToolbar
                   searchText={searchText}
                   onSearchChange={setSearchText}
-                  searchPlaceholder={t('profile.searchPlaceholders.discussions')}
+                  searchPlaceholder={t(
+                    'profile.searchPlaceholders.discussions',
+                  )}
                   sortBy={sortBy}
                   onSortChange={handleSortChange}
                   sortOptions={sortOptions}
@@ -177,35 +212,38 @@ function ProfileDiscussionsPage() {
                 />
 
                 {/* Content */}
-                <div className="flex flex-col gap-[8px]">
-                {isLoadingPosts ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-[rgba(204,248,255,0.65)] text-lg">{t('common.loading')}</p>
-                  </div>
-                ) : isPostsError ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-red-400 text-lg">{t('games.errorLoading')}</p>
-                  </div>
-                ) : !filteredItems.length ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-[rgba(204,248,255,0.65)] text-lg">
-                      {searchText ? t('games.noGamesFound') : t('games.noGamesMessage')}
-                    </p>
-                  </div>
-                ) : (
-                  filteredItems.map((post) => (
-                    <ProfileDiscussionCard
-                      key={post.id}
-                      post={post}
-                    />
-                  ))
-                )}
+                <div className="flex flex-col gap-2 sm:gap-3 lg:gap-[8px]">
+                  {isLoadingPosts ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-[rgba(204,248,255,0.65)] text-lg">
+                        {t('common.loading')}
+                      </p>
+                    </div>
+                  ) : isPostsError ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-red-400 text-lg">
+                        {t('games.errorLoading')}
+                      </p>
+                    </div>
+                  ) : !filteredItems.length ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-[rgba(204,248,255,0.65)] text-lg">
+                        {searchText
+                          ? t('games.noGamesFound')
+                          : t('games.noGamesMessage')}
+                      </p>
+                    </div>
+                  ) : (
+                    filteredItems.map((post) => (
+                      <ProfileDiscussionCard key={post.id} post={post} />
+                    ))
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Sidebar */}
-            <div className="flex flex-col gap-[20px]">
+            <div className="w-full lg:w-[calc(25%-12px)] xl:w-[348px] flex flex-col gap-4 sm:gap-5 lg:gap-[20px]">
               <ProfileTabs
                 nickname={profileUser.nickname}
                 level={profileData.level}

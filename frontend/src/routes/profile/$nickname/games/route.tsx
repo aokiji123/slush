@@ -1,5 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProfileTabs, ProfileHeader, ProfileTabToolbar, ProfileTabSection, ProfileGameCard, ProfileFriendsPreview } from '@/components'
+import {
+  ProfileTabs,
+  ProfileHeader,
+  ProfileTabToolbar,
+  ProfileTabSection,
+  ProfileGameCard,
+  ProfileFriendsPreview,
+} from '@/components'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useUserStatistics } from '@/api/queries/useProfile'
 import { useMyLibraryQuery, useSharedGames } from '@/api/queries/useLibrary'
@@ -23,37 +30,45 @@ function ProfileGamesPage() {
   })
 
   // Fetch profile user data
-  const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
-  
+  const {
+    data: profileUser,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useUserByNickname(nickname)
+
   // Fetch current authenticated user
-  const { data: currentUser, isLoading: isLoadingCurrentUser } = useAuthenticatedUser()
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useAuthenticatedUser()
 
   // Determine if this is the user's own profile
-  const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
+  const isOwnProfile =
+    currentUser && profileUser && currentUser.id === profileUser.id
 
   // Use profile actions hook
   const profileActions = useProfileActions({
     currentUserId: currentUser?.id,
     profileUserId: profileUser?.id,
     nickname,
-    isOwnProfile: isOwnProfile || false
+    isOwnProfile: isOwnProfile || false,
   })
 
   // Fetch profile data
   const { data: statistics } = useUserStatistics(profileUser?.id || '')
 
   // Fetch user's library (only if it's their own profile)
-  const { data: libraryData, isLoading: isLoadingLibrary, isError: isLibraryError } = useMyLibraryQuery(
-    isOwnProfile ? filters : { page: 1, limit: 0 } // Don't fetch if not own profile
+  const {
+    data: libraryData,
+    isLoading: isLoadingLibrary,
+    isError: isLibraryError,
+  } = useMyLibraryQuery(
+    isOwnProfile ? filters : { page: 1, limit: 0 }, // Don't fetch if not own profile
   )
 
   // Fetch shared games (only when viewing another user's profile)
   const { data: sharedGamesData } = useSharedGames(
     currentUser?.id || '',
-    profileUser?.id || ''
+    profileUser?.id || '',
   )
-
-  
 
   // Create sort options dynamically using translations
   const sortOptions = [
@@ -72,31 +87,39 @@ function ProfileGamesPage() {
   }
 
   // Client-side search filtering
-  const sharedGameIds = new Set(sharedGamesData?.data?.map(g => g.id) || [])
-  const filteredItems = libraryData?.data?.items?.filter((game) => {
-    // Hide shared games from main list when viewing another user's profile
-    if (!isOwnProfile && sharedGameIds.has(game.id)) return false
-    
-    if (!searchText.trim()) return true
-    const searchLower = searchText.toLowerCase()
-    return (
-      game.name?.toLowerCase().includes(searchLower) ||
-      game.developer?.toLowerCase().includes(searchLower) ||
-      game.publisher?.toLowerCase().includes(searchLower) ||
-      game.description?.toLowerCase().includes(searchLower)
-    )
-  }) || []
+  const sharedGameIds = new Set(sharedGamesData?.data?.map((g) => g.id) || [])
+  const filteredItems =
+    libraryData?.data?.items?.filter((game) => {
+      // Hide shared games from main list when viewing another user's profile
+      if (!isOwnProfile && sharedGameIds.has(game.id)) return false
+
+      if (!searchText.trim()) return true
+      const searchLower = searchText.toLowerCase()
+      return (
+        game.name?.toLowerCase().includes(searchLower) ||
+        game.developer?.toLowerCase().includes(searchLower) ||
+        game.publisher?.toLowerCase().includes(searchLower) ||
+        game.description?.toLowerCase().includes(searchLower)
+      )
+    }) || []
 
   // Helper function to render game card
-  const renderGameCard = (game: any, status: 'inLibrary' | 'inWishlist' | 'shared' = 'inLibrary') => (
+  const renderGameCard = (
+    game: any,
+    status: 'inLibrary' | 'inWishlist' | 'shared' = 'inLibrary',
+  ) => (
     <ProfileGameCard
       key={game.id}
       game={game}
       variant="games"
       status={status}
-      statusText={status === 'inLibrary' ? t('profile.status.inLibrary') : 
-                  status === 'inWishlist' ? t('profile.status.inWishlist') : 
-                  t('profile.status.shared')}
+      statusText={
+        status === 'inLibrary'
+          ? t('profile.status.inLibrary')
+          : status === 'inWishlist'
+            ? t('profile.status.inWishlist')
+            : t('profile.status.shared')
+      }
     />
   )
 
@@ -104,7 +127,9 @@ function ProfileGamesPage() {
   if (isLoadingProfile || isLoadingCurrentUser) {
     return (
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
-        <div className="text-[var(--color-background)] text-[18px]">{t('loading')}</div>
+        <div className="text-[var(--color-background)] text-[18px]">
+          {t('loading')}
+        </div>
       </div>
     )
   }
@@ -147,8 +172,18 @@ function ProfileGamesPage() {
       {/* Background decorative elements */}
       <div className="absolute w-[497px] h-[459px] left-[-131px] top-[14px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient1)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient1)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient1">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -158,11 +193,21 @@ function ProfileGamesPage() {
           </svg>
         </div>
       </div>
-      
+
       <div className="absolute w-[497px] h-[459px] right-[-136px] top-[829px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient2)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient2)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient2">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -173,14 +218,8 @@ function ProfileGamesPage() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto" style={{ 
-        paddingLeft: '228px', 
-        paddingRight: '228px', 
-        paddingTop: '121px', 
-        paddingBottom: '100px', 
-        maxWidth: '1920px' 
-      }}>
-        <div style={{ width: '1464px' }}>
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[228px] pt-8 sm:pt-16 md:pt-24 lg:pt-[121px] pb-8 sm:pb-16 md:pb-20 lg:pb-[100px] max-w-[1920px]">
+        <div className="w-full max-w-[1464px]">
           {/* Profile Header */}
           <ProfileHeader
             username={profileUser.nickname}
@@ -189,7 +228,13 @@ function ProfileGamesPage() {
             banner={profileUser.banner}
             isOnline={profileUser.isOnline ?? false}
             isOwnProfile={isOwnProfile || false}
-            friendshipStatus={profileActions.friendshipStatus as 'none' | 'pending_outgoing' | 'pending_incoming' | 'friends'}
+            friendshipStatus={
+              profileActions.friendshipStatus as
+                | 'none'
+                | 'pending_outgoing'
+                | 'pending_incoming'
+                | 'friends'
+            }
             onEditProfile={profileActions.handleEditProfile}
             onAddFriend={profileActions.handleAddFriend}
             onCancelRequest={profileActions.handleCancelRequest}
@@ -197,11 +242,11 @@ function ProfileGamesPage() {
             onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
-          <div className="flex gap-[24px]">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-[24px]">
             {/* Main Content */}
-            <div style={{ width: '1092px' }}>
+            <div className="w-full lg:w-[calc(75%-12px)] xl:w-[1092px]">
               {/* Main Container */}
-              <div className="bg-[#004252] p-[20px] rounded-[20px] flex flex-col gap-[16px]">
+              <div className="bg-[#004252] p-3 sm:p-4 lg:p-[20px] rounded-[20px] flex flex-col gap-3 sm:gap-4 lg:gap-[16px]">
                 {/* Toolbar */}
                 <ProfileTabToolbar
                   searchText={searchText}
@@ -214,45 +259,66 @@ function ProfileGamesPage() {
                 />
 
                 {/* Content */}
-                <div className="flex flex-col gap-[16px]">
-                {/* Shared Games Section - only show when viewing another user's profile */}
-                {!isOwnProfile && sharedGamesData && sharedGamesData.data && sharedGamesData.data.length > 0 && (
-                  <ProfileTabSection
-                    title={t('profile.categories.shared')}
-                    icon={
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" fill="#f1fdff"/>
-                      </svg>
-                    }
-                  >
-                    {sharedGamesData.data.map((game) => renderGameCard(game, 'shared'))}
-                  </ProfileTabSection>
-                )}
+                <div className="flex flex-col gap-3 sm:gap-4 lg:gap-[16px]">
+                  {/* Shared Games Section - only show when viewing another user's profile */}
+                  {!isOwnProfile &&
+                    sharedGamesData &&
+                    sharedGamesData.data &&
+                    sharedGamesData.data.length > 0 && (
+                      <ProfileTabSection
+                        title={t('profile.categories.shared')}
+                        icon={
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
+                              fill="#f1fdff"
+                            />
+                          </svg>
+                        }
+                      >
+                        {sharedGamesData.data.map((game) =>
+                          renderGameCard(game, 'shared'),
+                        )}
+                      </ProfileTabSection>
+                    )}
 
-                {/* Regular Games Section */}
-                {isLoadingLibrary ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-[rgba(204,248,255,0.65)] text-lg">{t('common.loading')}</p>
-                  </div>
-                ) : isLibraryError ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-red-400 text-lg">{t('games.errorLoading')}</p>
-                  </div>
-                ) : !filteredItems.length ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-[rgba(204,248,255,0.65)] text-lg">
-                      {searchText ? t('games.noGamesFound') : t('games.noGamesMessage')}
-                    </p>
-                  </div>
-                ) : (
-                  filteredItems.map((game) => renderGameCard(game, 'inLibrary'))
-                )}
+                  {/* Regular Games Section */}
+                  {isLoadingLibrary ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-[rgba(204,248,255,0.65)] text-lg">
+                        {t('common.loading')}
+                      </p>
+                    </div>
+                  ) : isLibraryError ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-red-400 text-lg">
+                        {t('games.errorLoading')}
+                      </p>
+                    </div>
+                  ) : !filteredItems.length ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-[rgba(204,248,255,0.65)] text-lg">
+                        {searchText
+                          ? t('games.noGamesFound')
+                          : t('games.noGamesMessage')}
+                      </p>
+                    </div>
+                  ) : (
+                    filteredItems.map((game) =>
+                      renderGameCard(game, 'inLibrary'),
+                    )
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Sidebar */}
-            <div className="flex flex-col gap-[20px]">
+            <div className="w-full lg:w-[calc(25%-12px)] xl:w-[348px] flex flex-col gap-4 sm:gap-5 lg:gap-[20px]">
               <ProfileTabs
                 nickname={profileUser.nickname}
                 level={profileData.level}

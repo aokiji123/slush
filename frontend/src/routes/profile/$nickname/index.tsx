@@ -1,27 +1,27 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { 
-  ProfileHeader, 
-  ProfileStats, 
+import {
+  ProfileHeader,
+  ProfileStats,
   BadgeGalleryPreview,
-  DiscussionGallery, 
-  ScreenshotGallery, 
-  VideoGallery, 
-  ReviewGallery, 
+  DiscussionGallery,
+  ScreenshotGallery,
+  VideoGallery,
+  ReviewGallery,
   GuideGallery,
   ProfileCommentCard,
   ProfileTabs,
-  ProfileFriendsPreview
+  ProfileFriendsPreview,
 } from '@/components'
 import { PostType } from '@/types/community'
 import { useUserByNickname, useAuthenticatedUser } from '@/api/queries/useUser'
-import { 
-  useUserStatistics, 
-  useUserReviews, 
-  useUserPosts, 
-  useProfileComments, 
-  useAddProfileComment, 
+import {
+  useUserStatistics,
+  useUserReviews,
+  useUserPosts,
+  useProfileComments,
+  useAddProfileComment,
   useDeleteProfileComment,
-  useFriendsWithDetails 
+  useFriendsWithDetails,
 } from '@/api/queries/useProfile'
 import { useUserBadges } from '@/api/queries/useBadges'
 import { useMyLibraryQuery } from '@/api/queries/useLibrary'
@@ -37,20 +37,26 @@ function ProfileHomePage() {
   const [newComment, setNewComment] = useState('')
 
   // Fetch profile user data
-  const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
-  
+  const {
+    data: profileUser,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useUserByNickname(nickname)
+
   // Fetch current authenticated user
-  const { data: currentUser, isLoading: isLoadingCurrentUser } = useAuthenticatedUser()
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useAuthenticatedUser()
 
   // Determine if this is the user's own profile
-  const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
+  const isOwnProfile =
+    currentUser && profileUser && currentUser.id === profileUser.id
 
   // Use profile actions hook
   const profileActions = useProfileActions({
     currentUserId: currentUser?.id,
     profileUserId: profileUser?.id,
     nickname,
-    isOwnProfile: isOwnProfile || false
+    isOwnProfile: isOwnProfile || false,
   })
 
   // Fetch profile data
@@ -60,12 +66,12 @@ function ProfileHomePage() {
   const { data: profileComments } = useProfileComments(profileUser?.id || '')
   const { data: userBadges } = useUserBadges(profileUser?.id || '')
   const { data: friendsWithDetails } = useFriendsWithDetails(
-    isOwnProfile ? profileUser.id : ''
+    isOwnProfile ? profileUser.id : '',
   )
-  
+
   // Fetch user's library for game thumbnails
   const { data: libraryData } = useMyLibraryQuery(
-    isOwnProfile ? { page: 1, limit: 4 } : { page: 1, limit: 0 }
+    isOwnProfile ? { page: 1, limit: 4 } : { page: 1, limit: 0 },
   )
 
   // Profile comment mutations
@@ -76,20 +82,23 @@ function ProfileHomePage() {
     if (newComment.trim() && profileUser) {
       addProfileCommentMutation.mutate({
         profileUserId: profileUser.id,
-        content: newComment.trim()
+        content: newComment.trim(),
       })
       setNewComment('')
     }
   }
 
   // Get game thumbnails from user's library
-  const gameThumbnails = libraryData?.data?.items?.slice(0, 4).map(game => game.mainImage) || []
+  const gameThumbnails =
+    libraryData?.data?.items?.slice(0, 4).map((game) => game.mainImage) || []
 
   // Loading state
   if (isLoadingProfile || isLoadingCurrentUser) {
     return (
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
-        <div className="text-[var(--color-background)] text-[18px]">Загрузка...</div>
+        <div className="text-[var(--color-background)] text-[18px]">
+          Загрузка...
+        </div>
       </div>
     )
   }
@@ -114,14 +123,15 @@ function ProfileHomePage() {
   const profileData = {
     ...profileUser,
     level: statistics?.level || 1,
-    badges: userBadges?.map(ub => ({
-      id: ub.badge.id,
-      name: ub.badge.name,
-      icon: ub.badge.icon,
-      description: ub.badge.description,
-      requiredValue: ub.badge.requiredValue,
-      earnedAt: ub.earnedAt
-    })) || [],
+    badges:
+      userBadges?.map((ub) => ({
+        id: ub.badge.id,
+        name: ub.badge.name,
+        icon: ub.badge.icon,
+        description: ub.badge.description,
+        requiredValue: ub.badge.requiredValue,
+        earnedAt: ub.earnedAt,
+      })) || [],
     stats: {
       badges: statistics?.badgesCount || 0,
       games: statistics?.gamesCount || 0,
@@ -133,14 +143,16 @@ function ProfileHomePage() {
       guides: statistics?.guidesCount || 0,
       reviews: statistics?.reviewsCount || 0,
     },
-    friends: isOwnProfile ? (friendsWithDetails?.map(f => ({
-      id: f.id,
-      userId: f.id,
-      nickname: f.nickname,
-      avatar: f.avatar,
-      isOnline: f.isOnline,
-      level: f.level,
-    })) || []) : [],
+    friends: isOwnProfile
+      ? friendsWithDetails?.map((f) => ({
+          id: f.id,
+          userId: f.id,
+          nickname: f.nickname,
+          avatar: f.avatar,
+          isOnline: f.isOnline,
+          level: f.level,
+        })) || []
+      : [],
   }
 
   return (
@@ -148,8 +160,18 @@ function ProfileHomePage() {
       {/* Background decorative elements */}
       <div className="absolute w-[497px] h-[459px] left-[-131px] top-[14px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient1)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient1)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient1">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -159,11 +181,21 @@ function ProfileHomePage() {
           </svg>
         </div>
       </div>
-      
+
       <div className="absolute w-[497px] h-[459px] right-[-136px] top-[829px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient2)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient2)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient2">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -174,14 +206,8 @@ function ProfileHomePage() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto" style={{ 
-        paddingLeft: '228px', 
-        paddingRight: '228px', 
-        paddingTop: '121px', 
-        paddingBottom: '100px', 
-        maxWidth: '1920px' 
-      }}>
-        <div style={{ width: '1464px' }}>
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[228px] pt-8 sm:pt-16 md:pt-24 lg:pt-[121px] pb-8 sm:pb-16 md:pb-20 lg:pb-[100px] max-w-[1920px]">
+        <div className="w-full max-w-[1464px]">
           {/* Profile Header */}
           <ProfileHeader
             username={profileUser.nickname}
@@ -198,11 +224,11 @@ function ProfileHomePage() {
             onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
-          <div className="flex gap-[24px]">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-[24px]">
             {/* Main Content */}
-            <div style={{ width: '1092px' }}>
+            <div className="w-full lg:w-[calc(75%-12px)] xl:w-[1092px]">
               {/* Badge Gallery Preview */}
-              <BadgeGalleryPreview 
+              <BadgeGalleryPreview
                 badgesCount={statistics?.badgesCount || 0}
                 topBadges={profileData.badges.slice(0, 5)}
               />
@@ -228,36 +254,40 @@ function ProfileHomePage() {
               <ReviewGallery reviews={userReviews} />
 
               {/* Guides Gallery */}
-              <GuideGallery guides={userPosts?.filter(p => p.type === PostType.Guide) || []} />
+              <GuideGallery
+                guides={
+                  userPosts?.filter((p) => p.type === PostType.Guide) || []
+                }
+              />
 
               {/* Comments Section */}
-              <div className="bg-[var(--color-background-8)] rounded-[20px] p-[20px]">
-                <div className="flex items-center justify-between mb-[20px]">
-                  <h2 className="text-[20px] font-bold text-[var(--color-background)] font-manrope">
+              <div className="bg-[var(--color-background-8)] rounded-[20px] p-3 sm:p-4 lg:p-[20px]">
+                <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-[20px]">
+                  <h2 className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold text-[var(--color-background)] font-manrope">
                     Коментарі
                   </h2>
-                  <div className="bg-[var(--color-background-18)] rounded-[20px] px-[12px] py-[4px]">
-                    <span className="text-[14px] font-bold text-[var(--color-background-25)] opacity-65">
+                  <div className="bg-[var(--color-background-18)] rounded-[20px] px-2 sm:px-3 lg:px-[12px] py-1 sm:py-[4px]">
+                    <span className="text-[12px] sm:text-[14px] font-bold text-[var(--color-background-25)] opacity-65">
                       {profileComments?.length || 0}
                     </span>
                   </div>
                 </div>
 
                 {/* Add Comment Input */}
-                <div className="mb-[20px]">
-                  <div className="bg-[var(--color-background-15)] rounded-[20px] p-[16px]">
+                <div className="mb-3 sm:mb-4 lg:mb-[20px]">
+                  <div className="bg-[var(--color-background-15)] rounded-[20px] p-3 sm:p-4 lg:p-[16px]">
                     <textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Написати коментар..."
-                      className="w-full bg-transparent text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 resize-none outline-none min-h-[40px]"
+                      className="w-full bg-transparent text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 resize-none outline-none min-h-[40px] text-[14px] sm:text-[16px]"
                       rows={1}
                     />
-                    <div className="flex justify-end mt-[12px]">
+                    <div className="flex justify-end mt-2 sm:mt-3 lg:mt-[12px]">
                       <button
                         onClick={handleAddComment}
                         disabled={!newComment.trim()}
-                        className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[20px] py-[8px] rounded-[12px] font-medium text-[14px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-background-23)] transition-colors"
+                        className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-4 sm:px-5 lg:px-[20px] py-1.5 sm:py-2 lg:py-[8px] rounded-[12px] font-medium text-[12px] sm:text-[14px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-background-23)] transition-colors"
                       >
                         Опублікувати
                       </button>
@@ -266,19 +296,25 @@ function ProfileHomePage() {
                 </div>
 
                 {/* Comments List */}
-                <div className="space-y-[8px]">
+                <div className="space-y-2 sm:space-y-3 lg:space-y-[8px]">
                   {profileComments?.map((comment) => (
-                    <ProfileCommentCard 
-                      key={comment.id} 
-                      comment={{
-                        id: comment.id,
-                        username: comment.authorNickname,
-                        avatar: comment.authorAvatar || '/avatar.png',
-                        content: comment.content,
-                        createdAt: comment.createdAt
-                      } as const} 
-                      onDelete={() => deleteProfileCommentMutation.mutate(comment.id)}
-                      canDelete={isOwnProfile || comment.authorId === currentUser?.id}
+                    <ProfileCommentCard
+                      key={comment.id}
+                      comment={
+                        {
+                          id: comment.id,
+                          username: comment.authorNickname,
+                          avatar: comment.authorAvatar || '/avatar.png',
+                          content: comment.content,
+                          createdAt: comment.createdAt,
+                        } as const
+                      }
+                      onDelete={() =>
+                        deleteProfileCommentMutation.mutate(comment.id)
+                      }
+                      canDelete={
+                        isOwnProfile || comment.authorId === currentUser?.id
+                      }
                     />
                   ))}
                 </div>
@@ -286,7 +322,7 @@ function ProfileHomePage() {
             </div>
 
             {/* Sidebar */}
-            <div className="flex flex-col gap-[20px]">
+            <div className="w-full lg:w-[calc(25%-12px)] xl:w-[348px] flex flex-col gap-4 sm:gap-5 lg:gap-[20px]">
               <ProfileTabs
                 nickname={profileUser.nickname}
                 level={profileData.level}

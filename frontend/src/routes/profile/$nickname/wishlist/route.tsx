@@ -207,17 +207,8 @@ function ProfileWishlistPage() {
         </div>
       </div>
 
-      <div
-        className="relative z-10 mx-auto"
-        style={{
-          paddingLeft: '228px',
-          paddingRight: '228px',
-          paddingTop: '121px',
-          paddingBottom: '100px',
-          maxWidth: '1920px',
-        }}
-      >
-        <div style={{ width: '1464px' }}>
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[228px] pt-8 sm:pt-16 md:pt-24 lg:pt-[121px] pb-8 sm:pb-16 md:pb-20 lg:pb-[100px] max-w-[1920px]">
+        <div className="w-full max-w-[1464px]">
           <ProfileHeader
             username={profileUser.nickname}
             bio={profileUser.bio || ''}
@@ -239,9 +230,9 @@ function ProfileWishlistPage() {
             onRemoveFriend={profileActions.handleRemoveFriend}
           />
 
-          <div className="flex gap-[24px]">
-            <div style={{ width: '1092px' }}>
-              <div className="bg-[#004252] p-[20px] rounded-[20px] flex flex-col gap-[16px]">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-[24px]">
+            <div className="w-full lg:w-[calc(75%-12px)] xl:w-[1092px]">
+              <div className="bg-[#004252] p-3 sm:p-4 lg:p-[20px] rounded-[20px] flex flex-col gap-3 sm:gap-4 lg:gap-[16px]">
                 <ProfileTabToolbar
                   searchText={searchText}
                   onSearchChange={setSearchText}
@@ -252,7 +243,7 @@ function ProfileWishlistPage() {
                   showFilters={false}
                 />
 
-                <div className="flex flex-col gap-[8px]">
+                <div className="flex flex-col gap-2 sm:gap-3 lg:gap-[8px]">
                   {isLoadingWishlist ? (
                     <div className="flex items-center justify-center py-8">
                       <p className="text-[rgba(204,248,255,0.65)] text-lg">
@@ -280,7 +271,7 @@ function ProfileWishlistPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-[20px]">
+            <div className="w-full lg:w-[calc(25%-12px)] xl:w-[348px] flex flex-col gap-4 sm:gap-5 lg:gap-[20px]">
               <ProfileTabs
                 nickname={profileUser.nickname}
                 level={profileData.level}

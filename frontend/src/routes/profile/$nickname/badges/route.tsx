@@ -17,29 +17,41 @@ function ProfileBadgesPage() {
   const { nickname } = Route.useParams()
 
   // Fetch profile user data
-  const { data: profileUser, isLoading: isLoadingProfile, error: profileError } = useUserByNickname(nickname)
-  
+  const {
+    data: profileUser,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useUserByNickname(nickname)
+
   // Fetch current authenticated user
-  const { data: currentUser, isLoading: isLoadingCurrentUser } = useAuthenticatedUser()
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useAuthenticatedUser()
 
   // Determine if this is the user's own profile
-  const isOwnProfile = currentUser && profileUser && currentUser.id === profileUser.id
+  const isOwnProfile =
+    currentUser && profileUser && currentUser.id === profileUser.id
 
   // Get friendship status (only if not own profile)
   const { data: friendshipStatus = 'none' } = useFriendshipStatus(
     currentUser?.id || '',
-    profileUser?.id || ''
+    profileUser?.id || '',
   )
 
   // Fetch profile data
-  const { data: statistics, isLoading: isLoadingStats } = useUserStatistics(profileUser?.id || '')
-  const { data: userBadges, isLoading: isLoadingBadges } = useUserBadges(profileUser?.id || '')
+  const { data: statistics, isLoading: isLoadingStats } = useUserStatistics(
+    profileUser?.id || '',
+  )
+  const { data: userBadges, isLoading: isLoadingBadges } = useUserBadges(
+    profileUser?.id || '',
+  )
 
   // Loading state
   if (isLoadingProfile || isLoadingCurrentUser) {
     return (
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
-        <div className="text-[var(--color-background)] text-[18px]">{t('profile.loading')}</div>
+        <div className="text-[var(--color-background)] text-[18px]">
+          {t('profile.loading')}
+        </div>
       </div>
     )
   }
@@ -64,14 +76,15 @@ function ProfileBadgesPage() {
   const profileData = {
     ...profileUser,
     level: statistics?.level || 1,
-    badges: userBadges?.map(ub => ({
-      id: ub.badge.id,
-      name: ub.badge.name,
-      icon: ub.badge.icon,
-      description: ub.badge.description,
-      requiredValue: ub.badge.requiredValue,
-      earnedAt: ub.earnedAt
-    })) || [],
+    badges:
+      userBadges?.map((ub) => ({
+        id: ub.badge.id,
+        name: ub.badge.name,
+        icon: ub.badge.icon,
+        description: ub.badge.description,
+        requiredValue: ub.badge.requiredValue,
+        earnedAt: ub.earnedAt,
+      })) || [],
     stats: {
       badges: statistics?.badgesCount || 0,
       games: statistics?.gamesCount || 0,
@@ -90,8 +103,18 @@ function ProfileBadgesPage() {
       {/* Background decorative elements */}
       <div className="absolute w-[497px] h-[459px] left-[-131px] top-[14px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient1)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient1)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient1">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -101,11 +124,21 @@ function ProfileBadgesPage() {
           </svg>
         </div>
       </div>
-      
+
       <div className="absolute w-[497px] h-[459px] right-[-136px] top-[829px] pointer-events-none opacity-30">
         <div className="absolute inset-[-130.72%_-120.72%]">
-          <svg viewBox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="800" cy="800" r="600" fill="url(#gradient2)" opacity="0.3" />
+          <svg
+            viewBox="0 0 1600 1600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="800"
+              cy="800"
+              r="600"
+              fill="url(#gradient2)"
+              opacity="0.3"
+            />
             <defs>
               <radialGradient id="gradient2">
                 <stop offset="0%" stopColor="#24E5C2" />
@@ -116,14 +149,8 @@ function ProfileBadgesPage() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto" style={{ 
-        paddingLeft: '228px', 
-        paddingRight: '228px', 
-        paddingTop: '121px', 
-        paddingBottom: '100px', 
-        maxWidth: '1920px' 
-      }}>
-        <div style={{ width: '1464px' }}>
+      <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[228px] pt-8 sm:pt-16 md:pt-24 lg:pt-[121px] pb-8 sm:pb-16 md:pb-20 lg:pb-[100px] max-w-[1920px]">
+        <div className="w-full max-w-[1464px]">
           {/* Profile Header */}
           <ProfileHeader
             username={profileUser.nickname}
@@ -140,13 +167,15 @@ function ProfileBadgesPage() {
             onRemoveFriend={() => {}}
           />
 
-          <div className="flex gap-[24px]">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-[24px]">
             {/* Main Content */}
-            <div style={{ width: '1092px' }}>
+            <div className="w-full lg:w-[calc(75%-12px)] xl:w-[1092px]">
               {/* Badge Gallery */}
               {isLoadingStats || isLoadingBadges ? (
                 <div className="bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex items-center justify-center min-h-[400px]">
-                  <div className="text-[var(--color-background)] text-[18px]">{t('profile.loading')}</div>
+                  <div className="text-[var(--color-background)] text-[18px]">
+                    {t('profile.loading')}
+                  </div>
                 </div>
               ) : profileData.badges.length === 0 ? (
                 <div className="bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex items-center justify-center min-h-[400px]">
@@ -160,8 +189,8 @@ function ProfileBadgesPage() {
                   </div>
                 </div>
               ) : (
-                <BadgeGallery 
-                  badges={profileData.badges} 
+                <BadgeGallery
+                  badges={profileData.badges}
                   level={profileData.level}
                   experience={statistics?.experience || 0}
                   nextLevelExperience={statistics?.nextLevelExperience || 100}
@@ -170,7 +199,7 @@ function ProfileBadgesPage() {
             </div>
 
             {/* Sidebar */}
-            <div className="flex flex-col gap-[20px]">
+            <div className="w-full lg:w-[calc(25%-12px)] xl:w-[348px] flex flex-col gap-4 sm:gap-5 lg:gap-[20px]">
               <ProfileTabs
                 nickname={profileUser.nickname}
                 level={profileData.level}
