@@ -20,5 +20,40 @@
   "connectionError": "Connection error",
   "reconnecting": "Reconnecting...",
   "connected": "Connected",
-  "disconnected": "Disconnected"
+  "disconnected": "Disconnected",
+  "startConversation": "Start conversation",
+  "friends": "Friends",
+  "conversations": "Conversations",
+  "startChatting": "Start chatting",
+  "removeFriendTitle": "Remove Friend?",
+  "removeFriendWarning": "This will permanently delete all chat history with this user. This action cannot be undone.",
+  "removeFriendConfirm": "Remove Friend",
+  "cancel": "Cancel",
+  "sendHello": "Send Hello 👋",
+  "startConversationWith": "Start a conversation with {nickname}",
+  "clickToSendHello": "Click to send a friendly greeting",
+  "mediaTabs": {
+    "photos": "Photos",
+    "files": "Files",
+    "voice": "Voice Messages"
+  },
+  "mediaEmptyStates": {
+    "noPhotos": "No photos yet",
+    "noFiles": "No files yet",
+    "noVoiceMessages": "No voice messages yet"
+  },
+  "mediaLoading": "Loading media...",
+  "mediaError": "Failed to load media",
+  "emojiPicker": {
+    "searchPlaceholder": "Search emojis...",
+    "noResults": "No emojis found",
+    "categories": {
+      "frequently": "Frequently Used",
+      "smileys": "Smileys & People",
+      "animals": "Animals & Nature",
+      "food": "Food & Drink",
+      "activities": "Activities",
+      "symbols": "Symbols"
+    }
+  }
 }

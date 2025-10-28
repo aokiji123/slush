@@ -8,6 +8,8 @@ import {
   sendTextMessage,
   sendMediaMessage,
   clearConversationHistory,
+  getConversationMedia,
+  getConversationMediaCounts,
 } from '../chatAPI'
 import type {
   ChatMessageDto,
@@ -200,6 +202,39 @@ export const useUpdateMessageInCache = () => {
       }
     )
   }
+}
+
+// Get conversation media (photos, files, or voice messages)
+export const useConversationMedia = (
+  friendId: string,
+  mediaType: string,
+  page: number = 1,
+  pageSize: number = 50,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: [...chatKeys.conversationHistory(friendId), 'media', mediaType, { page, pageSize }],
+    queryFn: () => getConversationMedia(friendId, mediaType, page, pageSize),
+    enabled: enabled && !!friendId && !!mediaType,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
+}
+
+// Get media counts for a conversation
+export const useConversationMediaCounts = (
+  friendId: string,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: [...chatKeys.conversationHistory(friendId), 'media', 'counts'],
+    queryFn: () => getConversationMediaCounts(friendId),
+    enabled: enabled && !!friendId,
+    staleTime: 1000 * 60 * 1, // 1 minute
+    retry: 3,
+    refetchOnWindowFocus: false,
+  })
 }
 
 // Clear conversation history mutation

@@ -23,7 +23,7 @@ export const useProfileActions = ({
     profileUserId || ''
   )
   
-  const friendshipStatus = (friendshipStatusRaw as 'none' | 'friends' | 'pending_incoming' | 'pending_outgoing') || 'none'
+  const friendshipStatus = (friendshipStatusRaw) || 'none'
 
   // Mutations
   const sendFriendRequestMutation = useSendFriendRequest()

@@ -57,4 +57,14 @@ public interface IChatService
     /// Clears conversation history between two users
     /// </summary>
     Task ClearConversationHistoryAsync(Guid userId, Guid friendId);
+
+    /// <summary>
+    /// Gets conversation media filtered by type (photos, files, voice messages)
+    /// </summary>
+    Task<IReadOnlyList<ChatMessageDto>> GetConversationMediaAsync(Guid userId, Guid friendId, string mediaType, int page = 1, int pageSize = 50);
+
+    /// <summary>
+    /// Gets media counts for a conversation (photos, files, voice messages)
+    /// </summary>
+    Task<MediaCountsDto> GetConversationMediaCountsAsync(Guid userId, Guid friendId);
 }

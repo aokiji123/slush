@@ -261,4 +261,69 @@ public class ChatService : IChatService
         
         _logger.LogInformation("Conversation history cleared successfully between {UserId} and {FriendId}", userId, friendId);
     }
+
+    public async Task<IReadOnlyList<ChatMessageDto>> GetConversationMediaAsync(Guid userId, Guid friendId, string mediaType, int page = 1, int pageSize = 50)
+    {
+        _logger.LogInformation("Getting {MediaType} media for conversation between {UserId} and {FriendId}, page {Page}", 
+            mediaType, userId, friendId, page);
+
+        // Validate friendship
+        await ValidateFriendshipAsync(userId, friendId);
+
+        // Map media type string to ChatMessageType
+        ChatMessageType? messageType = mediaType.ToLower() switch
+        {
+            "photos" => ChatMessageType.Image,
+            "voice" => ChatMessageType.Audio,
+            "files" => null, // Files are documents with Text type but has attachments
+            _ => null
+        };
+
+        // Get all messages and filter
+        var messages = await _chatMessageRepository.GetConversationAsync(userId, friendId, 1, 1000);
+        
+        var filteredMessages = messages.Where(m =>
+        {
+            if (mediaType.ToLower() == "photos")
+                return m.MessageType == ChatMessageType.Image;
+            
+            if (mediaType.ToLower() == "voice")
+                return m.MessageType == ChatMessageType.Audio;
+            
+            if (mediaType.ToLower() == "files")
+                return m.MessageType == ChatMessageType.Text && 
+                       !string.IsNullOrEmpty(m.MediaUrl) && 
+                       !string.IsNullOrEmpty(m.FileName);
+            
+            return false;
+        }).ToList();
+
+        // Apply pagination
+        var paginatedMessages = filteredMessages
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return _mapper.Map<IReadOnlyList<ChatMessageDto>>(paginatedMessages);
+    }
+
+    public async Task<MediaCountsDto> GetConversationMediaCountsAsync(Guid userId, Guid friendId)
+    {
+        _logger.LogInformation("Getting media counts for conversation between {UserId} and {FriendId}", userId, friendId);
+
+        // Validate friendship
+        await ValidateFriendshipAsync(userId, friendId);
+
+        // Get all messages
+        var messages = await _chatMessageRepository.GetConversationAsync(userId, friendId, 1, 1000);
+
+        return new MediaCountsDto
+        {
+            PhotosCount = messages.Count(m => m.MessageType == ChatMessageType.Image),
+            VoiceCount = messages.Count(m => m.MessageType == ChatMessageType.Audio),
+            FilesCount = messages.Count(m => m.MessageType == ChatMessageType.Text && 
+                                            !string.IsNullOrEmpty(m.MediaUrl) && 
+                                            !string.IsNullOrEmpty(m.FileName))
+        };
+    }
 }

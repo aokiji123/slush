@@ -6,6 +6,7 @@ import type {
   SendMediaMessageDto,
   FileUploadDto,
   ChatApiResponse,
+  MediaCountsDto,
 } from './types/chat'
 
 // Get all conversations for the current user
@@ -130,4 +131,37 @@ export const clearConversationHistory = async (friendId: string): Promise<void> 
   if (!data.success) {
     throw new Error(data.message || 'Failed to clear conversation history')
   }
+}
+
+// Get conversation media filtered by type
+export const getConversationMedia = async (
+  friendId: string,
+  mediaType: string,
+  page: number = 1,
+  pageSize: number = 50
+): Promise<ChatMessageDto[]> => {
+  const { data } = await axiosInstance.get<ChatApiResponse<ChatMessageDto[]>>(
+    `/chat/messages/${friendId}/media?mediaType=${mediaType}&page=${page}&pageSize=${pageSize}`
+  )
+  
+  if (!data.success || !data.data) {
+    throw new Error(data.message || 'Failed to fetch conversation media')
+  }
+  
+  return data.data
+}
+
+// Get media counts for a conversation
+export const getConversationMediaCounts = async (
+  friendId: string
+): Promise<MediaCountsDto> => {
+  const { data } = await axiosInstance.get<ChatApiResponse<MediaCountsDto>>(
+    `/chat/messages/${friendId}/media/counts`
+  )
+  
+  if (!data.success || !data.data) {
+    throw new Error(data.message || 'Failed to fetch media counts')
+  }
+  
+  return data.data
 }

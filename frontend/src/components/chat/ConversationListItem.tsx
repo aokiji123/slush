@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDistanceToNow } from 'date-fns'
 import { uk } from 'date-fns/locale'
 import { OptimizedImage } from '../OptimizedImage'
@@ -15,6 +16,8 @@ export const ConversationListItem = memo<ConversationListItemProps>(({
   isActive = false,
   onClick,
 }) => {
+  const { t } = useTranslation('chat')
+  
   const handleClick = useCallback(() => {
     onClick(conversation)
   }, [conversation, onClick])
@@ -34,7 +37,7 @@ export const ConversationListItem = memo<ConversationListItemProps>(({
 
   const getLastMessagePreview = useCallback(() => {
     if (!conversation.lastMessage) {
-      return 'Немає повідомлень'
+      return t('startChatting')
     }
 
     const { lastMessage } = conversation

@@ -50,3 +50,10 @@ public enum ChatMessageTypeDto
     Video = 2,
     Audio = 3
 }
+
+public class MediaCountsDto
+{
+    public int PhotosCount { get; set; }
+    public int FilesCount { get; set; }
+    public int VoiceCount { get; set; }
+}

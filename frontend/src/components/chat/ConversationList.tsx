@@ -4,11 +4,14 @@ import { ConversationListItem } from './ConversationListItem'
 import { EmptyState } from '../EmptyState'
 import { ErrorState } from '../ErrorState'
 import { useConversations } from '@/api/queries/useChat'
+import { useFriends } from '@/api/queries/useFriendship'
+import { useAuthenticatedUser } from '@/api/queries/useUser'
 import type { ChatConversationDto } from '@/api/types/chat'
 
 interface ConversationListProps {
   selectedConversationId?: string
   onConversationSelect: (conversation: ChatConversationDto) => void
+  onFriendSelect?: (conversation: ChatConversationDto) => void
   searchQuery?: string
   onSearchChange?: (query: string) => void
 }
@@ -16,6 +19,7 @@ interface ConversationListProps {
 export const ConversationList = memo<ConversationListProps>(({
   selectedConversationId,
   onConversationSelect,
+  onFriendSelect,
   searchQuery = '',
   onSearchChange,
 }) => {
@@ -23,22 +27,65 @@ export const ConversationList = memo<ConversationListProps>(({
   const [page] = useState(1)
   const pageSize = 20
 
+  // Get authenticated user
+  const { data: authenticatedUser } = useAuthenticatedUser()
+
   const {
     data: conversations = [],
-    isLoading,
-    error,
+    isLoading: isLoadingConversations,
+    error: conversationsError,
     refetch,
   } = useConversations(page, pageSize)
 
-  // Filter conversations based on search query
-  const filteredConversations = useMemo(() => {
-    if (!searchQuery.trim()) return conversations
+  // Get all friends
+  const {
+    data: friends = [],
+    isLoading: isLoadingFriends,
+    error: friendsError,
+  } = useFriends(authenticatedUser?.id || '')
 
-    return conversations.filter(conversation =>
-      conversation.friendNickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conversation.lastMessage?.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  const isLoading = isLoadingConversations || isLoadingFriends
+  const error = conversationsError || friendsError
+
+  // Merge friends and conversations into unified conversation-like objects
+  const mergedConversations = useMemo(() => {
+    const conversationMap = new Map<string, ChatConversationDto>()
+    
+    // Add existing conversations
+    conversations.forEach(conv => {
+      conversationMap.set(conv.friendId, conv)
+    })
+
+    // Add friends without conversations as conversation-like objects
+    friends.forEach(friend => {
+      if (!conversationMap.has(friend.userId) && !conversationMap.has(friend.id)) {
+        const friendId = friend.userId
+        const mockConversation: ChatConversationDto = {
+          friendId: friendId,
+          friendNickname: friend.nickname,
+          friendAvatar: friend.avatar,
+          friendIsOnline: friend.isOnline,
+          unreadCount: 0,
+          lastActivityAt: friend.lastSeenAt || new Date().toISOString(),
+          lastMessage: undefined, // No messages yet
+        }
+        conversationMap.set(friendId, mockConversation)
+      }
+    })
+
+    return Array.from(conversationMap.values())
+  }, [conversations, friends])
+
+  // Filter merged conversations based on search query
+  const filteredConversations = useMemo(() => {
+    if (!searchQuery.trim()) return mergedConversations
+
+    const queryLower = searchQuery.toLowerCase()
+    return mergedConversations.filter(conversation =>
+      conversation.friendNickname.toLowerCase().includes(queryLower) ||
+      conversation.lastMessage?.content?.toLowerCase().includes(queryLower)
     )
-  }, [conversations, searchQuery])
+  }, [mergedConversations, searchQuery])
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange?.(e.target.value)
@@ -47,6 +94,7 @@ export const ConversationList = memo<ConversationListProps>(({
   const handleConversationClick = useCallback((conversation: ChatConversationDto) => {
     onConversationSelect(conversation)
   }, [onConversationSelect])
+
 
   if (isLoading) {
     return (
@@ -121,14 +169,25 @@ export const ConversationList = memo<ConversationListProps>(({
           </div>
         ) : (
           <div className="space-y-[20px]">
-            {filteredConversations.map((conversation) => (
-              <ConversationListItem
-                key={conversation.friendId}
-                conversation={conversation}
-                isActive={selectedConversationId === conversation.friendId}
-                onClick={handleConversationClick}
-              />
-            ))}
+              {filteredConversations.map((conversation) => {
+              // Check if this conversation has messages (lastMessage is defined)
+              const hasMessages = !!conversation.lastMessage
+              
+              return (
+                <ConversationListItem
+                  key={conversation.friendId}
+                  conversation={conversation}
+                  isActive={selectedConversationId === conversation.friendId}
+                  onClick={hasMessages ? handleConversationClick : () => {
+                    if (onFriendSelect) {
+                      onFriendSelect(conversation)
+                    } else {
+                      handleConversationClick(conversation)
+                    }
+                  }}
+                />
+              )
+            })}
           </div>
         )}
       </div>
