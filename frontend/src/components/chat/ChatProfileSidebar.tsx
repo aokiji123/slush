@@ -2,22 +2,30 @@ import { memo, useState } from 'react'
 import type { ChatConversationDto } from '@/api/types/chat'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useRemoveFriend, useBlockUser } from '@/api/queries/useFriendship'
-import { useClearConversationHistory } from '@/api/queries/useChat'
+import { useClearConversationHistory, useConversationMediaCounts } from '@/api/queries/useChat'
 import { useToastStore } from '@/lib/toast-store'
 import { ReportUserModal } from '@/components/modals/ReportUserModal'
+import { RemoveFriendModal } from '@/components/modals/RemoveFriendModal'
+import { MediaModal } from './MediaModal'
 
 interface ChatProfileSidebarProps {
   conversation: ChatConversationDto | null
   isOnline: boolean
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
   conversation,
-  isOnline
+  isOnline,
+  isOpen = true,
+  onClose
 }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [activeTab, setActiveTab] = useState<'photos' | 'files' | 'voice'>('photos')
+  const [selectedMediaType, setSelectedMediaType] = useState<'photos' | 'files' | 'voice' | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
+  const [showRemoveFriendModal, setShowRemoveFriendModal] = useState(false)
+  const [showMediaModal, setShowMediaModal] = useState(false)
 
   const { data: currentUser } = useAuthenticatedUser()
   const { success: showSuccess, error: showError } = useToastStore()
@@ -26,19 +34,31 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
   const blockUserMutation = useBlockUser()
   const clearHistoryMutation = useClearConversationHistory()
 
-  const handleRemoveFriend = async () => {
+  // Fetch media counts
+  const { data: mediaCounts, isLoading: isLoadingCounts } = useConversationMediaCounts(
+    conversation?.friendId || '',
+    !!conversation
+  )
+
+  const handleMediaTabClick = (type: 'photos' | 'files' | 'voice') => {
+    setSelectedMediaType(type)
+    setShowMediaModal(true)
+  }
+
+  const handleRemoveFriend = () => {
+    setShowRemoveFriendModal(true)
+  }
+
+  const handleConfirmRemoveFriend = async () => {
     if (!conversation?.friendId || !currentUser) return
     
-    if (!confirm('Ви впевнені, що хочете видалити цього користувача з друзів?')) {
-      return
-    }
-
     try {
       await removeFriendMutation.mutateAsync({
         senderId: currentUser.id,
         receiverId: conversation.friendId
       })
       showSuccess('Користувача видалено з друзів')
+      setShowRemoveFriendModal(false)
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Не вдалося видалити друга'
       showError(errorMessage)
@@ -86,8 +106,43 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
   }
 
   return (
-    <div className="w-[348px] bg-[#004252] rounded-[20px] flex flex-col overflow-hidden">
-      {/* Profile Header */}
+    <>
+      {/* Backdrop for mobile overlay */}
+      {onClose && isOpen && (
+        <div
+          className="xl:hidden fixed inset-0 bg-[rgba(0,20,31,0.9)] backdrop-blur-sm z-40"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        w-[348px] bg-[#004252] rounded-[20px] flex flex-col overflow-y-auto
+        xl:relative xl:max-h-full
+        ${onClose ? 'fixed right-0 top-0 bottom-0 z-50 xl:static' : ''}
+        ${onClose && !isOpen ? 'hidden' : ''}
+      `}>
+        {/* Close Button for Mobile */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="xl:hidden absolute top-[16px] right-[16px] w-[40px] h-[40px] flex items-center justify-center bg-[rgba(4,96,117,0.3)] hover:bg-[rgba(4,96,117,0.5)] rounded-full transition-colors z-10"
+            aria-label="Close profile"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="#f1fdff"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+
+        {/* Profile Header */}
       <div className="relative h-[308px] overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -153,9 +208,10 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
 
         {/* Media Tabs */}
         <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-          <div className={`box-border content-stretch flex items-center justify-between px-[20px] py-[8px] relative rounded-[12px] shrink-0 w-full ${
-            activeTab === 'photos' ? 'bg-[rgba(55,195,255,0.25)]' : ''
-          }`}>
+          <button
+            onClick={() => handleMediaTabClick('photos')}
+            className="box-border content-stretch flex items-center justify-between px-[20px] py-[8px] relative rounded-[12px] shrink-0 w-full transition-colors hover:bg-[rgba(55,195,255,0.1)]"
+          >
             <div className="content-stretch flex gap-[12px] items-center relative shrink-0">
               <div className="overflow-clip relative shrink-0 size-[24px]">
                 <div className="absolute inset-[8.33%_7.92%_8.33%_8.33%]">
@@ -185,16 +241,14 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
             </div>
             <div className="bg-[rgba(55,195,255,0.25)] box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative rounded-[20px] shrink-0">
               <p className="font-['Artifakt_Element:Bold',sans-serif] leading-[1.15] not-italic relative shrink-0 text-[14px] text-[rgba(204,248,255,0.65)] tracking-[-0.14px]">
-                100
+                {isLoadingCounts ? '...' : (mediaCounts?.photosCount || 0)}
               </p>
             </div>
-          </div>
+          </button>
 
           <button
-            onClick={() => setActiveTab('files')}
-            className={`w-full flex items-center justify-between px-[20px] py-[8px] rounded-[12px] transition-colors ${
-              activeTab === 'files' ? 'bg-[rgba(55,195,255,0.25)]' : 'hover:bg-[rgba(55,195,255,0.1)]'
-            }`}
+            onClick={() => handleMediaTabClick('files')}
+            className="w-full flex items-center justify-between px-[20px] py-[8px] rounded-[12px] transition-colors hover:bg-[rgba(55,195,255,0.1)]"
           >
             <div className="flex items-center gap-[12px]">
               <div className="w-[24px] h-[24px] flex items-center justify-center">
@@ -219,16 +273,14 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
             </div>
             <div className="bg-[rgba(55,195,255,0.25)] px-[12px] py-[4px] rounded-[20px]">
               <span className="text-[rgba(204,248,255,0.65)] text-[14px] font-['Artifakt_Element'] font-bold">
-                100
+                {isLoadingCounts ? '...' : (mediaCounts?.filesCount || 0)}
               </span>
             </div>
           </button>
 
           <button
-            onClick={() => setActiveTab('voice')}
-            className={`w-full flex items-center justify-between px-[20px] py-[8px] rounded-[12px] transition-colors ${
-              activeTab === 'voice' ? 'bg-[rgba(55,195,255,0.25)]' : 'hover:bg-[rgba(55,195,255,0.1)]'
-            }`}
+            onClick={() => handleMediaTabClick('voice')}
+            className="w-full flex items-center justify-between px-[20px] py-[8px] rounded-[12px] transition-colors hover:bg-[rgba(55,195,255,0.1)]"
           >
             <div className="flex items-center gap-[12px]">
               <div className="w-[24px] h-[24px] flex items-center justify-center">
@@ -259,7 +311,7 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
             </div>
             <div className="bg-[rgba(55,195,255,0.25)] px-[12px] py-[4px] rounded-[20px]">
               <span className="text-[rgba(204,248,255,0.65)] text-[14px] font-['Artifakt_Element'] font-bold">
-                100
+                {isLoadingCounts ? '...' : (mediaCounts?.voiceCount || 0)}
               </span>
             </div>
           </button>
@@ -359,7 +411,27 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
         reportedUserId={conversation.friendId}
         reportedUserNickname={conversation.friendNickname || 'Користувач'}
       />
-    </div>
+
+      {/* Remove Friend Modal */}
+      <RemoveFriendModal
+        isOpen={showRemoveFriendModal}
+        onClose={() => setShowRemoveFriendModal(false)}
+        onConfirm={handleConfirmRemoveFriend}
+        friendNickname={conversation.friendNickname || 'Користувач'}
+        isRemoving={removeFriendMutation.isPending}
+      />
+
+      {/* Media Modal */}
+      {showMediaModal && (
+        <MediaModal
+          isOpen={showMediaModal}
+          onClose={() => setShowMediaModal(false)}
+          mediaType={selectedMediaType || 'photos'}
+          friendId={conversation.friendId}
+        />
+      )}
+      </div>
+    </>
   )
 })
 

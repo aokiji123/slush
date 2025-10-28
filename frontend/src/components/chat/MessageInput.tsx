@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useCallback } from 'react'
+import { EmojiPicker } from './EmojiPicker'
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void
@@ -17,9 +18,11 @@ export const MessageInput = memo<MessageInputProps>(({
 }) => {
   const [message, setMessage] = useState('')
   const [isRecording, setIsRecording] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -100,18 +103,39 @@ export const MessageInput = memo<MessageInputProps>(({
     }
   }, [disabled, isRecording, mediaRecorder, onSendFile, onSendVoice])
 
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      const cursorPosition = textarea.selectionStart || 0
+      const newMessage = message.slice(0, cursorPosition) + emoji + message.slice(cursorPosition)
+      setMessage(newMessage)
+      
+      // Set cursor position after emoji
+      setTimeout(() => {
+        textarea.focus()
+        textarea.setSelectionRange(cursorPosition + emoji.length, cursorPosition + emoji.length)
+      }, 0)
+    }
+  }, [message])
+
+  const handleEmojiButtonClick = useCallback(() => {
+    setShowEmojiPicker(!showEmojiPicker)
+  }, [showEmojiPicker])
+
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex items-center gap-[12px] w-full">
+      <form onSubmit={handleSubmit} className="flex items-center gap-[12px] w-full relative">
         {/* Left side buttons */}
         <div className="flex items-center gap-[8px]">
           {/* Emoji button */}
-          <button
-            type="button"
-            disabled={disabled}
-            className="w-[24px] h-[24px] flex items-center justify-center text-[#f1fdff] hover:text-[#24e5c2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Emoji"
-          >
+          <div className="relative">
+            <button
+              type="button"
+              onClick={handleEmojiButtonClick}
+              disabled={disabled}
+              className="w-[24px] h-[24px] flex items-center justify-center text-[#f1fdff] hover:text-[#24e5c2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Emoji"
+            >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
                 d="M8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1Z"
@@ -132,7 +156,13 @@ export const MessageInput = memo<MessageInputProps>(({
                 fill="currentColor"
               />
             </svg>
-          </button>
+            </button>
+            <EmojiPicker 
+              isOpen={showEmojiPicker}
+              onEmojiSelect={handleEmojiSelect}
+              onClose={() => setShowEmojiPicker(false)}
+            />
+          </div>
 
           {/* File attachment button */}
           <button
@@ -156,6 +186,7 @@ export const MessageInput = memo<MessageInputProps>(({
         {/* Text input */}
         <div className="flex-1 bg-[rgba(0,20,31,0.4)] border border-[#046075] rounded-[22px] px-[16px] py-[10px]">
           <textarea
+            ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}

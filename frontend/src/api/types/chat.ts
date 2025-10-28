@@ -85,3 +85,22 @@ export interface ChatApiResponse<T> {
   message?: string
   errors?: string[]
 }
+
+export enum MediaType {
+  Photos = 'photos',
+  Files = 'files',
+  Voice = 'voice'
+}
+
+export interface MediaCountsDto {
+  photosCount: number
+  filesCount: number
+  voiceCount: number
+}
+
+export interface ConversationMediaDto {
+  messages: ChatMessageDto[]
+  totalCount: number
+  page: number
+  pageSize: number
+}

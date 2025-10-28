@@ -3,11 +3,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ConversationList } from '@/components/chat/ConversationList'
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState'
+import { ChatHeader } from '@/components/chat/ChatHeader'
 import { ChatProfileSidebar } from '@/components/chat/ChatProfileSidebar'
 import { MessageBubble } from '@/components/chat/MessageBubble'
 import { MessageInput } from '@/components/chat/MessageInput'
+import { MessageSkeleton } from '@/components/chat/MessageSkeleton'
+import { ConnectionStatus } from '@/components/chat/ConnectionStatus'
 import { DateDivider } from '@/components/chat/DateDivider'
 import { ImageLightbox } from '@/components/chat/ImageLightbox'
+import { SendHelloButton } from '@/components/chat/SendHelloButton'
 import { useSignalRContext } from '@/providers/SignalRProvider'
 import { uploadChatMedia } from '@/api/chatAPI'
 import { useConversationHistory } from '@/api/queries/useChat'
@@ -25,6 +29,8 @@ function ChatPage() {
   const [isUserScrolledUp, setIsUserScrolledUp] = useState(false)
   const [onlineFriends, setOnlineFriends] = useState<string[]>([])
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+  const [displayMessages, setDisplayMessages] = useState<ChatMessageDto[]>([])
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const loadedConversationRef = useRef<string | null>(null)
@@ -50,20 +56,58 @@ function ChatPage() {
     setSearchQuery(query)
   }, [])
 
+  const handleSendHello = useCallback(async () => {
+    if (!selectedConversation || !isConnected) return
+    
+    const helloMessage = 'Hello! 👋'
+    await sendTextMessage(selectedConversation.friendId, helloMessage)
+  }, [selectedConversation, isConnected, sendTextMessage])
+
   // Initialize messages from API data when conversation changes
   useEffect(() => {
-    if (selectedConversation && conversationMessages.length > 0) {
+    if (selectedConversation) {
       const conversationId = selectedConversation.friendId
-      // Only initialize if we haven't loaded this conversation yet
+      // Clear messages if switching to different conversation
       if (loadedConversationRef.current !== conversationId) {
-        setMessages(conversationMessages)
+        if (conversationMessages.length > 0) {
+          setMessages(conversationMessages)
+        } else if (!isLoadingMessages) {
+          // Only clear messages if not loading
+          setMessages([])
+        }
         loadedConversationRef.current = conversationId
+      } else if (loadedConversationRef.current === conversationId && conversationMessages.length > 0) {
+        // Update messages if they've loaded for current conversation
+        setMessages(conversationMessages)
       }
-    } else if (!selectedConversation) {
+    } else {
       setMessages([])
+      setDisplayMessages([])
       loadedConversationRef.current = null
     }
-  }, [selectedConversation?.friendId, conversationMessages.length])
+  }, [selectedConversation?.friendId, conversationMessages, isLoadingMessages])
+
+  // Update display messages only when fully loaded
+  useEffect(() => {
+    if (!isLoadingMessages && messages.length > 0) {
+      setDisplayMessages(messages)
+    }
+  }, [isLoadingMessages, messages])
+
+  // Auto-scroll when new messages arrive (only if user is at bottom)
+  useEffect(() => {
+    if (messages.length > 0) {
+      const container = messagesContainerRef.current
+      if (container) {
+        // Always scroll to bottom on initial load or when not scrolled up
+        if (!isUserScrolledUp || loadedConversationRef.current !== selectedConversation?.friendId) {
+          requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight
+          })
+        }
+      }
+    }
+  }, [messages.length, isUserScrolledUp, selectedConversation?.friendId])
 
   // Helper function to determine message type from MIME type
   const getMessageType = useCallback((contentType: string): number => {
@@ -220,12 +264,18 @@ function ChatPage() {
     return () => container.removeEventListener('scroll', handleScroll)
   }, [sortedMessages.length]) // Re-run when messages change
 
-  const groupedMessages = sortedMessages.reduce((groups: Record<string, ChatMessageDto[]>, message: ChatMessageDto) => {
-    const date = new Date(message.createdAt).toDateString()
-    groups[date] = groups[date] ?? []
-    groups[date].push(message)
-    return groups
-  }, {} as Record<string, ChatMessageDto[]>)
+  // Sort and group display messages
+  const groupedDisplayMessages = useMemo(() => {
+    const sorted = [...displayMessages].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+    return sorted.reduce((groups: Record<string, ChatMessageDto[]>, message: ChatMessageDto) => {
+      const date = new Date(message.createdAt).toDateString()
+      groups[date] = groups[date] ?? []
+      groups[date].push(message)
+      return groups
+    }, {} as Record<string, ChatMessageDto[]>)
+  }, [displayMessages])
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!selectedConversation) return
@@ -357,12 +407,21 @@ function ChatPage() {
     setIsUserScrolledUp(false)
   }, [])
 
+  const handleToggleProfile = useCallback(() => {
+    setIsProfileOpen(prev => !prev)
+  }, [])
+
+  const handleCloseProfile = useCallback(() => {
+    setIsProfileOpen(false)
+  }, [])
+
 
   return (
     <ErrorBoundary>
-      <div className="h-[calc(100vh-90px)] bg-[#00141f] flex">
+      <ConnectionStatus isConnected={isConnected} />
+      <div className="fixed inset-x-0 top-[90px] bottom-0 bg-[#00141f] flex overflow-hidden">
         {/* Left Sidebar - Conversation List */}
-        <div className="w-[328px] bg-[#004252] flex flex-col px-[20px] py-[16px]">
+        <div className="hidden lg:flex w-[328px] bg-[#004252] flex-col px-[20px] py-[16px] overflow-hidden">
           <ConversationList
             selectedConversationId={selectedConversation?.friendId}
             onConversationSelect={handleConversationSelect}
@@ -372,42 +431,65 @@ function ChatPage() {
         </div>
 
         {/* Center Area - Chat Messages */}
-        <div className="flex-1 flex flex-col bg-[#00141f]">
+        <div className="flex-1 flex flex-col bg-[#00141f] overflow-hidden">
           {selectedConversation ? (
             <>
+              {/* Chat Header (mobile only) */}
+              <div className="xl:hidden">
+                <ChatHeader
+                  conversation={selectedConversation}
+                  isOnline={onlineFriends.includes(selectedConversation.friendId)}
+                  onToggleProfile={handleToggleProfile}
+                />
+              </div>
+
               {/* Messages Area */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-[20px] space-y-[12px] relative">
-                {isLoadingMessages ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-[#f1fdff] text-[16px]">Loading messages...</div>
-                  </div>
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-[12px] md:p-[20px] flex flex-col [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-background-16)] [&::-webkit-scrollbar-thumb]:rounded-[5px] [&::-webkit-scrollbar-thumb]:hover:bg-[var(--color-background-17)]">
+                {isLoadingMessages && displayMessages.length === 0 ? (
+                  <>
+                    {/* Spacer pushes skeleton to bottom */}
+                    <div className="flex-1 min-h-0" />
+                    <MessageSkeleton count={5} />
+                  </>
                 ) : messagesError ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-red-400 text-[16px]">Failed to load messages</div>
                   </div>
-                ) : Object.entries(groupedMessages).length === 0 ? (
+                ) : displayMessages.length === 0 && !selectedConversation.lastMessage ? (
+                  <SendHelloButton
+                    friendNickname={selectedConversation.friendNickname}
+                    onSendHello={handleSendHello}
+                    isConnected={isConnected}
+                  />
+                ) : displayMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-[#f1fdff] text-[16px]">No messages yet</div>
                   </div>
                 ) : (
                   <>
-                    {Object.entries(groupedMessages).map(([date, dateMessages]) => (
-                      <div key={date}>
-                        <DateDivider date={dateMessages[0].createdAt} />
-                        <div className="space-y-[12px]">
-                          {dateMessages.map((message: ChatMessageDto) => (
-                            <MessageBubble
-                              key={message.id}
-                              message={message}
-                              isOwn={message.senderId !== selectedConversation.friendId}
-                              onImageClick={handleImageClick}
-                              onFileDownload={handleFileDownload}
-                            />
-                          ))}
+                    {/* Spacer pushes messages to bottom */}
+                    <div className="flex-1 min-h-0" />
+                    
+                    {/* Messages always positioned at bottom */}
+                    <div className="space-y-[12px]">
+                      {Object.entries(groupedDisplayMessages).map(([date, dateMessages]) => (
+                        <div key={date}>
+                          <DateDivider date={dateMessages[0].createdAt} />
+                          <div className="space-y-[12px]">
+                            {dateMessages.map((message: ChatMessageDto) => (
+                              <MessageBubble
+                                key={message.id}
+                                message={message}
+                                isOwn={message.senderId !== selectedConversation.friendId}
+                                onImageClick={handleImageClick}
+                                onFileDownload={handleFileDownload}
+                              />
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
                   </>
                 )}
                 
@@ -415,7 +497,7 @@ function ChatPage() {
                 {isUserScrolledUp && (
                   <button
                     onClick={scrollToBottom}
-                    className="fixed bottom-[120px] right-[calc(348px+40px)] w-[48px] h-[48px] bg-[#24e5c2] rounded-full flex items-center justify-center text-[#00141f] hover:bg-[#3de6c7] transition-colors shadow-lg z-10"
+                    className="absolute bottom-[120px] right-[20px] xl:right-[calc(348px+20px)] w-[48px] h-[48px] bg-[#24e5c2] rounded-full flex items-center justify-center text-[#00141f] hover:bg-[#3de6c7] transition-colors shadow-lg z-10"
                     title="Scroll to bottom"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -426,13 +508,13 @@ function ChatPage() {
               </div>
 
               {/* Message Input */}
-              <div className="p-[20px]">
+              <div className="p-[12px] md:p-[20px]">
                 <div className="bg-[#004252] rounded-[20px] px-[16px] py-[5px]">
                   <MessageInput
                     onSendMessage={handleSendMessage}
                     onSendFile={handleSendFile}
                     onSendVoice={handleSendVoice}
-                    disabled={!isConnected || isLoadingMessages}
+                    disabled={!isConnected}
                   />
                 </div>
               </div>
@@ -444,12 +526,23 @@ function ChatPage() {
 
         {/* Right Sidebar - Profile Panel */}
         {selectedConversation && (
-          <div className="w-[348px] bg-[#00141f] flex items-start justify-center pt-[38px]">
+          <>
+            {/* Desktop: Always visible on xl+ screens */}
+            <div className="hidden xl:flex w-[348px] bg-[#00141f] items-start justify-center pt-[38px]">
+              <ChatProfileSidebar
+                conversation={selectedConversation}
+                isOnline={onlineFriends.includes(selectedConversation.friendId)}
+              />
+            </div>
+
+            {/* Mobile: Overlay sidebar */}
             <ChatProfileSidebar
               conversation={selectedConversation}
               isOnline={onlineFriends.includes(selectedConversation.friendId)}
+              isOpen={isProfileOpen}
+              onClose={handleCloseProfile}
             />
-          </div>
+          </>
         )}
       </div>
 

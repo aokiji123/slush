@@ -363,4 +363,78 @@ public class ChatController : ControllerBase
             return StatusCode(500, ApiResponse<object>.CreateError("Failed to clear conversation history"));
         }
     }
+
+    /// <summary>
+    /// Gets media (photos, files, or voice messages) from a conversation
+    /// </summary>
+    /// <param name="friendId">Friend's user ID</param>
+    /// <param name="mediaType">Type of media: photos, files, or voice</param>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 50)</param>
+    /// <returns>List of media messages</returns>
+    [HttpGet("messages/{friendId}/media")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ChatMessageDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<ChatMessageDto>>>> GetConversationMedia(
+        Guid friendId,
+        [FromQuery] string mediaType,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
+    {
+        try
+        {
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
+            _logger.LogInformation("Getting {MediaType} media for conversation between {UserId} and {FriendId}, page {Page}", 
+                mediaType, userId, friendId, page);
+
+            var messages = await _chatService.GetConversationMediaAsync(userId, friendId, mediaType, page, pageSize);
+            return Ok(ApiResponse<IReadOnlyList<ChatMessageDto>>.CreateSuccess(messages));
+        }
+        catch (UnauthorizedException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access to conversation media between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return Unauthorized(ApiResponse<IReadOnlyList<ChatMessageDto>>.CreateError(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting conversation media between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return StatusCode(500, ApiResponse<IReadOnlyList<ChatMessageDto>>.CreateError("Failed to get conversation media"));
+        }
+    }
+
+    /// <summary>
+    /// Gets media counts (photos, files, voice messages) for a conversation
+    /// </summary>
+    /// <param name="friendId">Friend's user ID</param>
+    /// <returns>Media counts</returns>
+    [HttpGet("messages/{friendId}/media/counts")]
+    [ProducesResponseType(typeof(ApiResponse<MediaCountsDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<MediaCountsDto>>> GetConversationMediaCounts(Guid friendId)
+    {
+        try
+        {
+            var userId = ClaimsHelper.GetUserIdOrThrow(User);
+            _logger.LogInformation("Getting media counts for conversation between {UserId} and {FriendId}", userId, friendId);
+
+            var counts = await _chatService.GetConversationMediaCountsAsync(userId, friendId);
+            return Ok(ApiResponse<MediaCountsDto>.CreateSuccess(counts));
+        }
+        catch (UnauthorizedException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access to conversation media counts between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return Unauthorized(ApiResponse<MediaCountsDto>.CreateError(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting conversation media counts between {UserId} and {FriendId}", 
+                ClaimsHelper.GetUserId(User), friendId);
+            return StatusCode(500, ApiResponse<MediaCountsDto>.CreateError("Failed to get conversation media counts"));
+        }
+    }
 }

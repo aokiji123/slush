@@ -22,7 +22,7 @@ function RouteComponent() {
 
   const resetPasswordMutation = useResetPassword()
 
-  const email = ((location.search as any)?.email as string) || ''
+  const email = ((location.search)?.email as string) || ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

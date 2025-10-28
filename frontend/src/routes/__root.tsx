@@ -1,14 +1,21 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { Outlet, createRootRoute, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Footer, Header } from '@/components'
 
-export const Route = createRootRoute({
-  component: () => (
+function RootComponent() {
+  const location = useLocation()
+  const isChatPage = location.pathname === '/chat'
+  
+  return (
     <>
       <Header />
       <Outlet />
-      <Footer />
+      {!isChatPage && <Footer />}
       <TanStackRouterDevtools />
     </>
-  ),
+  )
+}
+
+export const Route = createRootRoute({
+  component: RootComponent,
 })

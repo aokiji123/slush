@@ -68,7 +68,7 @@ export const MessageBubble = memo<MessageBubbleProps>(({
   }
 
   const getBubbleClasses = () => {
-    const baseClasses = "max-w-[596px] px-[20px] py-[20px]"
+    const baseClasses = "max-w-[80%] md:max-w-[596px] px-[20px] py-[20px]"
     
     if (isOwn) {
       return `${baseClasses} bg-[rgba(36,229,194,0.2)] rounded-tl-[20px] rounded-tr-[20px] rounded-bl-[20px] rounded-br-[6px]`
@@ -134,7 +134,11 @@ export const MessageBubble = memo<MessageBubbleProps>(({
             )}
             {message.mediaUrl && (
               <div 
-                className="cursor-pointer rounded-[8px] overflow-hidden max-w-[400px]"
+                className={`cursor-pointer overflow-hidden ${
+                  isOwn 
+                    ? 'rounded-bl-[20px] rounded-br-[20px] rounded-tl-[20px] rounded-tr-[6px]'
+                    : 'rounded-bl-[6px] rounded-br-[20px] rounded-tl-[20px] rounded-tr-[20px]'
+                } max-w-[596px]`}
                 onClick={handleImageClick}
               >
                 <img
@@ -156,7 +160,11 @@ export const MessageBubble = memo<MessageBubbleProps>(({
               </p>
             )}
             {message.mediaUrl && (
-              <div className="relative rounded-[8px] overflow-hidden max-w-[400px]">
+              <div className={`relative overflow-hidden max-w-[596px] ${
+                isOwn 
+                  ? 'rounded-bl-[20px] rounded-br-[20px] rounded-tl-[20px] rounded-tr-[6px]'
+                  : 'rounded-bl-[6px] rounded-br-[20px] rounded-tl-[20px] rounded-tr-[20px]'
+              }`}>
                 <video
                   src={message.mediaUrl}
                   className="w-full h-auto"
@@ -169,18 +177,25 @@ export const MessageBubble = memo<MessageBubbleProps>(({
         )
 
       case ChatMessageTypeDto.Audio:
+        // Voice messages don't need the bubble wrapper - they are the bubble
+        if (message.mediaUrl) {
+          return (
+            <VoiceMessagePlayer
+              audioUrl={message.mediaUrl}
+              duration={message.fileSize ? Math.floor(message.fileSize / 1000) : 0}
+              className="max-w-[596px]"
+              isOwn={isOwn}
+            />
+          )
+        }
+        
+        // Fallback for text-only audio messages
         return (
           <div className="space-y-[10px]">
             {message.content && (
               <p className="text-[#f1fdff] text-[16px] font-['Artifakt_Element'] leading-[1.5] whitespace-pre-wrap">
                 {message.content}
               </p>
-            )}
-            {message.mediaUrl && (
-              <VoiceMessagePlayer
-                audioUrl={message.mediaUrl}
-                duration={message.fileSize ? Math.floor(message.fileSize / 1000) : 0}
-              />
             )}
           </div>
         )
@@ -230,6 +245,27 @@ export const MessageBubble = memo<MessageBubbleProps>(({
           </p>
         )
     }
+  }
+
+  // Voice messages are rendered differently - they are the bubble themselves
+  if (message.messageType === ChatMessageTypeDto.Audio && message.mediaUrl) {
+    return (
+      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} gap-[14px] items-end`}>
+        {!isOwn && (
+          <p className="text-[rgba(204,248,255,0.65)] text-[14px] font-['Artifakt_Element'] whitespace-nowrap">
+            {formatTime(message.createdAt)}
+          </p>
+        )}
+        
+        {renderContent()}
+        
+        {isOwn && (
+          <p className="text-[rgba(204,248,255,0.65)] text-[14px] font-['Artifakt_Element'] whitespace-nowrap">
+            {formatTime(message.createdAt)}
+          </p>
+        )}
+      </div>
+    )
   }
 
   return (

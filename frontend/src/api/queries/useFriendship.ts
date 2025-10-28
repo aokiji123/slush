@@ -195,6 +195,8 @@ export function useRemoveFriend() {
       // Invalidate all friend-related queries
       queryClient.invalidateQueries({ queryKey: ['friends'] })
       queryClient.invalidateQueries({ queryKey: ['onlineFriends'] })
+      // Invalidate chat conversations to remove the conversation from the list
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] })
     },
   })
 }

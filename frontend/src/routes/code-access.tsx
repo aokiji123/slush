@@ -24,7 +24,7 @@ function RouteComponent() {
   const verifyCodeMutation = useVerifyCode()
   const resendCodeMutation = useResendVerificationCode()
 
-  const email = ((location.search as any)?.email as string) || ''
+  const email = ((location.search)?.email as string) || ''
 
   useEffect(() => {
     if (!email) {
