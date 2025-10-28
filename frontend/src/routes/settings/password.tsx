@@ -12,7 +12,7 @@ function RouteComponent() {
   const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const resetPasswordMutation = useResetPassword()
-  
+
   const [formData, setFormData] = useState({
     oldPassword: '',
     newPassword: '',
@@ -23,17 +23,19 @@ function RouteComponent() {
   const validatePassword = (password: string) => {
     const errors = []
     if (password.length < 7) errors.push(t('password.validation.minLength'))
-    if (!/[a-zA-Z]/.test(password)) errors.push(t('password.validation.atLeastOneLetter'))
-    if (!/\d/.test(password)) errors.push(t('password.validation.atLeastOneDigit'))
+    if (!/[a-zA-Z]/.test(password))
+      errors.push(t('password.validation.atLeastOneLetter'))
+    if (!/\d/.test(password))
+      errors.push(t('password.validation.atLeastOneDigit'))
     if (/\s/.test(password)) errors.push(t('password.validation.noSpaces'))
     return errors
   }
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setErrors((prev) => ({ ...prev, [field]: '' }))
     }
   }
 
@@ -54,7 +56,9 @@ function RouteComponent() {
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t('password.validation.confirmPasswordRequired')
+      newErrors.confirmPassword = t(
+        'password.validation.confirmPasswordRequired',
+      )
     } else if (formData.newPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = t('password.validation.passwordsNotMatch')
     }
@@ -72,7 +76,7 @@ function RouteComponent() {
         newPassword: formData.newPassword,
         newPasswordConfirmed: formData.confirmPassword,
       })
-      
+
       toast.success(t('password.successMessage'))
       setFormData({ oldPassword: '', newPassword: '', confirmPassword: '' })
     } catch (error) {
@@ -84,9 +88,11 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">{t('password.loginRequired')}</p>
-          <a 
-            href="/login" 
+          <p className="text-white text-lg mb-4">
+            {t('password.loginRequired')}
+          </p>
+          <a
+            href="/login"
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
             {t('password.loginButton')}
@@ -108,11 +114,11 @@ function RouteComponent() {
 
   return (
     <div className="flex items-center justify-center">
-      <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
+      <div className="w-full lg:w-[70%] xl:w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
         <p className="text-[24px] font-bold text-center font-manrope">
           {t('password.title')}
         </p>
-        
+
         <div className="bg-[var(--color-background-17)] rounded-[16px] py-[12px] px-[24px]">
           <ul className="flex flex-col gap-[4px] list-disc list-inside">
             <li>{t('password.requirements.noRecentPasswords')}</li>
@@ -156,26 +162,31 @@ function RouteComponent() {
             {formData.newPassword && (
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-300 rounded-full h-2">
-                  <div 
+                  <div
                     className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                     style={{ width: `${passwordStrength.strength}%` }}
                   />
                 </div>
                 <span className="text-sm text-gray-400">
-                  {passwordStrength.strength === 100 ? t('password.strength.strong') : 
-                   passwordStrength.strength >= 60 ? t('password.strength.medium') : t('password.strength.weak')}
+                  {passwordStrength.strength === 100
+                    ? t('password.strength.strong')
+                    : passwordStrength.strength >= 60
+                      ? t('password.strength.medium')
+                      : t('password.strength.weak')}
                 </span>
               </div>
             )}
             {errors.newPassword && (
               <p className="text-red-400 text-sm">{errors.newPassword}</p>
             )}
-            
+
             <input
               type="password"
               id="new-password-confirm"
               value={formData.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              onChange={(e) =>
+                handleInputChange('confirmPassword', e.target.value)
+              }
               placeholder={t('password.confirmPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
@@ -186,12 +197,14 @@ function RouteComponent() {
         </div>
 
         <div className="flex items-center justify-center">
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={resetPasswordMutation.isPending}
             className="h-[40px] w-[120px] rounded-[22px] bg-[var(--color-background-21)] text-[16px] font-medium text-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {resetPasswordMutation.isPending ? t('password.saving') : t('password.submitButton')}
+            {resetPasswordMutation.isPending
+              ? t('password.saving')
+              : t('password.submitButton')}
           </button>
         </div>
       </div>

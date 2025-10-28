@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import { ChangeImageIcon } from '@/icons'
 import { Select } from '@/components/Select'
-import { useAuthenticatedUser, useUpdateUser, useUploadAvatar, useUploadBanner } from '@/api/queries/useUser'
+import {
+  useAuthenticatedUser,
+  useUpdateUser,
+  useUploadAvatar,
+  useUploadBanner,
+} from '@/api/queries/useUser'
 import { useLanguage } from '@/hooks/useLanguage'
 import type { UserUpdateRequest } from '@/api/types/user'
 
@@ -32,7 +37,7 @@ function RouteComponent() {
       icon: '/english.svg',
     },
   ]
-  
+
   const [formData, setFormData] = useState({
     nickname: '',
     email: '',
@@ -45,8 +50,8 @@ function RouteComponent() {
   // Map backend language codes to frontend language codes
   const mapBackendLanguageCode = (backendLang: string): string => {
     const mapping: Record<string, string> = {
-      'UA': 'uk',
-      'EN': 'en'
+      UA: 'uk',
+      EN: 'en',
     }
     return mapping[backendLang] || 'uk'
   }
@@ -56,10 +61,11 @@ function RouteComponent() {
     if (user) {
       // Use i18n.language as the source of truth (from localStorage),
       // but fallback to user.lang if i18n.language is not set
-      const currentLang = i18n.language && ['uk', 'en'].includes(i18n.language) 
-        ? i18n.language 
-        : mapBackendLanguageCode(user.lang || 'UA')
-      
+      const currentLang =
+        i18n.language && ['uk', 'en'].includes(i18n.language)
+          ? i18n.language
+          : mapBackendLanguageCode(user.lang || 'UA')
+
       const userData = {
         nickname: user.nickname || '',
         email: user.email || '',
@@ -78,21 +84,21 @@ function RouteComponent() {
   }, [formData, originalData])
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleLanguageChange = async (value: string) => {
     if (!user) return
-    
+
     try {
       // Update i18n language
       await changeLanguage(value)
-      
+
       // Update form data to keep Select in sync
-      setFormData(prev => ({ ...prev, lang: value }))
+      setFormData((prev) => ({ ...prev, lang: value }))
       // Also update originalData to keep form state clean
-      setOriginalData(prev => ({ ...prev, lang: value }))
-      
+      setOriginalData((prev) => ({ ...prev, lang: value }))
+
       // Also update backend directly with full user data
       const updateRequest: UserUpdateRequest = {
         id: user.id,
@@ -103,16 +109,21 @@ function RouteComponent() {
         avatar: user.avatar,
         banner: user.banner,
       }
-      
-      await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
-      
+
+      await updateUserMutation.mutateAsync({
+        userId: user.id,
+        request: updateRequest,
+      })
+
       toast.success(t('general.success'))
     } catch (error) {
       toast.error(t('general.error'))
     }
   }
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file || !user) return
 
@@ -124,7 +135,9 @@ function RouteComponent() {
     }
   }
 
-  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file || !user) return
 
@@ -139,8 +152,8 @@ function RouteComponent() {
   // Map frontend language codes to backend language codes
   const mapLanguageCode = (frontendLang: string): string => {
     const mapping: Record<string, string> = {
-      'uk': 'UA',
-      'en': 'EN'
+      uk: 'UA',
+      en: 'EN',
     }
     return mapping[frontendLang] || 'UA'
   }
@@ -162,7 +175,9 @@ function RouteComponent() {
     // Check nickname format (only letters, numbers, underscores, and hyphens)
     const nicknameRegex = /^[a-zA-Z0-9_-]+$/
     if (!nicknameRegex.test(formData.nickname.trim())) {
-      toast.error('Nickname can only contain letters, numbers, underscores, and hyphens')
+      toast.error(
+        'Nickname can only contain letters, numbers, underscores, and hyphens',
+      )
       return
     }
 
@@ -187,13 +202,16 @@ function RouteComponent() {
         banner: user.banner,
       }
 
-      await updateUserMutation.mutateAsync({ userId: user.id, request: updateRequest })
+      await updateUserMutation.mutateAsync({
+        userId: user.id,
+        request: updateRequest,
+      })
       setOriginalData(formData)
       setIsDirty(false)
       toast.success(t('general.success'))
     } catch (error) {
       console.error('Update user error:', error)
-      
+
       // Try to extract the actual error message from the backend
       let errorMessage = t('general.error')
       if (error && typeof error === 'object' && 'response' in error) {
@@ -204,7 +222,7 @@ function RouteComponent() {
           errorMessage = axiosError.response.data.error
         }
       }
-      
+
       toast.error(errorMessage)
     }
   }
@@ -215,7 +233,11 @@ function RouteComponent() {
   }
 
   if (userLoading) {
-    return <div className="flex items-center justify-center h-64">{t('common.loading')}</div>
+    return (
+      <div className="flex items-center justify-center h-64">
+        {t('common.loading')}
+      </div>
+    )
   }
 
   if (!user) {
@@ -223,8 +245,8 @@ function RouteComponent() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-white text-lg mb-4">{t('auth.loginRequired')}</p>
-          <a 
-            href="/login" 
+          <a
+            href="/login"
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
             {t('header.login')}
@@ -238,11 +260,11 @@ function RouteComponent() {
     <div className="w-full bg-[var(--color-background-15)] rounded-[20px] overflow-hidden text-white">
       <div className="w-full relative">
         <img
-          src={user.banner || "/banner-settings.jpg"}
+          src={user.banner || '/banner-settings.jpg'}
           alt="Banner for settings page"
           className="w-full h-[175px] object-cover rounded-none"
         />
-        <label className="bg-white rounded-full p-[8px] absolute bottom-[16px] right-[16px] cursor-pointer">
+        <label className="bg-white rounded-full p-[8px] absolute bottom-[16px] lg:right-[16px] right-0 cursor-pointer">
           <ChangeImageIcon className="text-black" />
           <input
             type="file"
@@ -254,16 +276,16 @@ function RouteComponent() {
       </div>
 
       <div className="p-[24px] w-full flex flex-col justify-between min-h-[600px]">
-        <div className="flex gap-[24px]">
-          <div className="w-[20%]">
+        <div className="flex flex-col lg:flex-row gap-[24px]">
+          <div className="w-[30%] lg:w-[20%]">
             <div className="w-full relative aspect-square">
               <img
-                src={user.avatar || "/avatar-settings.png"}
+                src={user.avatar || '/avatar-settings.png'}
                 alt="Avatar"
                 className="w-full h-full object-cover rounded-full"
               />
-              <label className="bg-[var(--color-background-16)] rounded-full p-[8px] absolute bottom-0 right-[10px] cursor-pointer">
-                <ChangeImageIcon className="text-white" />
+              <label className="bg-[var(--color-background-16)] rounded-full p-[8px] absolute bottom-0 right-0 cursor-pointer">
+                <ChangeImageIcon className="text-white w-[20px] h-[20px]" />
                 <input
                   type="file"
                   accept="image/*"
@@ -273,9 +295,9 @@ function RouteComponent() {
               </label>
             </div>
           </div>
-          <div className="w-[80%] flex flex-col gap-[24px]">
-            <div className="flex items-center gap-[20px]">
-              <div className="w-1/2 flex flex-col gap-[8px]">
+          <div className="lg:w-[80%] w-full flex flex-col gap-[24px]">
+            <div className="flex flex-col lg:flex-row gap-[20px]">
+              <div className="lg:w-1/2 w-full flex flex-col gap-[8px]">
                 <label htmlFor="nickname" className="text-[16px] font-bold">
                   {t('general.nicknameLabel')}
                 </label>
@@ -283,12 +305,14 @@ function RouteComponent() {
                   id="nickname"
                   type="text"
                   value={formData.nickname}
-                  onChange={(e) => handleInputChange('nickname', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('nickname', e.target.value)
+                  }
                   className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
                   placeholder={t('general.nicknamePlaceholder')}
                 />
               </div>
-              <div className="w-1/2 flex flex-col gap-[8px]">
+              <div className="lg:w-1/2 w-full flex flex-col gap-[8px]">
                 <label htmlFor="email" className="text-[16px] font-bold">
                   {t('general.emailLabel')}
                 </label>
@@ -331,20 +355,22 @@ function RouteComponent() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-[12px]">
-          <button 
+        <div className="flex items-center justify-end gap-[12px] lg:pt-0 pt-4">
+          <button
             onClick={handleCancel}
             disabled={!isDirty || updateUserMutation.isPending}
             className="h-[40px] w-[120px] text-[16px] text-[var(--color-background-19)] font-normal cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('common.cancel')}
           </button>
-          <button 
+          <button
             onClick={handleSave}
             disabled={!isDirty || updateUserMutation.isPending}
             className="h-[40px] w-[120px] rounded-[20px] bg-[var(--color-background-21)] text-[16px] font-normal text-black cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {updateUserMutation.isPending ? t('common.saving') : t('common.save')}
+            {updateUserMutation.isPending
+              ? t('common.saving')
+              : t('common.save')}
           </button>
         </div>
       </div>

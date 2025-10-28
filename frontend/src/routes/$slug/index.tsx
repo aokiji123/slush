@@ -10,7 +10,12 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MasonryLayout, SortDropdown, GameComment } from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
-import { useGameById, useGameDlcs, useGameReviews, useBaseGame } from '@/api/queries/useGame'
+import {
+  useGameById,
+  useGameDlcs,
+  useGameReviews,
+  useBaseGame,
+} from '@/api/queries/useGame'
 import { useAuthState } from '@/api/queries/useAuth'
 import { useAuthenticatedUser } from '@/api/queries/useUser'
 import { useGenreTranslation } from '@/utils/translateGenre'
@@ -39,7 +44,6 @@ const getSortOptions = (t: any) => [
   t('game:reviews.sortByNegative'),
 ]
 
-
 function RouteComponent() {
   const { t } = useTranslation(['game', 'common'])
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
@@ -48,15 +52,23 @@ function RouteComponent() {
   const navigate = useNavigate()
   const { slug } = useParams({ from: '/$slug' })
   const { data: game, isLoading, isError } = useGameById(slug)
-  const { data: baseGame } = useBaseGame(game?.data?.isDlc ? game.data.id : null)
+  const { data: baseGame } = useBaseGame(
+    game?.data?.isDlc ? game.data.id : null,
+  )
   // Fetch DLCs from base game if this is a DLC, otherwise fetch from current game
-  const { data: gameDlcs } = useGameDlcs(game?.data?.isDlc ? (baseGame?.data?.slug || slug) : slug)
-  
+  const { data: gameDlcs } = useGameDlcs(
+    game?.data?.isDlc ? baseGame?.data?.slug || slug : slug,
+  )
+
   // Filter out current DLC from the list if viewing a DLC
-  const otherDlcs = game?.data?.isDlc 
-    ? gameDlcs?.data?.filter(dlc => dlc.id !== game.data.id) || []
+  const otherDlcs = game?.data?.isDlc
+    ? gameDlcs?.data?.filter((dlc) => dlc.id !== game.data.id) || []
     : gameDlcs?.data || []
-  const { data: reviews, isLoading: reviewsLoading, refetch: refetchReviews } = useGameReviews(game?.data?.id || '', selectedSort)
+  const {
+    data: reviews,
+    isLoading: reviewsLoading,
+    refetch: refetchReviews,
+  } = useGameReviews(game?.data?.id || '', selectedSort)
   const { user: authUser } = useAuthState()
   const { data: authenticatedUser } = useAuthenticatedUser()
   const translateGenre = useGenreTranslation()
@@ -66,14 +78,18 @@ function RouteComponent() {
   const swiperRef = useRef<SwiperType | null>(null)
   const [selectedImage, setSelectedImage] = useState<string>('')
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0)
-  
+
   const gameInCart = game?.data ? isInCart(game.data.id) : false
 
   // Create combined images array with mainImage as first element, avoiding duplicates
-  const allImages = game?.data ? [
-    game.data.mainImage, 
-    ...(game.data.images || []).filter(img => img !== game.data.mainImage && img && img.trim())
-  ] : []
+  const allImages = game?.data
+    ? [
+        game.data.mainImage,
+        ...(game.data.images || []).filter(
+          (img) => img !== game.data.mainImage && img && img.trim(),
+        ),
+      ]
+    : []
 
   // Get valid selected image
   const validSelectedImage = selectedImage || game?.data?.mainImage || ''
@@ -90,7 +106,9 @@ function RouteComponent() {
   // Find user's existing review
   // Try to get user ID from authenticated user first, then fallback to auth state
   const userId = authenticatedUser?.id || (authUser as any)?.id
-  const userReview = reviews?.data?.find((review: Review) => review.userId === userId)
+  const userReview = reviews?.data?.find(
+    (review: Review) => review.userId === userId,
+  )
 
   const handleAddToCart = () => {
     if (game?.data && !gameInCart) {
@@ -126,14 +144,15 @@ function RouteComponent() {
 
   const handlePrevClick = () => {
     if (allImages.length === 0) return
-    
+
     // Calculate the previous image index with wraparound
-    const newIndex = activeImageIndex > 0 ? activeImageIndex - 1 : allImages.length - 1
-    
+    const newIndex =
+      activeImageIndex > 0 ? activeImageIndex - 1 : allImages.length - 1
+
     // Update selected image immediately
     setSelectedImage(allImages[newIndex])
     setActiveImageIndex(newIndex)
-    
+
     // Tell swiper to slide to this index
     if (swiperRef.current) {
       swiperRef.current.slideTo(newIndex)
@@ -142,14 +161,15 @@ function RouteComponent() {
 
   const handleNextClick = () => {
     if (allImages.length === 0) return
-    
+
     // Calculate the next image index with wraparound
-    const newIndex = activeImageIndex < allImages.length - 1 ? activeImageIndex + 1 : 0
-    
+    const newIndex =
+      activeImageIndex < allImages.length - 1 ? activeImageIndex + 1 : 0
+
     // Update selected image immediately
     setSelectedImage(allImages[newIndex])
     setActiveImageIndex(newIndex)
-    
+
     // Tell swiper to slide to this index
     if (swiperRef.current) {
       swiperRef.current.slideTo(newIndex)
@@ -166,7 +186,7 @@ function RouteComponent() {
       [t('game:reviews.sortByPositive')]: 'rating:desc',
       [t('game:reviews.sortByNegative')]: 'rating:asc',
     }
-    
+
     const backendSort = sortMapping[sortValue] || 'createdat:desc'
     setSelectedSort(backendSort)
     setIsSortDropdownOpen(false)
@@ -180,7 +200,7 @@ function RouteComponent() {
       'createdat:desc': t('common:sorting.newest'),
       'rating:asc': t('game:reviews.sortByNegative'),
     }
-    
+
     return reverseMapping[selectedSort] || t('common:sorting.newest')
   }
 
@@ -229,42 +249,43 @@ function RouteComponent() {
           onSlideChange={handleSlideChange}
           className="w-full"
         >
-              {allImages.filter(img => img && img.trim()).map((image, index) => {
-                const isSelected = selectedImage === image
-                return (
-                  <SwiperSlide
-                    key={index}
-                    className="w-[180px] p-1"
+          {allImages
+            .filter((img) => img && img.trim())
+            .map((image, index) => {
+              const isSelected = selectedImage === image
+              return (
+                <SwiperSlide key={index} className="w-[180px] p-1">
+                  <div
+                    className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
+                      isSelected ? 'ring-2 ring-[#0d8a6b]' : 'hover:opacity-80'
+                    }`}
+                    onClick={() => handleSlideClick(index)}
                   >
-                    <div 
-                      className={`w-[180px] h-[90px] flex-shrink-0 cursor-pointer transition-all duration-200 rounded-[20px] ${
-                        isSelected ? 'ring-2 ring-[#0d8a6b]' : 'hover:opacity-80'
+                    <img
+                      src={image}
+                      alt={`${game.data.name} ${index + 1}`}
+                      className={`w-full object-cover h-full rounded-[20px] transition-all duration-200 ${
+                        isSelected
+                          ? 'opacity-100'
+                          : 'opacity-90 hover:opacity-100'
                       }`}
-                      onClick={() => handleSlideClick(index)}
-                    >
-                      <img
-                        src={image}
-                        alt={`${game.data.name} ${index + 1}`}
-                        className={`w-full object-cover h-full rounded-[20px] transition-all duration-200 ${
-                          isSelected ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-                        }`}
-                        loading="lazy"
-                      />
-                    </div>
-                  </SwiperSlide>
-                )
-              })}
+                      loading="lazy"
+                    />
+                  </div>
+                </SwiperSlide>
+              )
+            })}
         </Swiper>
-        
+
         {allImages.length > 1 && (
           <>
-            <div 
+            <div
               className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -left-3 top-[35px] z-10 shadow-lg cursor-pointer"
               onClick={handlePrevClick}
             >
               <FaChevronLeft size={16} />
             </div>
-            <div 
+            <div
               className="w-[24px] h-[24px] flex items-center justify-center bg-white rounded-[20px] absolute -right-3 top-[35px] z-10 shadow-lg cursor-pointer"
               onClick={handleNextClick}
             >
@@ -300,7 +321,7 @@ function RouteComponent() {
       {/* Base Game Section - Only for DLCs */}
       {game.data.isDlc && baseGame?.data && (
         <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
-          <div 
+          <div
             className="w-full bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex flex-col gap-[12px] cursor-pointer hover:bg-[var(--color-background-8)] transition-colors"
             onClick={() => navigate({ to: `/${baseGame.data.slug}` })}
           >
@@ -308,15 +329,17 @@ function RouteComponent() {
               <div className="bg-[#FF6F95] text-[#00141F] px-[12px] py-[4px] rounded-[20px] text-[16px] font-bold">
                 {t('game:dlc.baseGame')}
               </div>
-              <p className="text-[24px] font-bold font-manrope">{baseGame.data.name}</p>
+              <p className="text-[24px] font-bold font-manrope">
+                {baseGame.data.name}
+              </p>
             </div>
             <div className="flex items-center justify-end">
               <div className="flex items-center gap-[20px]">
                 <p className="text-[20px] font-bold">
-                  {baseGame.data.salePrice > 0 
-                    ? `${baseGame.data.salePrice}₴` 
-                    : baseGame.data.price > 0 
-                      ? `${baseGame.data.price}₴` 
+                  {baseGame.data.salePrice > 0
+                    ? `${baseGame.data.salePrice}₴`
+                    : baseGame.data.price > 0
+                      ? `${baseGame.data.price}₴`
                       : t('game:actions.free')}
                 </p>
                 <button
@@ -335,13 +358,17 @@ function RouteComponent() {
       )}
 
       <div className="mb-[24px] text-[var(--color-background)] flex flex-col gap-[12px]">
-        <p className="text-[32px] font-bold font-manrope">{t('game:bundles.title')}</p>
+        <p className="text-[32px] font-bold font-manrope">
+          {t('game:bundles.title')}
+        </p>
         <div className="w-full bg-[var(--color-background-15)] min-h-[275px] rounded-[20px] p-[20px] flex flex-col gap-[20px]">
           <p className="text-[24px] font-bold font-manrope">{game.data.name}</p>
           <div className="p-[16px] rounded-[20px] flex flex-col gap-[12px] bg-[var(--color-background-8)]">
             <p className="text-[20px] font-normal">{game.data.description}</p>
             <div className="text-[20px] font-normal">
-              <p className="text-[var(--color-background-25)]">{t('game:bundles.contents')}</p>
+              <p className="text-[var(--color-background-25)]">
+                {t('game:bundles.contents')}
+              </p>
               <p className="ml-3">
                 • {game.data.name}{' '}
                 <span className="text-[var(--color-background-25)]">
@@ -368,11 +395,13 @@ function RouteComponent() {
                 </>
               ) : (
                 <p className="text-[20px] font-normal text-[var(--color-background)]">
-                  {game.data.price ? `${game.data.price}₴` : t('game:actions.free')}
+                  {game.data.price
+                    ? `${game.data.price}₴`
+                    : t('game:actions.free')}
                 </p>
               )}
               {isOwned ? (
-                <button 
+                <button
                   disabled
                   className="h-[48px] flex items-center justify-center py-[12px] px-[26px] text-[20px] font-bold rounded-[20px] bg-[#F1FDFF] text-[var(--color-background-16)] cursor-default"
                 >
@@ -406,7 +435,9 @@ function RouteComponent() {
         {game.data.isDlc && otherDlcs.length > 0 && (
           <div className="flex flex-col gap-[20px]">
             <div className="flex items-center justify-between">
-              <p className="text-[32px] font-bold font-manrope">{t('game:dlc.otherDlc')}</p>
+              <p className="text-[32px] font-bold font-manrope">
+                {t('game:dlc.otherDlc')}
+              </p>
               {baseGame?.data?.slug && (
                 <p
                   className="text-[16px] flex items-center gap-[8px] cursor-pointer text-[var(--color-background)]"
@@ -456,7 +487,9 @@ function RouteComponent() {
         {!game.data.isDlc && gameDlcs && gameDlcs.data.length > 0 && (
           <div className="flex flex-col gap-[20px]">
             <div className="flex items-center justify-between">
-              <p className="text-[32px] font-bold font-manrope">{t('game:dlc.otherDlc')}</p>
+              <p className="text-[32px] font-bold font-manrope">
+                {t('game:dlc.otherDlc')}
+              </p>
               <p
                 className="text-[16px] flex items-center gap-[8px] cursor-pointer"
                 onClick={() => navigate({ to: `/${slug}/dlc` })}
@@ -530,7 +563,9 @@ function RouteComponent() {
                 onClick={() => setIsReviewModalOpen(true)}
                 className="h-[48px] flex items-center justify-center py-[8px] px-[20px] text-[16px] font-medium rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)]"
               >
-                {userReview ? t('game:actions.editReview') : t('game:actions.writeReview')}
+                {userReview
+                  ? t('game:actions.editReview')
+                  : t('game:actions.writeReview')}
               </button>
             </div>
           )}
@@ -542,9 +577,13 @@ function RouteComponent() {
           >
             {reviewsLoading ? (
               <div className="col-span-2 text-center py-8">
-                <p className="text-[var(--color-background-25)]">{t('common.loading')}</p>
+                <p className="text-[var(--color-background-25)]">
+                  {t('common.loading')}
+                </p>
               </div>
-            ) : reviews?.data && Array.isArray(reviews.data) && reviews.data.length > 0 ? (
+            ) : reviews?.data &&
+              Array.isArray(reviews.data) &&
+              reviews.data.length > 0 ? (
               reviews.data.map((review: Review, index: number) => (
                 <GameComment
                   key={review.id || index}
@@ -555,7 +594,9 @@ function RouteComponent() {
               ))
             ) : (
               <div className="col-span-2 text-center py-8">
-                <p className="text-[var(--color-background-25)]">{t('game.review.noReviews')}</p>
+                <p className="text-[var(--color-background-25)]">
+                  {t('game.review.noReviews')}
+                </p>
               </div>
             )}
           </MasonryLayout>

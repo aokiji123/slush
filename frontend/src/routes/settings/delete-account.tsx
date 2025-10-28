@@ -12,7 +12,7 @@ function RouteComponent() {
   const { t } = useTranslation('settings')
   const { data: user } = useAuthenticatedUser()
   const deleteAccountMutation = useDeleteAccount()
-  
+
   const [formData, setFormData] = useState({
     nickname: '',
     password: '',
@@ -22,10 +22,10 @@ function RouteComponent() {
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setErrors((prev) => ({ ...prev, [field]: '' }))
     }
   }
 
@@ -43,9 +43,13 @@ function RouteComponent() {
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t('deleteAccount.validation.confirmPasswordRequired')
+      newErrors.confirmPassword = t(
+        'deleteAccount.validation.confirmPasswordRequired',
+      )
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('deleteAccount.validation.passwordsNotMatch')
+      newErrors.confirmPassword = t(
+        'deleteAccount.validation.passwordsNotMatch',
+      )
     }
 
     setErrors(newErrors)
@@ -68,9 +72,9 @@ function RouteComponent() {
           nickname: formData.nickname,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-        }
+        },
       })
-      
+
       // Clear local storage and redirect
       localStorage.clear()
       sessionStorage.clear()
@@ -91,9 +95,11 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-white text-lg mb-4">{t('deleteAccount.loginRequired')}</p>
-          <a 
-            href="/login" 
+          <p className="text-white text-lg mb-4">
+            {t('deleteAccount.loginRequired')}
+          </p>
+          <a
+            href="/login"
             className="inline-block px-6 py-2 bg-[var(--color-background-21)] text-black rounded-lg hover:opacity-80"
           >
             {t('deleteAccount.loginButton')}
@@ -105,15 +111,13 @@ function RouteComponent() {
 
   return (
     <div className="flex items-center justify-center">
-      <div className="w-[60%] bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
+      <div className="lg:w-[60%] w-full bg-[var(--color-background-15)] rounded-[20px] p-[24px] text-white gap-[24px] flex flex-col">
         <p className="text-[24px] font-bold text-center font-manrope">
           {t('deleteAccount.title')}
         </p>
 
         <div className="p-[12px] bg-[#FF6F952E] rounded-[16px]">
-          <p>
-            {t('deleteAccount.warning')}
-          </p>
+          <p>{t('deleteAccount.warning')}</p>
         </div>
 
         <div className="flex flex-col gap-[16px]">
@@ -149,12 +153,14 @@ function RouteComponent() {
             {errors.password && (
               <p className="text-red-400 text-sm">{errors.password}</p>
             )}
-            
+
             <input
               type="password"
               id="confirm-password"
               value={formData.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              onChange={(e) =>
+                handleInputChange('confirmPassword', e.target.value)
+              }
               placeholder={t('deleteAccount.confirmPasswordPlaceholder')}
               className="w-full h-[44px] border-1 border-[var(--color-background-16)] rounded-[20px] py-[10px] px-[16px] text-[16px] bg-[var(--color-background-14)] text-[var(--color-background)] placeholder:text-[var(--color-background-25)]"
             />
@@ -165,12 +171,14 @@ function RouteComponent() {
         </div>
 
         <div className="flex items-center justify-center">
-          <button 
+          <button
             onClick={handleDeleteClick}
             disabled={deleteAccountMutation.isPending}
             className="h-[40px] rounded-[22px] bg-[var(--color-background-19)] text-[16px] font-medium text-black cursor-pointer px-[24px] py-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {deleteAccountMutation.isPending ? t('deleteAccount.deleting') : t('deleteAccount.deleteButton')}
+            {deleteAccountMutation.isPending
+              ? t('deleteAccount.deleting')
+              : t('deleteAccount.deleteButton')}
           </button>
         </div>
 
@@ -196,7 +204,9 @@ function RouteComponent() {
                   disabled={deleteAccountMutation.isPending}
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                 >
-                  {deleteAccountMutation.isPending ? t('deleteAccount.deleting') : t('deleteAccount.confirmDeleteButton')}
+                  {deleteAccountMutation.isPending
+                    ? t('deleteAccount.deleting')
+                    : t('deleteAccount.confirmDeleteButton')}
                 </button>
               </div>
             </div>

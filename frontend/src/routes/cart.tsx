@@ -40,11 +40,12 @@ const glowCoords = [
 function RouteComponent() {
   const navigate = useNavigate()
   const { t } = useTranslation('cart')
-  const { items, removeFromCart, clearCart, getCartTotal, getCartSavings } = useCartStore()
+  const { items, removeFromCart, clearCart, getCartTotal, getCartSavings } =
+    useCartStore()
   const addToWishlistMutation = useAddToWishlist()
   const purchaseGameMutation = usePurchaseGame()
   const { data: walletBalance } = useWalletBalance()
-  
+
   // Bug #6: Add loading state
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [currentItemIndex, setCurrentItemIndex] = useState(0)
@@ -56,7 +57,7 @@ function RouteComponent() {
         onSuccess: () => {
           removeFromCart(gameId)
         },
-      }
+      },
     )
   }
 
@@ -71,44 +72,48 @@ function RouteComponent() {
     }
 
     const totalPrice = getCartTotal()
-    
+
     // Check if user has sufficient balance
     if (walletBalance.amount < totalPrice) {
-      toast.error(`Insufficient funds. You need ${(totalPrice - walletBalance.amount).toFixed(2)}₴ more.`)
+      toast.error(
+        `Insufficient funds. You need ${(totalPrice - walletBalance.amount).toFixed(2)}₴ more.`,
+      )
       return
     }
 
     setIsCheckingOut(true)
-    
+
     try {
       // Purchase each game in the cart
       const purchased: typeof items = []
       let failedAtIndex = -1
-      
+
       try {
         for (let i = 0; i < items.length; i++) {
           const item = items[i]
           setCurrentItemIndex(i)
-          
-          const result = await purchaseGameMutation.mutateAsync({ 
+
+          const result = await purchaseGameMutation.mutateAsync({
             gameId: item.game.id,
-            title: `Purchase: ${item.game.name}`
+            title: `Purchase: ${item.game.name}`,
           })
-          
+
           // Check if purchase was successful
           if (!result.success) {
             failedAtIndex = i
             throw new Error(result.message || 'Purchase failed')
           }
-          
+
           purchased.push(item)
         }
-        
+
         // Clear cart only after ALL purchases succeed
         clearCart()
-        
+
         // Show success message and redirect
-        toast.success('Purchase successful! Your games have been added to your library.')
+        toast.success(
+          'Purchase successful! Your games have been added to your library.',
+        )
         setTimeout(() => {
           navigate({ to: '/library' })
         }, 1500)
@@ -120,34 +125,41 @@ function RouteComponent() {
             totalItems: items.length,
             successful: purchased.length,
             failedAt: failedAtIndex + 1,
-            successfulItems: purchased.map(p => p.game.name),
-            error
+            successfulItems: purchased.map((p) => p.game.name),
+            error,
           })
-          
+
           // Don't clear cart - user keeps the games they already purchased
           // Show informative error message
           toast.error(
             `Purchase partially completed. ${purchased.length} of ${items.length} games purchased. ` +
-            `The ${items.length - purchased.length} remaining games are still in your cart.`,
-            { duration: 8000 }
+              `The ${items.length - purchased.length} remaining games are still in your cart.`,
+            { duration: 8000 },
           )
-          
+
           // Remove successfully purchased games from cart
-          purchased.forEach(item => removeFromCart(item.game.id))
-          
+          purchased.forEach((item) => removeFromCart(item.game.id))
+
           // Show which games were successfully purchased
           if (purchased.length > 0) {
-            toast.success(`${purchased.length} game(s) added to your library!`, { duration: 5000 })
+            toast.success(
+              `${purchased.length} game(s) added to your library!`,
+              { duration: 5000 },
+            )
           }
         } else {
           // No purchases succeeded
           console.error('Checkout failed:', error)
-          toast.error(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          toast.error(
+            `Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          )
         }
       }
     } catch (error) {
       console.error('Unexpected checkout error:', error)
-      toast.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(
+        `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
     } finally {
       setIsCheckingOut(false)
       setCurrentItemIndex(0)
@@ -156,10 +168,11 @@ function RouteComponent() {
 
   const totalPrice = getCartTotal()
   const savings = getCartSavings()
-  const hasInsufficientFunds = walletBalance && walletBalance.amount < totalPrice
+  const hasInsufficientFunds =
+    walletBalance && walletBalance.amount < totalPrice
 
   return (
-    <div className="bg-[var(--color-night-background)] relative overflow-hidden">
+    <div className="bg-[var(--color-night-background)] relative overflow-hidden pb-[256px]">
       <div className="container mx-auto relative z-20">
         <div className="flex items-center justify-center">
           <Search className="my-[16px] w-full" />
@@ -176,14 +189,14 @@ function RouteComponent() {
             </p>
             <button
               onClick={handleContinueShopping}
-              className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] text-[20px] font-medium cursor-pointer"
+              className="min-h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-21)] text-[var(--color-night-background)] text-[20px] font-medium cursor-pointer"
             >
               {t('cart.continueShopping')}
             </button>
           </div>
         ) : (
-          <div className="flex gap-[24px] mt-[16px]">
-            <div className="w-[75%] pb-[256px]">
+          <div className="flex flex-col lg:flex-row gap-[24px] mt-[16px]">
+            <div className="lg:w-[75%] w-full">
               <div className="flex flex-col gap-[12px]">
                 {items.map((item) => {
                   const game = item.game
@@ -193,16 +206,19 @@ function RouteComponent() {
                   return (
                     <div
                       key={game.id}
-                      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden h-[128px]`}
+                      className={`bg-[var(--color-background-15)] rounded-[20px] overflow-hidden min-h-[128px]`}
                     >
-                      <div className="w-full flex">
+                      <div className="w-full flex flex-col lg:flex-row">
                         <img
                           src={game.mainImage}
                           alt={game.name}
                           loading="lazy"
-                          className={`w-[306px] h-[128px] object-cover cursor-pointer`}
+                          className={`lg:w-[306px] w-full lg:h-[128px] h-[200px] object-cover cursor-pointer`}
                           onClick={() =>
-                            navigate({ to: '/$slug', params: { slug: game.slug } })
+                            navigate({
+                              to: '/$slug',
+                              params: { slug: game.slug },
+                            })
                           }
                         />
                         <div className="pt-[16px] p-[20px] w-full text-[var(--color-background)] flex flex-col justify-between h-[128px]">
@@ -210,7 +226,10 @@ function RouteComponent() {
                             <p
                               className="text-[20px] font-bold font-manrope cursor-pointer hover:text-[var(--color-background-23)] transition-colors"
                               onClick={() =>
-                                navigate({ to: '/$slug', params: { slug: game.slug } })
+                                navigate({
+                                  to: '/$slug',
+                                  params: { slug: game.slug },
+                                })
                               }
                             >
                               {game.name}
@@ -256,26 +275,36 @@ function RouteComponent() {
                 })}
               </div>
             </div>
-            <div className="w-[25%]">
+            <div className="lg:w-[25%] w-full">
               <div className="bg-[var(--color-background-8)] rounded-[20px] p-[20px] pt-[24px] flex flex-col gap-[24px] sticky top-[24px]">
                 <div className="flex flex-col gap-[16px] text-[var(--color-background)]">
                   <div className="flex flex-col gap-[8px]">
                     {walletBalance && (
                       <div className="flex items-center justify-between w-full">
-                        <p className="text-[16px] font-normal">Wallet Balance</p>
-                        <p className={`text-[18px] font-bold ${hasInsufficientFunds ? 'text-red-400' : 'text-green-400'}`}>
+                        <p className="text-[16px] font-normal">
+                          Wallet Balance
+                        </p>
+                        <p
+                          className={`text-[18px] font-bold ${hasInsufficientFunds ? 'text-red-400' : 'text-green-400'}`}
+                        >
                           {walletBalance.amount.toFixed(2)}₴
                         </p>
                       </div>
                     )}
                     {savings > 0 && (
                       <div className="flex items-center justify-between w-full">
-                        <p className="text-[16px] font-normal">{t('cart.youSave')}</p>
-                        <p className="text-[20px] font-bold">{savings.toFixed(0)}₴</p>
+                        <p className="text-[16px] font-normal">
+                          {t('cart.youSave')}
+                        </p>
+                        <p className="text-[20px] font-bold">
+                          {savings.toFixed(0)}₴
+                        </p>
                       </div>
                     )}
                     <div className="flex items-center justify-between w-full">
-                      <p className="text-[20px] font-normal">{t('cart.total')}</p>
+                      <p className="text-[20px] font-normal">
+                        {t('cart.total')}
+                      </p>
                       <p className="text-[24px] font-bold font-manrope">
                         {totalPrice.toFixed(0)}₴
                       </p>
@@ -286,7 +315,8 @@ function RouteComponent() {
                           Insufficient funds
                         </p>
                         <p className="text-[14px] font-bold text-red-400">
-                          Need {(totalPrice - walletBalance.amount).toFixed(2)}₴ more
+                          Need {(totalPrice - walletBalance.amount).toFixed(2)}₴
+                          more
                         </p>
                       </div>
                     )}
@@ -296,37 +326,38 @@ function RouteComponent() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-[12px] w-full">
-                  <button 
+                  <button
                     onClick={handleCheckout}
-                    disabled={hasInsufficientFunds || isCheckingOut || !walletBalance}
-                    className={`h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[20px] font-medium transition-colors ${
+                    disabled={
+                      hasInsufficientFunds || isCheckingOut || !walletBalance
+                    }
+                    className={`min-h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] text-[20px] font-medium transition-colors ${
                       hasInsufficientFunds || !walletBalance
                         ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                         : isCheckingOut
-                        ? 'bg-yellow-600 text-white cursor-wait'
-                        : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
+                          ? 'bg-yellow-600 text-white cursor-wait'
+                          : 'bg-[var(--color-background-21)] text-[var(--color-night-background)] cursor-pointer hover:bg-[var(--color-background-22)]'
                     }`}
                   >
-                    {isCheckingOut 
-                      ? items.length > 1 
+                    {isCheckingOut
+                      ? items.length > 1
                         ? `Processing ${currentItemIndex + 1} of ${items.length}...`
                         : 'Processing...'
-                      : hasInsufficientFunds 
-                      ? 'Insufficient Funds' 
-                      : t('cart.proceedToCheckout')
-                    }
+                      : hasInsufficientFunds
+                        ? 'Insufficient Funds'
+                        : t('cart.proceedToCheckout')}
                   </button>
                   {hasInsufficientFunds ? (
                     <button
                       onClick={() => navigate({ to: '/settings/wallet' })}
-                      className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-green-600 text-white text-[20px] font-medium cursor-pointer hover:bg-green-700 transition-colors"
+                      className="min-h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-green-600 text-white text-[20px] font-medium cursor-pointer hover:bg-green-700 transition-colors"
                     >
                       Add Funds to Wallet
                     </button>
                   ) : (
                     <button
                       onClick={handleContinueShopping}
-                      className="h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] text-[20px] font-medium cursor-pointer hover:bg-[var(--color-background-17)] transition-colors"
+                      className="min-h-[48px] flex items-center justify-center px-[26px] py-[12px] rounded-[20px] bg-[var(--color-background-16)] text-[var(--color-background)] text-[20px] font-medium cursor-pointer hover:bg-[var(--color-background-17)] transition-colors"
                     >
                       {t('cart.continueShopping')}
                     </button>

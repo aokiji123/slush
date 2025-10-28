@@ -11,17 +11,29 @@ interface SearchModalProps {
   searchText: string
 }
 
-export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) => {
+export const SearchModal = ({
+  isOpen,
+  onClose,
+  searchText,
+}: SearchModalProps) => {
   const navigate = useNavigate()
   const { t } = useTranslation('common')
   const modalRef = useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  
-  const { data: searchResults, isLoading, isError } = useSearchGames(
+
+  const {
+    data: searchResults,
+    isLoading,
+    isError,
+  } = useSearchGames(
     searchText,
     { limit: 10 }, // Show max 10 results in modal
-    isOpen && searchText.length > 0
-  ) as { data: PagedGamesResponse | undefined, isLoading: boolean, isError: boolean }
+    isOpen && searchText.length > 0,
+  ) as {
+    data: PagedGamesResponse | undefined
+    isLoading: boolean
+    isError: boolean
+  }
 
   // Reset selected index when search text changes
   useEffect(() => {
@@ -46,15 +58,15 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen || !searchResults?.data.items) return
-      
+
       const itemsCount = searchResults.data.items.length
-      
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSelectedIndex(prev => (prev < itemsCount - 1 ? prev + 1 : prev))
+        setSelectedIndex((prev) => (prev < itemsCount - 1 ? prev + 1 : prev))
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
       } else if (e.key === 'Enter' && selectedIndex >= 0) {
         e.preventDefault()
         handleGameClick(searchResults.data.items[selectedIndex].slug)
@@ -73,7 +85,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
       const target = e.target as HTMLElement
       // Don't close if clicking on the search input or its container
       if (
-        modalRef.current && 
+        modalRef.current &&
         !modalRef.current.contains(target) &&
         !target.closest('input[type="text"]') &&
         !target.closest('.search-input-container')
@@ -97,9 +109,9 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
 
   const handleViewAllClick = () => {
     // Navigate to catalog with search query as title
-    navigate({ 
-      to: '/catalog', 
-      search: { title: searchText } 
+    navigate({
+      to: '/catalog',
+      search: { title: searchText },
     })
     onClose()
   }
@@ -136,9 +148,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
 
           {isError && (
             <div className="flex items-center justify-center py-8">
-              <p className="text-red-400 text-lg">
-                {t('search.error')}
-              </p>
+              <p className="text-red-400 text-lg">{t('search.error')}</p>
             </div>
           )}
 
@@ -158,8 +168,8 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
                     key={game.id}
                     onClick={() => handleGameClick(game.slug)}
                     className={`flex items-center gap-4 p-3 rounded-[16px] hover:bg-[var(--color-background-17)] cursor-pointer transition-all duration-200 hover:scale-[1.02] border ${
-                      selectedIndex === index 
-                        ? 'border-[var(--color-background-23)]/40 bg-[var(--color-background-17)]' 
+                      selectedIndex === index
+                        ? 'border-[var(--color-background-23)]/40 bg-[var(--color-background-17)]'
                         : 'border-transparent hover:border-[var(--color-background-23)]/20'
                     }`}
                   >
@@ -184,7 +194,7 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
                             <span className="text-[var(--color-background-25)] line-through">
                               ${game.price}
                             </span>
-                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                            <span className="bg-[var(--color-background-10)] text-black text-xs px-2 py-1 rounded">
                               -{game.discountPercent}%
                             </span>
                           </>
@@ -206,7 +216,8 @@ export const SearchModal = ({ isOpen, onClose, searchText }: SearchModalProps) =
                     onClick={handleViewAllClick}
                     className="w-full bg-[var(--color-background-23)] text-white py-3 rounded-[16px] font-bold hover:bg-[var(--color-background-21)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {t('search.viewAll')} ({searchResults.data.totalCount} {t('search.results')})
+                    {t('search.viewAll')} ({searchResults.data.totalCount}{' '}
+                    {t('search.results')})
                   </button>
                 </div>
               )}

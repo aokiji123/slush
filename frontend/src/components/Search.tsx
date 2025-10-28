@@ -38,10 +38,12 @@ export const Search = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const cartCount = useCartStore((state) => state.getCartCount())
   const { data: wishlistData } = useWishlist()
-  const wishlistDiscountCount = wishlistData?.data?.filter(game => game.discountPercent > 0).length || 0
-  
+  const wishlistDiscountCount =
+    wishlistData?.data?.filter((game) => game.discountPercent > 0).length || 0
+
   // Use external search text if provided, otherwise use internal state
-  const searchText = externalSearchText !== undefined ? externalSearchText : internalSearchText
+  const searchText =
+    externalSearchText !== undefined ? externalSearchText : internalSearchText
   const setSearchText = onSearchTextChange || setInternalSearchText
   const debouncedSearchText = useDebounce(searchText, 300)
 
@@ -58,7 +60,7 @@ export const Search = ({
           padding: '4px 26px 4px 4px',
         }}
       >
-        <div className="search-input-container w-[190px] sm:w-[320px] lg:w-[590px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative z-[101]">
+        <div className="search-input-container w-[190px] sm:w-[320px] lg:w-[590px] xl:w-[800px] h-[44px] bg-[var(--overlay-dark)] rounded-[16px] flex items-center justify-between py-[10px] px-[16px] relative z-[101]">
           <input
             type="text"
             placeholder={t('search.placeholder')}

@@ -134,13 +134,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Add support for file uploads
-    options.MapType<IFormFile>(() => new OpenApiSchema
-    {
-        Type = "string",
-        Format = "binary"
-    });
-
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);

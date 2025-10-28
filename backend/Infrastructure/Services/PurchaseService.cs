@@ -62,11 +62,16 @@ public class PurchaseService : IPurchaseService
             // Fix Bug #7: Only deduct from wallet if not a free game
             if (!isFreeGame)
             {
-                await _walletService.SubtractAsync(userId, new WalletChangeDto
-                {
-                    Amount = price,
-                    Title = string.IsNullOrWhiteSpace(dto.Title) ? $"Purchase: {game.Title}" : dto.Title
-                });
+                // Check if user has sufficient balance BEFORE modifying balance
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                    return new PurchaseResultDto { Success = false, Message = "User not found" };
+                
+                if (user.Balance < price)
+                    return new PurchaseResultDto { Success = false, Message = "Insufficient funds" };
+                
+                // Deduct balance directly from the tracked entity
+                user.Balance -= price;
             }
 
             libraryEntry = new Library
@@ -94,7 +99,15 @@ public class PurchaseService : IPurchaseService
         {
             // Rollback transaction on any error
             await transaction.RollbackAsync();
-            return new PurchaseResultDto { Success = false, Message = ex.Message };
+            
+            // Provide more detailed error message
+            var errorMessage = ex.Message;
+            if (ex.InnerException != null)
+            {
+                errorMessage += $" (Inner: {ex.InnerException.Message})";
+            }
+            
+            return new PurchaseResultDto { Success = false, Message = errorMessage };
         }
 
         if (libraryEntry == null)
