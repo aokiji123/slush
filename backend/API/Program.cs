@@ -28,6 +28,7 @@ using API.Hubs;
 using DotNetEnv;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Application.Interfaces;
 
 // Load environment variables from .env file if it exists
 var currentDir = Directory.GetCurrentDirectory();
@@ -188,5 +189,26 @@ app.MapControllers();
 
 // Map SignalR hubs
 app.MapHub<ChatHub>("/api/hubs/chat");
+
+// CLI seeding support: dotnet run --project backend/API -- --seed --ids 452,999
+if (args.Contains("--seed"))
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    var idsArg = args.SkipWhile(a => a != "--ids").Skip(1).FirstOrDefault();
+    IEnumerable<int> ids = new[] { 452 };
+    if (!string.IsNullOrWhiteSpace(idsArg))
+    {
+        ids = idsArg.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(s => int.TryParse(s, out var v) ? v : (int?)null)
+            .Where(v => v.HasValue)
+            .Select(v => v!.Value)
+            .ToArray();
+        if (!ids.Any()) ids = new[] { 452 };
+    }
+
+    await seeder.SeedAsync(ids);
+    return;
+}
 
 app.Run();

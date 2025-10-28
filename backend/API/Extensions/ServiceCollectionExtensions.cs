@@ -16,6 +16,8 @@ using FluentValidation.AspNetCore;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Routing;
+using Infrastructure.Services.External;
+using Infrastructure.Services.Seed;
 
 namespace API.Extensions;
 
@@ -121,6 +123,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IUserReportService, UserReportService>();
         services.AddScoped<ICollectionService, CollectionService>();
+
+        // External clients & seeders
+        services.AddHttpClient<IFreeToGameClient, FreeToGameClient>(c =>
+        {
+            c.BaseAddress = new Uri("https://www.freetogame.com/");
+        });
+        services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
 
         return services;
     }
