@@ -110,6 +110,40 @@ public class BadgeService : IBadgeService
         }
     }
 
+    public async Task<int> AwardBadgesByNicknameAsync(string nickname, int count = 5)
+    {
+        if (string.IsNullOrWhiteSpace(nickname)) return 0;
+
+        var normalized = nickname.ToLower();
+        var user = await _db.Set<User>()
+            .FirstOrDefaultAsync(u => u.Nickname != null && u.Nickname.ToLower() == normalized);
+        if (user == null) return 0;
+
+        var allBadges = (await _badgeRepository.GetAllAsync()).ToList();
+        var existing = await _badgeRepository.GetUserBadgesAsync(user.Id);
+        var existingIds = new HashSet<Guid>(existing.Select(ub => ub.BadgeId));
+
+        var toAward = allBadges.Where(b => !existingIds.Contains(b.Id))
+            .Take(Math.Max(0, count))
+            .ToList();
+
+        var awarded = 0;
+        foreach (var badge in toAward)
+        {
+            var userBadge = new UserBadge
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                BadgeId = badge.Id,
+                EarnedAt = DateTime.UtcNow
+            };
+            await _badgeRepository.AddUserBadgeAsync(userBadge);
+            awarded++;
+        }
+
+        return awarded;
+    }
+
     private static int GetCurrentValue(int gamesCount, int dlcCount, int wishlistCount, int reviewsCount, int friendsCount, int postsCount, string requirementType)
     {
         return requirementType.ToLower() switch

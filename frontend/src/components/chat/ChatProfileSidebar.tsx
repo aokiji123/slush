@@ -6,6 +6,8 @@ import { useClearConversationHistory, useConversationMediaCounts } from '@/api/q
 import { useToastStore } from '@/lib/toast-store'
 import { ReportUserModal } from '@/components/modals/ReportUserModal'
 import { RemoveFriendModal } from '@/components/modals/RemoveFriendModal'
+import { ClearHistoryModal } from '@/components/modals/ClearHistoryModal'
+import { BlockUserModal } from '@/components/modals/BlockUserModal'
 import { MediaModal } from './MediaModal'
 
 interface ChatProfileSidebarProps {
@@ -25,6 +27,8 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
   const [selectedMediaType, setSelectedMediaType] = useState<'photos' | 'files' | 'voice' | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
   const [showRemoveFriendModal, setShowRemoveFriendModal] = useState(false)
+  const [showClearHistoryModal, setShowClearHistoryModal] = useState(false)
+  const [showBlockUserModal, setShowBlockUserModal] = useState(false)
   const [showMediaModal, setShowMediaModal] = useState(false)
 
   const { data: currentUser } = useAuthenticatedUser()
@@ -65,32 +69,34 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
     }
   }
 
-  const handleClearHistory = async () => {
+  const handleClearHistory = () => {
     if (!conversation?.friendId) return
-    
-    if (!confirm('Ви впевнені, що хочете видалити історію чату?')) {
-      return
-    }
+    setShowClearHistoryModal(true)
+  }
 
+  const handleConfirmClearHistory = async () => {
+    if (!conversation?.friendId) return
     try {
       await clearHistoryMutation.mutateAsync(conversation.friendId)
       showSuccess('Історію чату очищено')
+      setShowClearHistoryModal(false)
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Не вдалося очистити історію'
       showError(errorMessage)
     }
   }
 
-  const handleBlockUser = async () => {
+  const handleBlockUser = () => {
     if (!conversation?.friendId) return
-    
-    if (!confirm('Ви впевнені, що хочете заблокувати цього користувача?')) {
-      return
-    }
+    setShowBlockUserModal(true)
+  }
 
+  const handleConfirmBlockUser = async () => {
+    if (!conversation?.friendId) return
     try {
       await blockUserMutation.mutateAsync(conversation.friendId)
       showSuccess('Користувача заблоковано')
+      setShowBlockUserModal(false)
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Не вдалося заблокувати користувача'
       showError(errorMessage)
@@ -419,6 +425,24 @@ export const ChatProfileSidebar = memo<ChatProfileSidebarProps>(({
         onConfirm={handleConfirmRemoveFriend}
         friendNickname={conversation.friendNickname || 'Користувач'}
         isRemoving={removeFriendMutation.isPending}
+      />
+
+      {/* Clear History Modal */}
+      <ClearHistoryModal
+        isOpen={showClearHistoryModal}
+        onClose={() => setShowClearHistoryModal(false)}
+        onConfirm={handleConfirmClearHistory}
+        friendNickname={conversation.friendNickname || 'Користувач'}
+        isClearing={clearHistoryMutation.isPending}
+      />
+
+      {/* Block User Modal */}
+      <BlockUserModal
+        isOpen={showBlockUserModal}
+        onClose={() => setShowBlockUserModal(false)}
+        onConfirm={handleConfirmBlockUser}
+        friendNickname={conversation.friendNickname || 'Користувач'}
+        isBlocking={blockUserMutation.isPending}
       />
 
       {/* Media Modal */}

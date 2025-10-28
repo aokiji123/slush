@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react'
 
 interface UseKeyboardNavigationOptions {
-  /** Whether the hook is enabled */
   enabled?: boolean
-  /** Total number of items */
   itemCount: number
-  /** Callback when Enter is pressed on selected item */
   onSelect?: (index: number) => void
-  /** Callback when Escape is pressed */
   onEscape?: () => void
 }
 
-/**
- * Hook for keyboard navigation in lists (ArrowUp, ArrowDown, Enter, Escape)
- * @param options Configuration options
- * @returns Selected index and control functions
- */
 export const useKeyboardNavigation = ({
   enabled = true,
   itemCount,

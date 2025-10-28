@@ -1,38 +1,15 @@
 import { useState, useCallback } from 'react'
 
 interface OptimizedImageProps {
-  /** Image source URL */
   src: string
-  /** Alt text for accessibility */
   alt: string
-  /** Additional CSS classes */
   className?: string
-  /** Loading behavior */
   loading?: 'lazy' | 'eager'
-  /** Callback when image loads successfully */
   onLoad?: () => void
-  /** Callback when image fails to load */
   onError?: () => void
-  /** Fallback image URL for error state */
   placeholder?: string
-  /** Blur placeholder URL for loading state */
   blurDataURL?: string
 }
-
-/**
- * An optimized image component with lazy loading, blur placeholder, and error handling.
- * 
- * @example
- * ```tsx
- * <OptimizedImage
- *   src="/image.jpg"
- *   alt="Description"
- *   loading="lazy"
- *   blurDataURL="/blur.jpg"
- *   placeholder="/placeholder.jpg"
- * />
- * ```
- */
 
 export const OptimizedImage = ({
   src,

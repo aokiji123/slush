@@ -146,11 +146,15 @@
     "relevance": "За релевантністю",
     "popular": "Спочатку популярні",
     "newest": "Спочатку нові",
+    "oldest": "Спочатку старі",
     "rating": "За оцінкою",
     "priceLowHigh": "Від дешевих до дорогих",
     "priceHighLow": "Від дорогих до дешевих",
     "nameAZ": "А - Я",
-    "nameZA": "Я - А"
+    "nameZA": "Я - А",
+    "mostCommented": "Найбільше коментарів",
+    "highestRated": "Найвищий рейтинг",
+    "lowestRated": "Найнижчий рейтинг"
   },
   "game": {
     "review": {
@@ -202,6 +206,11 @@
   },
   "profile": {
     "level": "Рівень",
+    "loading": "Завантаження...",
+    "userNotFound": "Користувача не знайдено",
+    "userNotFoundMessage": "Профіль з нікнеймом \"{nickname}\" не існує",
+    "noBadges": "Немає значків",
+    "noBadgesMessage": "Користувач ще не заробив жодного значка",
     "tabs": {
       "home": "Головна",
       "badges": "Значки",
@@ -256,6 +265,73 @@
       "noOnlineFriends": "Немає друзів онлайн",
       "noFriendsMessage": "Цей користувач ще не має друзів",
       "noOnlineFriendsMessage": "Наразі немає друзів онлайн"
+    },
+    "addModal": {
+      "title": "Додати друга",
+      "searchPlaceholder": "Введіть нікнейм користувача...",
+      "searching": "Пошук...",
+      "noResults": "Користувачів не знайдено",
+      "enterNickname": "Введіть нікнейм для пошуку",
+      "status": {
+        "self": "Це ви",
+        "alreadyFriends": "Вже друзі",
+        "requestSent": "Запит відправлено"
+      },
+      "unblock": "Розблокувати",
+      "sendRequest": "Надіслати запит",
+      "close": "Закрити",
+      "requestSentSuccess": "Запит на дружбу відправлено",
+      "requestSentError": "Не вдалося відправити запит на дружбу",
+      "unblockSuccess": "Користувача розблоковано",
+      "unblockError": "Не вдалося розблокувати користувача"
+    },
+    "actions": {
+      "viewProfile": "Переглянути профіль",
+      "sendMessage": "Надіслати повідомлення",
+      "chatComingSoon": "Чат функція буде доступна скоро",
+      "removeFriend": "Видалити з друзів",
+      "block": "Заблокувати",
+      "removeConfirm": {
+        "title": "Видалити з друзів",
+        "message": "Ви впевнені, що хочете видалити {name} з друзів?",
+        "confirm": "Видалити",
+        "cancel": "Скасувати"
+      },
+      "blockConfirm": {
+        "title": "Заблокувати користувача",
+        "message": "Ви впевнені, що хочете заблокувати {name}? Це також видалить користувача з вашого списку друзів.",
+        "confirm": "Заблокувати",
+        "cancel": "Скасувати"
+      }
     }
+  },
+  "report": {
+    "title": "Поскаржитися на користувача",
+    "description": "Скарга на користувача @{nickname}",
+    "reasonLabel": "Причина скарги",
+    "reasons": {
+      "harassment": "Дошкулення",
+      "harassmentDesc": "Загрози, цькування або небажана поведінка",
+      "spam": "Спам",
+      "spamDesc": "Незапитувані повідомлення або реклама",
+      "inappropriateContent": "Неприпустимий контент",
+      "inappropriateContentDesc": "Образливий або недоречний вміст",
+      "impersonation": "Імперсонація",
+      "impersonationDesc": "Прикидання іншою людиною",
+      "other": "Інше",
+      "otherDesc": "Інша причина порушення"
+    },
+    "descriptionLabel": "Опис проблеми",
+    "descriptionPlaceholder": "Будь ласка, детально опишіть проблему...",
+    "characterCount": "{count}/500 символів",
+    "cancel": "Скасувати",
+    "submit": "Надіслати скаргу",
+    "submitting": "Надсилання...",
+    "errors": {
+      "selectReason": "Будь ласка, оберіть причину скарги",
+      "provideDescription": "Будь ласка, надайте опис проблеми",
+      "submitFailed": "Не вдалося надіслати скаргу"
+    },
+    "success": "Скаргу надіслано успішно"
   }
 }

@@ -141,7 +141,7 @@ export const VoiceMessagePlayer = memo<VoiceMessagePlayerProps>(({
           
           {/* Time Display */}
           <p className="font-['Artifakt_Element:Regular',sans-serif] leading-[1.15] not-italic relative text-[14px] text-[rgba(204,248,255,0.65)] tracking-[-0.14px]">
-            {formatTime(currentTime)}
+            {formatTime(currentTime)} / {formatTime(actualDuration)}
           </p>
         </div>
       </div>

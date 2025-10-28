@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoFilter } from 'react-icons/io5'
@@ -30,7 +30,6 @@ export const Route = createFileRoute('/library')({
 
 function RouteComponent() {
   const { t } = useTranslation('library')
-  const navigate = useNavigate()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid')
   const [searchText, setSearchText] = useState('')
@@ -91,12 +90,10 @@ function RouteComponent() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Filter out news posts from community highlights
   const filteredCommunityPosts = communityPosts.filter(
     (post) => post.type !== PostType.News,
   )
 
-  // Filter games based on active filter and search text
   const allGames = libraryData.data.items
   const filteredGames = allGames.filter((game) => {
     const matchesSearch = game.name
@@ -107,27 +104,13 @@ function RouteComponent() {
       return matchesSearch && game.isFavorite === true
     }
 
-    // TODO: Implement collections when backend supports it
     if (activeFilter === 'myCollection') {
-      // For now, return all games - will be implemented when backend supports collections
       return matchesSearch
     }
 
     // 'all' filter - return all games
     return matchesSearch
   })
-
-  // Navigation handlers
-  const handlePostClick = (postId: string, gameId: string) => {
-    navigate({
-      to: '/$slug/community/post/$id',
-      params: { slug: gameId, id: postId },
-    })
-  }
-
-  const handleGameClick = (gameSlug: string) => {
-    navigate({ to: '/$slug', params: { slug: gameSlug } })
-  }
 
   return (
     <div className="bg-[var(--color-night-background)] min-h-screen flex flex-col">
@@ -177,10 +160,11 @@ function RouteComponent() {
                 </div>
               ) : (
                 filteredGames.map((game) => (
-                  <div
+                  <Link
                     key={game.id}
+                    to="/$slug"
+                    params={{ slug: game.slug }}
                     className="flex items-center gap-[12px] sm:gap-[16px] cursor-pointer hover:bg-[var(--color-background-15)] transition-colors p-[8px] sm:p-2 rounded-[6px] sm:rounded-[8px]"
-                    onClick={() => handleGameClick(game.slug)}
                   >
                     <OptimizedImage
                       src={game.mainImage}
@@ -191,7 +175,7 @@ function RouteComponent() {
                     <p className="text-[14px] sm:text-[16px] font-bold line-clamp-1">
                       {game.name}
                     </p>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
@@ -260,10 +244,12 @@ function RouteComponent() {
                       key={post.id}
                       className="w-full sm:w-[400px] lg:w-[475px]"
                     >
-                      <LibraryNewsCard
-                        post={post}
-                        onClick={() => handlePostClick(post.id, post.gameId)}
-                      />
+                      <Link
+                        to="/$slug/community/post/$id"
+                        params={{ slug: post.gameId, id: post.id }}
+                      >
+                        <LibraryNewsCard post={post} onClick={() => {}} />
+                      </Link>
                     </SwiperSlide>
                   ))
                 ) : (
@@ -336,10 +322,12 @@ function RouteComponent() {
                       key={post.id}
                       className="w-full sm:w-[400px] lg:w-[475px]"
                     >
-                      <LibraryPostCard
-                        post={post}
-                        onClick={() => handlePostClick(post.id, post.gameId)}
-                      />
+                      <Link
+                        to="/$slug/community/post/$id"
+                        params={{ slug: post.gameId, id: post.id }}
+                      >
+                        <LibraryPostCard post={post} onClick={() => {}} />
+                      </Link>
                     </SwiperSlide>
                   ))
                 ) : (
@@ -441,10 +429,11 @@ function RouteComponent() {
               >
                 {filteredGames.map((game) =>
                   viewMode === 'grid' ? (
-                    <div
+                    <Link
                       key={game.id}
-                      className="w-[calc(50%-6px)] sm:w-[calc(33.33%-11px)] md:w-[calc(25%-18px)] lg:w-[225px] aspect-[3/4] rounded-[16px] sm:rounded-[20px] cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => handleGameClick(game.slug)}
+                      to="/$slug"
+                      params={{ slug: game.slug }}
+                      className="w-[calc(50%-6px)] sm:w-[calc(33.33%-11px)] md:w-[calc(25%-18px)] lg:w-[225px] aspect-[3/4] rounded-[16px] sm:rounded-[20px] cursor-pointer hover:opacity-90 transition-opacity block"
                     >
                       <OptimizedImage
                         src={game.mainImage}
@@ -452,12 +441,13 @@ function RouteComponent() {
                         className="w-full h-full object-cover rounded-[16px] sm:rounded-[20px]"
                         loading="lazy"
                       />
-                    </div>
+                    </Link>
                   ) : (
-                    <div
+                    <Link
                       key={game.id}
+                      to="/$slug"
+                      params={{ slug: game.slug }}
                       className="flex items-center h-[100px] sm:h-[120px] gap-[12px] sm:gap-[16px] lg:gap-[24px] bg-[var(--color-background-15)] rounded-[16px] sm:rounded-[20px] transition-colors overflow-hidden cursor-pointer hover:bg-[var(--color-background-17)]"
-                      onClick={() => handleGameClick(game.slug)}
                     >
                       <OptimizedImage
                         src={game.mainImage}
@@ -470,7 +460,7 @@ function RouteComponent() {
                           {game.name}
                         </h3>
                       </div>
-                    </div>
+                    </Link>
                   ),
                 )}
               </div>
@@ -550,13 +540,12 @@ function RouteComponent() {
           ) : (
             <div className="flex flex-col gap-[12px]">
               {filteredGames.map((game) => (
-                <div
+                <Link
                   key={game.id}
+                  to="/$slug"
+                  params={{ slug: game.slug }}
+                  onClick={() => setIsSidebarCollapsed(true)}
                   className="flex items-center gap-[12px] cursor-pointer hover:bg-[var(--color-background-15)] transition-colors p-2 rounded-[8px]"
-                  onClick={() => {
-                    handleGameClick(game.slug)
-                    setIsSidebarCollapsed(true)
-                  }}
                 >
                   <OptimizedImage
                     src={game.mainImage}
@@ -567,7 +556,7 @@ function RouteComponent() {
                   <p className="text-[14px] font-bold line-clamp-1">
                     {game.name}
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           )}

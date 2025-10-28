@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface ProfileCommentCardProps {
   comment: {
     id: string
@@ -11,6 +13,7 @@ interface ProfileCommentCardProps {
 }
 
 export const ProfileCommentCard = ({ comment, onDelete, canDelete }: ProfileCommentCardProps) => {
+  const { t } = useTranslation('common')
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('uk-UA', {
@@ -44,7 +47,8 @@ export const ProfileCommentCard = ({ comment, onDelete, canDelete }: ProfileComm
               <button
                 onClick={onDelete}
                 className="text-[var(--color-background-25)] hover:text-[var(--color-background)] transition-colors"
-                title="Видалити коментар"
+                title={t('common.delete')}
+                aria-label={t('common.delete')}
               >
                 ✕
               </button>

@@ -3,17 +3,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
+using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Data;
 
 namespace Infrastructure.Services;
 
 public class WalletService : IWalletService
 {
     private readonly IWalletRepository _walletRepository;
+    private readonly AppDbContext _dbContext;
 
-    public WalletService(IWalletRepository walletRepository)
+    public WalletService(IWalletRepository walletRepository, AppDbContext dbContext)
     {
         _walletRepository = walletRepository;
+        _dbContext = dbContext;
     }
 
     public async Task<BalanceDto> GetBalanceAsync(Guid userId)
@@ -28,6 +32,21 @@ public class WalletService : IWalletService
         var user = await _walletRepository.GetOrCreateUserAsync(userId);
         user.Balance += dto.Amount;
         await _walletRepository.SaveAsync();
+
+        // Create a payment record for the top-up
+        var payment = new Payment
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            GameId = null,
+            Sum = dto.Amount,
+            Name = dto.Title ?? "Поповнення рахунку",
+            Data = DateTime.UtcNow
+        };
+
+        _dbContext.Set<Payment>().Add(payment);
+        await _dbContext.SaveChangesAsync();
+
         return new BalanceDto { Amount = user.Balance };
     }
 

@@ -11,4 +11,5 @@ public interface IPaymentService
     Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto dto);
     Task<IReadOnlyList<PaymentDto>> GetUserPaymentsAsync(Guid userId);
     Task<PagedResult<PaymentDto>> GetUserPaymentsPagedAsync(Guid userId, PaymentQueryParameters query);
+    Task<PagedResult<PaymentHistoryItemDto>> GetPaymentHistoryAsync(Guid userId, PaymentHistoryQueryParams query);
 }

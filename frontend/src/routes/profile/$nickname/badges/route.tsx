@@ -6,12 +6,14 @@ import { useUserBadges } from '@/api/queries/useBadges'
 import { ProfileTabs } from '@/components/ProfileTabs'
 import { ProfileHeader } from '@/components/ProfileHeader'
 import { useFriendshipStatus } from '@/api/queries/useFriendship'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/profile/$nickname/badges')({
   component: ProfileBadgesPage,
 })
 
 function ProfileBadgesPage() {
+  const { t } = useTranslation('common')
   const { nickname } = Route.useParams()
 
   // Fetch profile user data
@@ -30,50 +32,14 @@ function ProfileBadgesPage() {
   )
 
   // Fetch profile data
-  const { data: statistics } = useUserStatistics(profileUser?.id || '')
-  const { data: userBadges } = useUserBadges(profileUser?.id || '')
-
-  // Mock data for testing
-  const mockBadges = [
-    {
-      id: '1',
-      name: 'First Steps',
-      icon: '/badge-icon.png',
-      description: 'Complete your first game',
-      requiredValue: 100,
-      earnedAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Explorer',
-      icon: '/badge-icon.png',
-      description: 'Play 10 different games',
-      requiredValue: 500,
-      earnedAt: '2024-01-20T15:30:00Z'
-    },
-    {
-      id: '3',
-      name: 'Collector',
-      icon: '/badge-icon.png',
-      description: 'Collect 50 games',
-      requiredValue: 1000,
-      earnedAt: '2024-01-25T12:00:00Z'
-    },
-    {
-      id: '4',
-      name: 'Reviewer',
-      icon: '/badge-icon.png',
-      description: 'Write 10 reviews',
-      requiredValue: 750,
-      earnedAt: '2024-01-30T14:30:00Z'
-    }
-  ]
+  const { data: statistics, isLoading: isLoadingStats } = useUserStatistics(profileUser?.id || '')
+  const { data: userBadges, isLoading: isLoadingBadges } = useUserBadges(profileUser?.id || '')
 
   // Loading state
   if (isLoadingProfile || isLoadingCurrentUser) {
     return (
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
-        <div className="text-[var(--color-background)] text-[18px]">Загрузка...</div>
+        <div className="text-[var(--color-background)] text-[18px]">{t('profile.loading')}</div>
       </div>
     )
   }
@@ -84,10 +50,10 @@ function ProfileBadgesPage() {
       <div className="min-h-screen bg-[var(--color-night-background)] flex items-center justify-center">
         <div className="text-center">
           <div className="text-[var(--color-background)] text-[24px] font-bold mb-[8px]">
-            Пользователь не найден
+            {t('profile.userNotFound')}
           </div>
           <div className="text-[var(--color-background-25)] text-[16px]">
-            Профиль с никнеймом "{nickname}" не существует
+            {t('profile.userNotFoundMessage', { nickname })}
           </div>
         </div>
       </div>
@@ -178,12 +144,29 @@ function ProfileBadgesPage() {
             {/* Main Content */}
             <div style={{ width: '1092px' }}>
               {/* Badge Gallery */}
-              <BadgeGallery 
-                badges={profileData.badges.length > 0 ? profileData.badges : mockBadges} 
-                level={profileData.level}
-                experience={statistics?.experience || 0}
-                nextLevelExperience={statistics?.nextLevelExperience || 100}
-              />
+              {isLoadingStats || isLoadingBadges ? (
+                <div className="bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex items-center justify-center min-h-[400px]">
+                  <div className="text-[var(--color-background)] text-[18px]">{t('profile.loading')}</div>
+                </div>
+              ) : profileData.badges.length === 0 ? (
+                <div className="bg-[var(--color-background-15)] rounded-[20px] p-[20px] flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="text-[var(--color-background)] text-[24px] font-bold mb-[8px]">
+                      {t('profile.noBadges')}
+                    </div>
+                    <div className="text-[var(--color-background-25)] text-[16px]">
+                      {t('profile.noBadgesMessage')}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <BadgeGallery 
+                  badges={profileData.badges} 
+                  level={profileData.level}
+                  experience={statistics?.experience || 0}
+                  nextLevelExperience={statistics?.nextLevelExperience || 100}
+                />
+              )}
             </div>
 
             {/* Sidebar */}

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useUpdateUser, useUploadAvatar, useUploadBanner } from '@/api/queries/useUser'
 import type { User } from '@/api/types/user'
 
@@ -9,6 +10,7 @@ interface EditProfileModalProps {
 }
 
 export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProps) => {
+  const { t } = useTranslation('settings')
   const [formData, setFormData] = useState({
     nickname: user.nickname,
     bio: user.bio || '',
@@ -98,7 +100,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
       <div className="bg-[var(--color-background-8)] rounded-[20px] p-[32px] w-[600px] max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-[24px]">
           <h2 className="text-[24px] font-bold text-[var(--color-background)] font-manrope">
-            Редактировать профиль
+            {t('editProfile.title')}
           </h2>
           <button
             onClick={onClose}
@@ -114,7 +116,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
           {/* Avatar Upload */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Аватар
+              {t('editProfile.avatar')}
             </label>
             <div className="flex items-center gap-[16px]">
               <div className="w-[80px] h-[80px] rounded-[12px] overflow-hidden bg-[var(--color-background-15)]">
@@ -130,7 +132,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
                   onClick={() => avatarInputRef.current?.click()}
                   className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[16px] py-[8px] rounded-[12px] font-medium text-[14px] hover:bg-[var(--color-background-23)] transition-colors"
                 >
-                  Загрузить
+                  {t('editProfile.changeAvatar')}
                 </button>
                 <input
                   ref={avatarInputRef}
@@ -146,7 +148,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
           {/* Banner Upload */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Баннер
+              {t('editProfile.banner')}
             </label>
             <div className="w-full h-[120px] rounded-[12px] overflow-hidden bg-[var(--color-background-15)]">
               <img
@@ -160,7 +162,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
               onClick={() => bannerInputRef.current?.click()}
               className="mt-[12px] bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[16px] py-[8px] rounded-[12px] font-medium text-[14px] hover:bg-[var(--color-background-23)] transition-colors"
             >
-              Загрузить баннер
+              {t('editProfile.changeBanner')}
             </button>
             <input
               ref={bannerInputRef}
@@ -174,7 +176,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
           {/* Nickname */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Никнейм
+              {t('editProfile.nickname')}
             </label>
             <input
               type="text"
@@ -182,7 +184,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
               value={formData.nickname}
               onChange={handleInputChange}
               className="w-full bg-[var(--color-background-15)] border border-[var(--color-background-18)] rounded-[12px] px-[16px] py-[12px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 focus:outline-none focus:border-[var(--color-background-21)] transition-colors"
-              placeholder="Введите никнейм"
+              placeholder={t('editProfile.nickname')}
               maxLength={50}
               required
             />
@@ -191,14 +193,14 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
           {/* Bio */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              О себе
+              {t('editProfile.bio')}
             </label>
             <textarea
               name="bio"
               value={formData.bio}
               onChange={handleInputChange}
               className="w-full bg-[var(--color-background-15)] border border-[var(--color-background-18)] rounded-[12px] px-[16px] py-[12px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 focus:outline-none focus:border-[var(--color-background-21)] transition-colors resize-none"
-              placeholder="Расскажите о себе"
+              placeholder={t('editProfile.bioPlaceholder')}
               rows={4}
               maxLength={500}
             />
@@ -210,7 +212,7 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
           {/* Language */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Язык
+              {t('editProfile.language')}
             </label>
             <select
               name="lang"
@@ -218,8 +220,8 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
               onChange={handleInputChange}
               className="w-full bg-[var(--color-background-15)] border border-[var(--color-background-18)] rounded-[12px] px-[16px] py-[12px] text-[var(--color-background)] focus:outline-none focus:border-[var(--color-background-21)] transition-colors"
             >
-              <option value="uk">Українська</option>
-              <option value="en">English</option>
+              <option value="uk">{t('editProfile.ukrainian')}</option>
+              <option value="en">{t('editProfile.english')}</option>
               <option value="ru">Русский</option>
             </select>
           </div>
@@ -232,14 +234,14 @@ export const EditProfileModal = ({ user, isOpen, onClose }: EditProfileModalProp
               className="px-[24px] py-[12px] rounded-[12px] border border-[var(--color-background-18)] text-[var(--color-background)] hover:bg-[var(--color-background-15)] transition-colors"
               disabled={isLoading}
             >
-              Отмена
+              {t('editProfile.cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading}
               className="bg-[var(--color-background-21)] text-[var(--color-night-background)] px-[24px] py-[12px] rounded-[12px] font-medium hover:bg-[var(--color-background-23)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Сохранение...' : 'Сохранить'}
+              {isLoading ? t('editProfile.saving') : t('editProfile.save')}
             </button>
           </div>
         </form>

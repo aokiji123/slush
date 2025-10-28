@@ -16,6 +16,8 @@ using FluentValidation.AspNetCore;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Routing;
+using Infrastructure.Services.External;
+using Infrastructure.Services.Seed;
 
 namespace API.Extensions;
 
@@ -29,10 +31,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Add AutoMapper
         services.AddAutoMapper(typeof(Application.Common.Mappings.GameProfile));
-
-        // Add FluentValidation
         services.AddFluentValidationAutoValidation();
         services.AddFluentValidationClientsideAdapters();
         services.AddValidatorsFromAssemblyContaining<CreateGameDtoValidator>();
@@ -45,14 +44,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Add strongly-typed configuration
         services.Configure<AppSettings>(configuration);
-
-        // Add DbContext
         services.AddDbContext<AppDbContext>(options => 
             options.UseNpgsql(SecretsConfiguration.BuildConnectionString()));
-
-        // Add Redis distributed cache (optional for development)
         var redisConnectionString = SecretsConfiguration.GetOptionalSecret("REDIS_CONNECTION_STRING");
         if (!string.IsNullOrEmpty(redisConnectionString))
         {
@@ -60,20 +54,15 @@ public static class ServiceCollectionExtensions
             {
                 options.Configuration = redisConnectionString;
             });
-
-            // Register Redis services
             services.AddScoped<IRedisCacheService, RedisCacheService>();
             services.AddScoped<IRedisVerificationCodeService, RedisVerificationCodeService>();
         }
         else
         {
-            // For development without Redis, use in-memory cache
             services.AddMemoryCache();
             services.AddScoped<IRedisCacheService, InMemoryCacheService>();
             services.AddScoped<IRedisVerificationCodeService, InMemoryVerificationCodeService>();
         }
-
-        // Add Identity
         services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -86,7 +75,6 @@ public static class ServiceCollectionExtensions
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-        // Register repositories
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILibraryRepository, LibraryRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -101,7 +89,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserReportRepository, UserReportRepository>();
         services.AddScoped<ICollectionRepository, CollectionRepository>();
 
-        // Register application services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IGameService, GameService>();
@@ -122,6 +109,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserReportService, UserReportService>();
         services.AddScoped<ICollectionService, CollectionService>();
 
+        services.AddHttpClient<IFreeToGameClient, FreeToGameClient>(c =>
+        {
+            c.BaseAddress = new Uri("https://www.freetogame.com/");
+        });
+        services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
+
         return services;
     }
 
@@ -130,21 +123,12 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Add Memory Cache
         services.AddMemoryCache();
-
-        // Add BaseUrl configuration
         services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
         var baseUrl = SecretsConfiguration.GetOptionalSecret("BASE_URL", "https://localhost:5088");
         services.AddHttpContextAccessor();
-
-        // Add HttpClient
         services.AddHttpClient();
-
-        // Add SignalR
         services.AddSignalR();
-
-        // Register chat services
         services.AddSingleton<ConnectionMappingService>();
 
         return services;

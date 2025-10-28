@@ -30,6 +30,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
 import { Route as SettingsWalletRouteImport } from './routes/settings/wallet'
+import { Route as SettingsPaymentsRouteImport } from './routes/settings/payments'
 import { Route as SettingsPasswordRouteImport } from './routes/settings/password'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsDeleteAccountRouteImport } from './routes/settings/delete-account'
@@ -156,6 +157,11 @@ const SlugIndexRoute = SlugIndexRouteImport.update({
 const SettingsWalletRoute = SettingsWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const SettingsPaymentsRoute = SettingsPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
 const SettingsPasswordRoute = SettingsPasswordRouteImport.update({
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
+  '/settings/payments': typeof SettingsPaymentsRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
+  '/settings/payments': typeof SettingsPaymentsRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug': typeof SlugIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/settings/delete-account': typeof SettingsDeleteAccountRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/password': typeof SettingsPasswordRoute
+  '/settings/payments': typeof SettingsPaymentsRoute
   '/settings/wallet': typeof SettingsWalletRoute
   '/$slug/': typeof SlugIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -444,6 +453,7 @@ export interface FileRouteTypes {
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
+    | '/settings/payments'
     | '/settings/wallet'
     | '/$slug/'
     | '/settings/'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
+    | '/settings/payments'
     | '/settings/wallet'
     | '/$slug'
     | '/settings'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/settings/delete-account'
     | '/settings/notifications'
     | '/settings/password'
+    | '/settings/payments'
     | '/settings/wallet'
     | '/$slug/'
     | '/settings/'
@@ -720,6 +732,13 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/settings/wallet'
       preLoaderRoute: typeof SettingsWalletRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/payments': {
+      id: '/settings/payments'
+      path: '/payments'
+      fullPath: '/settings/payments'
+      preLoaderRoute: typeof SettingsPaymentsRouteImport
       parentRoute: typeof SettingsRouteRoute
     }
     '/settings/password': {
@@ -928,6 +947,7 @@ interface SettingsRouteRouteChildren {
   SettingsDeleteAccountRoute: typeof SettingsDeleteAccountRoute
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsPasswordRoute: typeof SettingsPasswordRoute
+  SettingsPaymentsRoute: typeof SettingsPaymentsRoute
   SettingsWalletRoute: typeof SettingsWalletRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
@@ -936,6 +956,7 @@ const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
   SettingsDeleteAccountRoute: SettingsDeleteAccountRoute,
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsPasswordRoute: SettingsPasswordRoute,
+  SettingsPaymentsRoute: SettingsPaymentsRoute,
   SettingsWalletRoute: SettingsWalletRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ConversationList } from '@/components/chat/ConversationList'
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState'
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/chat')({
 })
 
 function ChatPage() {
+  const { t } = useTranslation('chat')
   const [selectedConversation, setSelectedConversation] = useState<ChatConversationDto | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
@@ -374,7 +376,6 @@ function ChatPage() {
   }, [selectedConversation, getMessageType, sendMediaMessage])
 
   const handleSendVoice = useCallback(() => {
-    // TODO: Implement voice recording
     console.log('Voice recording not implemented yet')
   }, [])
 
@@ -453,7 +454,7 @@ function ChatPage() {
                   </>
                 ) : messagesError ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-red-400 text-[16px]">Failed to load messages</div>
+                    <div className="text-red-400 text-[16px]">{t('failedToLoadMessages')}</div>
                   </div>
                 ) : displayMessages.length === 0 && !selectedConversation.lastMessage ? (
                   <SendHelloButton
@@ -463,7 +464,7 @@ function ChatPage() {
                   />
                 ) : displayMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-[#f1fdff] text-[16px]">No messages yet</div>
+                    <div className="text-[#f1fdff] text-[16px]">{t('noMessagesYet')}</div>
                   </div>
                 ) : (
                   <>

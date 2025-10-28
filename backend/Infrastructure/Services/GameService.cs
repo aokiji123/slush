@@ -51,7 +51,7 @@ public class GameService : IGameService
             query = query.Where(g => g.Price <= priceUpperBound.Value);
         }
 
-        // Track if we need genre filtering (but don't apply it yet)
+        // Track if genre filtering is needed (applied after DB fetch due to JSONB translations)
         var needsGenreFilter = !string.IsNullOrWhiteSpace(genre);
         var searchGenre = genre?.ToLower() ?? string.Empty;
 
@@ -63,7 +63,7 @@ public class GameService : IGameService
 
         var games = await query.ToListAsync();
         
-        // NOW apply genre filtering in-memory (after database operations)
+        // Apply genre filtering in-memory after DB operations
         if (needsGenreFilter)
         {
             games = games.Where(g => 

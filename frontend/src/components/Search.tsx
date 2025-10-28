@@ -84,7 +84,7 @@ export const Search = ({
         {location.pathname !== '/library' ? (
           <div className="flex items-center sm:gap-[26px] gap-[16px]">
             <p
-              className={`text-[]14px sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
+              className={`text-[14px] sm:text-[16px] font-bold cursor-pointer hover:text-[var(--color-background-23)] ${
                 location.pathname === '/catalog'
                   ? 'text-[var(--color-background-23)]'
                   : 'text-white'

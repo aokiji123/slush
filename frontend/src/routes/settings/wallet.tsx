@@ -17,12 +17,13 @@ export const Route = createFileRoute('/settings/wallet')({
 
 function RouteComponent() {
   const { t } = useTranslation('settings')
-  const [amount, setAmount] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-
   const { data: user } = useAuthenticatedUser()
   const { data: balance, isLoading: balanceLoading } = useWalletBalance()
   const addBalanceMutation = useAddBalance()
+
+  const [amount, setAmount] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
   const { data: paymentHistory, isLoading: historyLoading } = usePaymentHistory(
     user?.id || '',
     currentPage,
@@ -91,14 +92,16 @@ function RouteComponent() {
   const renderPagination = () => {
     if (!paymentHistory) return null
 
-    const totalPages = paymentHistory.totalPages
+    const totalPages = Math.ceil(paymentHistory.totalCount / paymentHistory.pageSize)
     const pages: (number | string)[] = []
 
+    // Show first page
     if (currentPage > 3) {
       pages.push(1)
       if (currentPage > 4) pages.push('...')
     }
 
+    // Show pages around current page
     const start = Math.max(1, currentPage - 2)
     const end = Math.min(totalPages, currentPage + 2)
 
@@ -106,6 +109,7 @@ function RouteComponent() {
       pages.push(i)
     }
 
+    // Show last page
     if (currentPage < totalPages - 2) {
       if (currentPage < totalPages - 3) pages.push('...')
       pages.push(totalPages)
@@ -216,23 +220,23 @@ function RouteComponent() {
             <div className="flex items-center justify-center py-8">
               <p className="text-white">{t('wallet.loadingHistory')}</p>
             </div>
-          ) : paymentHistory?.data && paymentHistory.data.length > 0 ? (
+          ) : paymentHistory?.items && paymentHistory.items.length > 0 ? (
             <div className="w-full rounded-[20px] flex flex-col gap-[8px]">
-              {paymentHistory.data.map((payment) => (
+              {paymentHistory.items.map((payment) => (
                 <div
                   key={payment.id}
                   className="flex items-center px-[20px] py-[16px] rounded-[20px] text-[16px] text-white font-light bg-[var(--color-background-15)]"
                 >
                   <div className="w-[15%]">
-                    <p className={getAmountColor(payment.sum)}>
-                      {formatAmount(payment.sum)}
+                    <p className={getAmountColor(payment.amount)}>
+                      {formatAmount(payment.amount)}
                     </p>
                   </div>
                   <div className="w-[75%]">
-                    <p>{payment.name}</p>
+                    <p>{payment.description}</p>
                   </div>
                   <div className="w-[10%] text-right">
-                    <p>{formatDate(payment.data)}</p>
+                    <p>{formatDate(payment.date)}</p>
                   </div>
                 </div>
               ))}
