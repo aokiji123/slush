@@ -53,7 +53,8 @@
     "submit": "Надіслати",
     "submitting": "Надсилання...",
     "submitted": "надіслано",
-    "update": "Оновити"
+    "update": "Оновити",
+    "logout": "Вийти"
   },
   "navigation": {
     "catalog": "Каталог",

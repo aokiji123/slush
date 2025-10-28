@@ -34,6 +34,10 @@ async function registerUser(
   }
 }
 
+function logout(): void {
+  clearAuthToken()
+}
+
 async function sendVerificationCode(email: string): Promise<void> {
   await axiosInstance.post('/auth/send-verification-code', { email })
 }
@@ -80,6 +84,12 @@ export const useSendVerificationCode = () => {
   })
 }
 
+export const useLogout = () => {
+  return useMutation({
+    mutationFn: () => Promise.resolve(logout()),
+  })
+}
+
 export const useResendVerificationCode = () => {
   return useMutation({
     mutationFn: ({ email }: { email: string }) => resendVerificationCode(email),
@@ -118,7 +128,7 @@ export function clearAuthToken() {
   localStorage.removeItem('user')
   sessionStorage.removeItem('token')
   sessionStorage.removeItem('user')
-  
+
   // Dispatch event to notify components of auth state change
   window.dispatchEvent(new Event('authStateChanged'))
 }

@@ -14,6 +14,8 @@ import {
 } from '@/icons'
 import { Switch } from '@/components/Switch'
 import { useTranslation } from 'react-i18next'
+import { MdLogout } from 'react-icons/md'
+import { useLogout } from '@/api/queries/useAuth'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
@@ -81,6 +83,7 @@ function RouteComponent() {
   const location = useLocation()
   const { t } = useTranslation('settings')
   const settings = getSettings(t)
+  const logoutMutation = useLogout()
 
   const handleSettingClick = (setting: (typeof settings)[0]) => {
     if (setting.hasSwitch) return
@@ -94,6 +97,13 @@ function RouteComponent() {
       return location.pathname === '/settings'
     }
     return location.pathname === path
+  }
+
+  const handleLogout = () => {
+    logoutMutation.mutateAsync()
+    localStorage.clear()
+    sessionStorage.clear()
+    navigate({ to: '/login' })
   }
 
   return (
@@ -131,6 +141,15 @@ function RouteComponent() {
                     {setting.hasSwitch && <Switch checked />}
                   </li>
                 ))}
+                <li className="py-[8px] px-[12px] rounded-[12px] flex items-center gap-[12px] h-[40px] cursor-pointer hover:bg-[var(--color-background-18)]">
+                  <div
+                    className="flex items-center gap-[12px] w-full"
+                    onClick={() => handleLogout()}
+                  >
+                    <MdLogout className="text-[24px]" />
+                    <p className="text-[16px] truncate">{t('common.logout')}</p>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>

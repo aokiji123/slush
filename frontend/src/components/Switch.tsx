@@ -31,7 +31,7 @@ export function Switch({
       disabled={disabled}
       onClick={handleToggle}
       className={`
-        relative inline-flex h-[24px] w-[44px] items-center rounded-full
+        relative inline-flex h-[24px] w-[44px] flex-shrink-0 items-center rounded-full
         transition-all duration-200 ease-in-out
         focus:outline-none
         cursor-pointer

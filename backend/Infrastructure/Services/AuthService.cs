@@ -65,6 +65,7 @@ public class AuthService : IAuthService
         {
             UserName = dto.Username,
             Email = dto.Email,
+            Nickname = dto.Username, // Set nickname from username
             CreatedAtDateTime = DateTime.UtcNow,
             EmailConfirmed = false // Will be confirmed after email verification
         };

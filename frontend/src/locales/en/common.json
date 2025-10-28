@@ -53,7 +53,8 @@
     "submit": "Submit",
     "submitting": "Submitting...",
     "submitted": "submitted",
-    "update": "Update"
+    "update": "Update",
+    "logout": "Logout"
   },
   "navigation": {
     "catalog": "Catalog",
