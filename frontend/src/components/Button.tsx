@@ -4,30 +4,11 @@ type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Button style variant */
   variant?: ButtonVariant
-  /** Button size */
   size?: ButtonSize
-  /** Whether the button is in a loading state */
   isLoading?: boolean
-  /** Button content */
   children: React.ReactNode
 }
-
-/**
- * A standardized button component with multiple variants and sizes.
- * 
- * @example
- * ```tsx
- * <Button variant="primary" size="md" onClick={handleClick}>
- *   Click me
- * </Button>
- * 
- * <Button variant="destructive" isLoading={isSubmitting}>
- *   Delete Item
- * </Button>
- * ```
- */
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'bg-[var(--color-background-21)] text-[var(--color-night-background)] hover:bg-[var(--color-background-23)]',

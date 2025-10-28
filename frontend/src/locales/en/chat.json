@@ -29,6 +29,12 @@
   "removeFriendWarning": "This will permanently delete all chat history with this user. This action cannot be undone.",
   "removeFriendConfirm": "Remove Friend",
   "cancel": "Cancel",
+  "clearHistoryTitle": "Clear Chat History?",
+  "clearHistoryWarning": "This will permanently delete all chat history. This action cannot be undone.",
+  "clearHistoryConfirm": "Clear History",
+  "blockUserTitle": "Block User?",
+  "blockUserWarning": "This user will no longer be able to send you messages or see your online status.",
+  "blockUserConfirm": "Block User",
   "sendHello": "Send Hello 👋",
   "startConversationWith": "Start a conversation with {nickname}",
   "clickToSendHello": "Click to send a friendly greeting",
@@ -46,6 +52,7 @@
   "mediaError": "Failed to load media",
   "emojiPicker": {
     "searchPlaceholder": "Search emojis...",
+    "loading": "Loading emojis...",
     "noResults": "No emojis found",
     "categories": {
       "frequently": "Frequently Used",
@@ -55,5 +62,8 @@
       "activities": "Activities",
       "symbols": "Symbols"
     }
-  }
+  },
+  "failedToLoadMessages": "Failed to load messages",
+  "noMessagesYet": "No messages yet",
+  "connectingToChat": "Connecting to chat..."
 }

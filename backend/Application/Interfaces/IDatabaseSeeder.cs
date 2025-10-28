@@ -6,6 +6,7 @@ namespace Application.Interfaces;
 public interface IDatabaseSeeder
 {
     Task SeedAsync(IEnumerable<int> ids);
+    Task SeedBadgesAsync();
 }
 
 

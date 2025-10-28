@@ -146,11 +146,15 @@
     "relevance": "By Relevance",
     "popular": "Popular First",
     "newest": "Newest First",
+    "oldest": "Oldest First",
     "rating": "By Rating",
     "priceLowHigh": "Price: Low to High",
     "priceHighLow": "Price: High to Low",
     "nameAZ": "A - Z",
-    "nameZA": "Z - A"
+    "nameZA": "Z - A",
+    "mostCommented": "Most Commented",
+    "highestRated": "Highest Rated",
+    "lowestRated": "Lowest Rated"
   },
   "game": {
     "review": {
@@ -202,6 +206,11 @@
   },
   "profile": {
     "level": "Level",
+    "loading": "Loading...",
+    "userNotFound": "User not found",
+    "userNotFoundMessage": "Profile with nickname \"{nickname}\" does not exist",
+    "noBadges": "No badges",
+    "noBadgesMessage": "User has not earned any badges yet",
     "tabs": {
       "home": "Home",
       "badges": "Badges",
@@ -256,6 +265,73 @@
         "noOnlineFriends": "No friends online",
         "noFriendsMessage": "This user doesn't have any friends yet",
         "noOnlineFriendsMessage": "No friends are currently online"
+      },
+    "addModal": {
+      "title": "Add friend",
+      "searchPlaceholder": "Enter user nickname...",
+      "searching": "Searching...",
+      "noResults": "No users found",
+      "enterNickname": "Enter nickname to search",
+      "status": {
+        "self": "This is you",
+        "alreadyFriends": "Already friends",
+        "requestSent": "Request sent"
+      },
+      "unblock": "Unblock",
+      "sendRequest": "Send request",
+      "close": "Close",
+      "requestSentSuccess": "Friend request sent",
+      "requestSentError": "Failed to send friend request",
+      "unblockSuccess": "User unblocked",
+      "unblockError": "Failed to unblock user"
+    },
+    "actions": {
+      "viewProfile": "View profile",
+      "sendMessage": "Send message",
+      "chatComingSoon": "Chat feature coming soon",
+      "removeFriend": "Remove from friends",
+      "block": "Block",
+      "removeConfirm": {
+        "title": "Remove from friends",
+        "message": "Are you sure you want to remove {name} from friends?",
+        "confirm": "Remove",
+        "cancel": "Cancel"
+      },
+      "blockConfirm": {
+        "title": "Block user",
+        "message": "Are you sure you want to block {name}? This will also remove them from your friends list.",
+        "confirm": "Block",
+        "cancel": "Cancel"
       }
+    }
+  },
+  "report": {
+    "title": "Report user",
+    "description": "Report for user @{nickname}",
+    "reasonLabel": "Reason for report",
+    "reasons": {
+      "harassment": "Harassment",
+      "harassmentDesc": "Threats, bullying, or unwanted behavior",
+      "spam": "Spam",
+      "spamDesc": "Unsolicited messages or advertising",
+      "inappropriateContent": "Inappropriate Content",
+      "inappropriateContentDesc": "Offensive or inappropriate content",
+      "impersonation": "Impersonation",
+      "impersonationDesc": "Pretending to be someone else",
+      "other": "Other",
+      "otherDesc": "Other violation reason"
+    },
+    "descriptionLabel": "Problem description",
+    "descriptionPlaceholder": "Please describe the problem in detail...",
+    "characterCount": "{count}/500 characters",
+    "cancel": "Cancel",
+    "submit": "Submit report",
+    "submitting": "Submitting...",
+    "errors": {
+      "selectReason": "Please select a reason",
+      "provideDescription": "Please provide a description",
+      "submitFailed": "Failed to submit report"
+    },
+    "success": "Report submitted successfully"
   }
 }

@@ -7,19 +7,22 @@ export type AddBalanceRequest = {
   title: string
 }
 
-export type Payment = {
+export type PaymentHistoryItem = {
   id: string
-  userId: string
+  date: string
+  type: 'Purchase' | 'TopUp' | 'Refund'
+  description: string
+  amount: number
+  currency: string
+  status: string
   gameId?: string
-  sum: number
-  name: string
-  data: string
+  gameName?: string
+  gameImage?: string
 }
 
 export type PagedPayments = {
-  data: Payment[]
+  items: PaymentHistoryItem[]
   totalCount: number
-  pageNumber: number
+  page: number
   pageSize: number
-  totalPages: number
 }

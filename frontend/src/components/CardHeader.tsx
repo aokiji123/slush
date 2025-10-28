@@ -1,17 +1,11 @@
 import { formatSimpleDate } from '@/utils/formatters'
 
 interface CardHeaderProps {
-  /** User avatar URL */
   avatar?: string
-  /** Username to display */
   username: string
-  /** Date to display */
   date?: string
-  /** Additional CSS classes */
   className?: string
-  /** Avatar size */
   avatarSize?: 'sm' | 'md' | 'lg'
-  /** Whether to show online indicator */
   isOnline?: boolean
 }
 
@@ -21,20 +15,6 @@ const avatarSizes = {
   lg: 'w-12 h-12',
 }
 
-/**
- * A reusable card header component for displaying user information.
- * Used in posts, reviews, guides, and comments.
- * 
- * @example
- * ```tsx
- * <CardHeader
- *   avatar="/avatar.jpg"
- *   username="JohnDoe"
- *   date="2024-01-15"
- *   isOnline={true}
- * />
- * ```
- */
 export const CardHeader = ({ 
   avatar, 
   username, 

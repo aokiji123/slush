@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Models;
+using Application.Common.Query;
 using Application.DTOs;
 using Application.Interfaces;
-using Application.Common.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,11 +31,39 @@ public class PaymentController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("history/{userId:guid}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<PagedResult<PaymentHistoryItemDto>>>> GetHistory(
+        Guid userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int limit = 20,
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null,
+        [FromQuery] PaymentTypeDto? type = null)
+    {
+        if (userId == Guid.Empty)
+        {
+            return BadRequest(new ApiResponse<PagedResult<PaymentHistoryItemDto>>("User ID cannot be empty"));
+        }
+
+        var query = new PaymentHistoryQueryParams
+        {
+            Page = page,
+            Limit = limit,
+            From = from,
+            To = to,
+            Type = type
+        };
+
+        var result = await _paymentService.GetPaymentHistoryAsync(userId, query);
+        return Ok(new ApiResponse<PagedResult<PaymentHistoryItemDto>>(result));
+    }
+
     /// <summary>
     /// Creates a new payment record.
     /// </summary>
-    /// <param name="dto">Payment creation data</param>
-    /// <returns>Created payment information</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,8 +105,6 @@ public class PaymentController : ControllerBase
     /// <summary>
     /// Gets all payments for a specific user.
     /// </summary>
-    /// <param name="userId">User identifier</param>
-    /// <returns>List of user's payments</returns>
     [HttpGet("{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -110,9 +136,6 @@ public class PaymentController : ControllerBase
     /// <summary>
     /// Gets payments for a specific user, with pagination and sorting.
     /// </summary>
-    /// <param name="userId">User identifier</param>
-    /// <param name="query">Paging and sorting query</param>
-    /// <returns>Paged list of user's payments</returns>
     [HttpGet("{userId:guid}/paged")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

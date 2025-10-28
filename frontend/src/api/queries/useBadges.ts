@@ -1,26 +1,25 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { getAllBadges, getUserBadges, checkAndAwardBadges } from '@/api/badgeAPI'
+import { useQuery } from '@tanstack/react-query'
+import { getAllBadges, getUserBadges } from '../badgesAPI'
 
-// Get all available badges
+// Hook for fetching all available badges
 export function useAllBadges() {
   return useQuery({
-    queryKey: ['badges'],
-    queryFn: getAllBadges,
+    queryKey: ['badges', 'all'],
+    queryFn: () => getAllBadges(),
+    staleTime: 1000 * 60 * 60, // 1 hour - badges don't change often
+    retry: 3,
+    refetchOnWindowFocus: false,
   })
 }
 
-// Get user's earned badges
+// Hook for fetching user's earned badges
 export function useUserBadges(userId: string) {
   return useQuery({
-    queryKey: ['user-badges', userId],
+    queryKey: ['badges', 'user', userId],
     queryFn: () => getUserBadges(userId),
     enabled: !!userId,
-  })
-}
-
-// Check and award badges for a user (admin only)
-export function useCheckAndAwardBadges() {
-  return useMutation({
-    mutationFn: (userId: string) => checkAndAwardBadges(userId),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    refetchOnWindowFocus: false,
   })
 }

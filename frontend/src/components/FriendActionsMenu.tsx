@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { ConfirmationModal } from './ConfirmationModal'
 import { useRemoveFriend, useBlockUser } from '@/api/queries/useFriendship'
 
@@ -20,6 +21,7 @@ export const FriendActionsMenu = ({
   onClose,
   buttonRef,
 }: FriendActionsMenuProps) => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const menuRef = useRef<HTMLDivElement>(null)
   const [showRemoveModal, setShowRemoveModal] = useState(false)
@@ -55,7 +57,7 @@ export const FriendActionsMenu = ({
 
   const handleSendMessage = () => {
     // Mock implementation
-    alert('Чат функція буде доступна скоро')
+    alert(t('friends.actions.chatComingSoon'))
     onClose()
   }
 
@@ -110,14 +112,14 @@ export const FriendActionsMenu = ({
           onClick={handleViewProfile}
           className="w-full px-[16px] py-[10px] text-left text-[16px] text-[var(--color-background)] hover:bg-[var(--color-background-18)] transition-colors"
         >
-          Переглянути профіль
+          {t('friends.actions.viewProfile')}
         </button>
 
         <button
           onClick={handleSendMessage}
           className="w-full px-[16px] py-[10px] text-left text-[16px] text-[var(--color-background)] hover:bg-[var(--color-background-18)] transition-colors"
         >
-          Надіслати повідомлення
+          {t('friends.actions.sendMessage')}
         </button>
 
         <div className="h-[1px] bg-[var(--color-background-16)] my-[8px]" />
@@ -129,7 +131,7 @@ export const FriendActionsMenu = ({
           }}
           className="w-full px-[16px] py-[10px] text-left text-[16px] text-[var(--color-background)] hover:bg-[var(--color-background-18)] transition-colors"
         >
-          Видалити з друзів
+          {t('friends.actions.removeFriend')}
         </button>
 
         <button
@@ -139,7 +141,7 @@ export const FriendActionsMenu = ({
           }}
           className="w-full px-[16px] py-[10px] text-left text-[16px] text-[#FF4444] hover:bg-[var(--color-background-18)] transition-colors"
         >
-          Заблокувати
+          {t('friends.actions.block')}
         </button>
         </div>
       )}
@@ -147,10 +149,10 @@ export const FriendActionsMenu = ({
       {/* Remove Friend Confirmation */}
       <ConfirmationModal
         isOpen={showRemoveModal}
-        title="Видалити з друзів"
-        message={`Ви впевнені, що хочете видалити ${friendName} з друзів?`}
-        confirmText="Видалити"
-        cancelText="Скасувати"
+        title={t('friends.actions.removeConfirm.title')}
+        message={t('friends.actions.removeConfirm.message', { name: friendName })}
+        confirmText={t('friends.actions.removeConfirm.confirm')}
+        cancelText={t('friends.actions.removeConfirm.cancel')}
         onConfirm={handleRemoveFriend}
         onCancel={() => {
           setShowRemoveModal(false)
@@ -162,10 +164,10 @@ export const FriendActionsMenu = ({
       {/* Block User Confirmation */}
       <ConfirmationModal
         isOpen={showBlockModal}
-        title="Заблокувати користувача"
-        message={`Ви впевнені, що хочете заблокувати ${friendName}? Це також видалить користувача з вашого списку друзів.`}
-        confirmText="Заблокувати"
-        cancelText="Скасувати"
+        title={t('friends.actions.blockConfirm.title')}
+        message={t('friends.actions.blockConfirm.message', { name: friendName })}
+        confirmText={t('friends.actions.blockConfirm.confirm')}
+        cancelText={t('friends.actions.blockConfirm.cancel')}
         onConfirm={handleBlockUser}
         onCancel={() => {
           setShowBlockModal(false)

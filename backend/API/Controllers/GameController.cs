@@ -72,7 +72,6 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
         }
 
-        // Extract language from Accept-Language header
         var language = ExtractLanguageFromHeader();
         var cacheKey = $"{CacheKeyPrefix}Game_{id}_{language}";
         
@@ -93,7 +92,6 @@ public class GameController : ControllerBase
                 return NotFound(new ApiResponse<GameDto>($"Game with ID {id} not found"));
             }
             
-            // Cache the game data with language-specific key
             _cache.Set(cacheKey, game, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved game with ID: {GameId} in language: {Language}", id, language);
@@ -121,7 +119,6 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<GameDto>("Game identifier cannot be empty"));
         }
 
-        // Extract language from Accept-Language header
         var language = ExtractLanguageFromHeader();
         var cacheKey = $"{CacheKeyPrefix}Game_Slug_{identifier}_{language}";
         
@@ -142,7 +139,6 @@ public class GameController : ControllerBase
                 return NotFound(new ApiResponse<GameDto>($"Game with identifier {identifier} not found"));
             }
             
-            // Cache the game data with language-specific key
             _cache.Set(cacheKey, game, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved game with identifier: {Identifier} in language: {Language}", identifier, language);
@@ -197,7 +193,6 @@ public class GameController : ControllerBase
                 name = g.Name
             });
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Found {Count} games matching search criteria in language {Language}", result.Count(), language);
@@ -233,7 +228,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving discounted games in language {Language}", language);
             var result = await _gameService.GetDiscountedAsync(language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} discounted games in language {Language}", result.Count(), language);
@@ -269,7 +263,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving recommended games in language {Language}", language);
             var result = await _gameService.GetRecommendedAsync(language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} recommended games in language {Language}", result.Count(), language);
@@ -308,7 +301,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving games cheaper than {Price} in language {Language}", price, language);
             var result = await _gameService.GetCheaperThanAsync(price, language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} games cheaper than {Price} in language {Language}", result.Count(), price, language);
@@ -344,7 +336,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving hit games in language {Language}", language);
             var result = await _gameService.GetHitsAsync(language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} hit games in language {Language}", result.Count(), language);
@@ -380,7 +371,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving new games in language {Language}", language);
             var result = await _gameService.GetNewAsync(language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} new games in language {Language}", result.Count(), language);
@@ -416,7 +406,6 @@ public class GameController : ControllerBase
             _logger.LogInformation("Retrieving free games in language {Language}", language);
             var result = await _gameService.GetFreeAsync(language);
             
-            // Cache the results with language-specific key
             _cache.Set(cacheKey, result, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved {Count} free games in language {Language}", result.Count(), language);
@@ -540,7 +529,6 @@ public class GameController : ControllerBase
             return BadRequest(new ApiResponse<GameDto>("Game ID cannot be empty"));
         }
 
-        // Extract language from Accept-Language header
         var language = ExtractLanguageFromHeader();
         var cacheKey = $"{CacheKeyPrefix}BaseGame_{id}_{language}";
         
@@ -561,7 +549,6 @@ public class GameController : ControllerBase
                 return NotFound(new ApiResponse<GameDto>("Base game not found for this DLC"));
             }
             
-            // Cache the base game data with language-specific key
             _cache.Set(cacheKey, baseGame, CacheExpiration);
             
             _logger.LogInformation("Successfully retrieved base game for DLC with ID: {DlcId} in language: {Language}", id, language);

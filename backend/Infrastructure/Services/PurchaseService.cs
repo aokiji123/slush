@@ -13,11 +13,13 @@ public class PurchaseService : IPurchaseService
 {
     private readonly AppDbContext _context;
     private readonly IWalletService _walletService;
+    private readonly IBadgeService _badgeService;
 
-    public PurchaseService(AppDbContext context, IWalletService walletService)
+    public PurchaseService(AppDbContext context, IWalletService walletService, IBadgeService badgeService)
     {
         _context = context;
         _walletService = walletService;
+        _badgeService = badgeService;
     }
 
     public async Task<PurchaseResultDto> PurchaseAsync(Guid userId, PurchaseRequestDto dto)
@@ -89,11 +91,39 @@ public class PurchaseService : IPurchaseService
             {
                 _context.Wishlists.Remove(wishlistItem);
             }
+
+            // Record payment for purchase (only for paid games)
+            if (!isFreeGame)
+            {
+                var payment = new Payment
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    GameId = game.Id,
+                    Sum = -price, // negative amount for purchase
+                    Name = game.Name ?? "Game purchase",
+                    Data = DateTime.UtcNow
+                };
+                _context.Set<Payment>().Add(payment);
+            }
             
             await _context.SaveChangesAsync();
             
             // Commit the transaction
             await transaction.CommitAsync();
+            
+            // Award badges after successful purchase (outside transaction to avoid blocking)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _badgeService.CheckAndAwardBadgesAsync(userId);
+                }
+                catch
+                {
+                    // Silently fail badge awarding - don't affect the purchase
+                }
+            });
         }
         catch (Exception ex)
         {

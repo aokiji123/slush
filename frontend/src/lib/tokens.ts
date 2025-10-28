@@ -1,27 +1,13 @@
-/**
- * Design tokens for consistent styling across the application
- * These map to CSS variables defined in colors.css
- */
-
 export const colors = {
-  // Semantic colors
   primary: 'var(--color-primary)',
   secondary: 'var(--color-secondary)',
   accent: 'var(--color-accent)',
-  
-  // Surface colors
   surface: 'var(--color-surface)',
   surfaceElevated: 'var(--color-surface-elevated)',
-  
-  // Text colors
   textPrimary: 'var(--color-text-primary)',
   textSecondary: 'var(--color-text-secondary)',
-  
-  // Background colors (original system)
   background: 'var(--color-background)',
   nightBackground: 'var(--color-night-background)',
-  
-  // Specific UI colors
   success: 'var(--color-background-20)',
   error: 'var(--color-background-4)',
   warning: 'var(--color-background-2)',
@@ -78,7 +64,6 @@ export const zIndex = {
   tooltip: 100,
 } as const
 
-// Type exports for TypeScript
 export type Color = keyof typeof colors
 export type Spacing = keyof typeof spacing
 export type BorderRadius = keyof typeof borderRadius

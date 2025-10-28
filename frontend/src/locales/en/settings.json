@@ -50,43 +50,6 @@
     "notifications": "Notifications",
     "sound": "Sound"
   },
-  "password": {
-    "title": "Change Password",
-    "currentPasswordLabel": "Current password",
-    "currentPasswordPlaceholder": "Enter current password...",
-    "newPasswordLabel": "New password",
-    "newPasswordPlaceholder": "Enter new password...",
-    "confirmPasswordLabel": "Confirm new password",
-    "confirmPasswordPlaceholder": "Confirm new password...",
-    "submit": "Change password",
-    "success": "Password changed successfully!",
-    "error": "Error changing password",
-    "fillAllFields": "Please fill in all fields",
-    "passwordsNotMatch": "Passwords do not match"
-  },
-  "wallet": {
-    "title": "Wallet",
-    "balance": "Balance",
-    "addFunds": "Add funds",
-    "withdrawFunds": "Withdraw funds",
-    "transactionHistory": "Transaction history",
-    "noTransactions": "No transactions yet",
-    "amount": "Amount",
-    "amountPlaceholder": "Enter amount...",
-    "submit": "Process",
-    "success": "Transaction successful!",
-    "error": "Transaction failed"
-  },
-  "deleteAccount": {
-    "title": "Delete Account",
-    "warning": "This action cannot be undone. All your data will be permanently deleted.",
-    "confirmText": "Type 'DELETE' to confirm",
-    "confirmPlaceholder": "Type DELETE here...",
-    "submit": "Delete account",
-    "cancel": "Cancel",
-    "error": "Error deleting account",
-    "confirmRequired": "Please type 'DELETE' to confirm"
-  },
   "navigation": {
     "darkTheme": "Dark Theme",
     "general": "General Settings",
@@ -186,5 +149,43 @@
       "confirmPasswordRequired": "Confirm password",
       "passwordsNotMatch": "Passwords do not match"
     }
+  },
+  "payments": {
+    "title": "Payments",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "type": "Type",
+      "typeOptions": {
+        "all": "All",
+        "purchase": "Purchase",
+        "topUp": "Top Up",
+        "refund": "Refund"
+      }
+    },
+    "loading": "Loading...",
+    "error": "Failed to load payments",
+    "empty": "No payments found",
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next",
+      "page": "Page"
+    }
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "avatar": "Avatar",
+    "banner": "Banner",
+    "changeAvatar": "Change avatar",
+    "changeBanner": "Change banner",
+    "nickname": "Nickname",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell about yourself...",
+    "language": "Language",
+    "ukrainian": "Ukrainian",
+    "english": "English",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "saving": "Saving..."
   }
 }

@@ -26,6 +26,103 @@ public class DatabaseSeeder : IDatabaseSeeder
         _logger = logger;
     }
 
+    public async Task SeedBadgesAsync()
+    {
+        if (await _dbContext.Set<Badge>().AnyAsync())
+        {
+            _logger.LogInformation("Badges already exist, skipping seeding");
+            return;
+        }
+
+        var badges = new List<Badge>
+        {
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "First Steps",
+                Description = "Add your first game to library",
+                Icon = "/badge-icon.png",
+                RequiredValue = 1,
+                RequirementType = "games",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Explorer",
+                Description = "Collect 10 games",
+                Icon = "/badge-icon.png",
+                RequiredValue = 10,
+                RequirementType = "games",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Collector",
+                Description = "Collect 50 games",
+                Icon = "/badge-icon.png",
+                RequiredValue = 50,
+                RequirementType = "games",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Reviewer",
+                Description = "Write 5 reviews",
+                Icon = "/badge-icon.png",
+                RequiredValue = 5,
+                RequirementType = "reviews",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Social Butterfly",
+                Description = "Make 10 friends",
+                Icon = "/badge-icon.png",
+                RequiredValue = 10,
+                RequirementType = "friends",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Content Creator",
+                Description = "Create 20 posts",
+                Icon = "/badge-icon.png",
+                RequiredValue = 20,
+                RequirementType = "posts",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "Wishlist Master",
+                Description = "Add 25 games to wishlist",
+                Icon = "/badge-icon.png",
+                RequiredValue = 25,
+                RequirementType = "wishlist",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Badge
+            {
+                Id = Guid.NewGuid(),
+                Name = "DLC Enthusiast",
+                Description = "Collect 5 DLCs",
+                Icon = "/badge-icon.png",
+                RequiredValue = 5,
+                RequirementType = "dlc",
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await _dbContext.Set<Badge>().AddRangeAsync(badges);
+        await _dbContext.SaveChangesAsync();
+        _logger.LogInformation("Seeded {Count} badges", badges.Count);
+    }
+
     public async Task SeedAsync(IEnumerable<int> ids)
     {
         var idList = (ids?.ToList() ?? new List<int> { 452 }).Distinct().ToList();

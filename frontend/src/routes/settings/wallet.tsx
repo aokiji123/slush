@@ -20,14 +20,15 @@ function RouteComponent() {
   const { data: user } = useAuthenticatedUser()
   const { data: balance, isLoading: balanceLoading } = useWalletBalance()
   const addBalanceMutation = useAddBalance()
-  const { data: paymentHistory, isLoading: historyLoading } = usePaymentHistory(
-    user?.id || '',
-    1,
-    10,
-  )
 
   const [amount, setAmount] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const { data: paymentHistory, isLoading: historyLoading } = usePaymentHistory(
+    user?.id || '',
+    currentPage,
+    10,
+  )
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -91,8 +92,8 @@ function RouteComponent() {
   const renderPagination = () => {
     if (!paymentHistory) return null
 
-    const totalPages = paymentHistory.totalPages
-    const pages = []
+    const totalPages = Math.ceil(paymentHistory.totalCount / paymentHistory.pageSize)
+    const pages: (number | string)[] = []
 
     // Show first page
     if (currentPage > 3) {
@@ -219,23 +220,23 @@ function RouteComponent() {
             <div className="flex items-center justify-center py-8">
               <p className="text-white">{t('wallet.loadingHistory')}</p>
             </div>
-          ) : paymentHistory?.data && paymentHistory.data.length > 0 ? (
+          ) : paymentHistory?.items && paymentHistory.items.length > 0 ? (
             <div className="w-full rounded-[20px] flex flex-col gap-[8px]">
-              {paymentHistory.data.map((payment) => (
+              {paymentHistory.items.map((payment) => (
                 <div
                   key={payment.id}
                   className="flex items-center px-[20px] py-[16px] rounded-[20px] text-[16px] text-white font-light bg-[var(--color-background-15)]"
                 >
                   <div className="w-[15%]">
-                    <p className={getAmountColor(payment.sum)}>
-                      {formatAmount(payment.sum)}
+                    <p className={getAmountColor(payment.amount)}>
+                      {formatAmount(payment.amount)}
                     </p>
                   </div>
                   <div className="w-[75%]">
-                    <p>{payment.name}</p>
+                    <p>{payment.description}</p>
                   </div>
                   <div className="w-[10%] text-right">
-                    <p>{formatDate(payment.data)}</p>
+                    <p>{formatDate(payment.date)}</p>
                   </div>
                 </div>
               ))}

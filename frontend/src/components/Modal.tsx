@@ -4,19 +4,12 @@ import { IoClose } from 'react-icons/io5'
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl'
 
 interface ModalProps {
-  /** Whether the modal is open */
   isOpen: boolean
-  /** Function to call when modal should close */
   onClose: () => void
-  /** Optional title for the modal */
   title?: string
-  /** Modal content */
   children: React.ReactNode
-  /** Size variant of the modal */
   size?: ModalSize
-  /** Additional CSS classes */
   className?: string
-  /** Whether to show close button */
   showCloseButton?: boolean
 }
 
@@ -27,22 +20,6 @@ const sizeClasses: Record<ModalSize, string> = {
   xl: 'max-w-6xl',
 }
 
-/**
- * A reusable modal component with consistent styling and behavior.
- * Handles backdrop clicks, ESC key, and focus management.
- * 
- * @example
- * ```tsx
- * <Modal
- *   isOpen={isOpen}
- *   onClose={onClose}
- *   title="Confirm Action"
- *   size="md"
- * >
- *   <p>Are you sure you want to proceed?</p>
- * </Modal>
- * ```
- */
 export const Modal = ({ 
   isOpen, 
   onClose, 

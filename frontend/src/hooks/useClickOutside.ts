@@ -1,12 +1,6 @@
 import { useEffect } from 'react'
 import type { RefObject } from 'react'
 
-/**
- * Hook for handling click outside events
- * @param ref Reference to the element to watch
- * @param callback Function to call when clicking outside
- * @param enabled Whether the hook is enabled
- */
 export const useClickOutside = <T extends HTMLElement = HTMLDivElement>(
   ref: RefObject<T>, 
   callback: () => void, 

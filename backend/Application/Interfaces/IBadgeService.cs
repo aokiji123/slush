@@ -10,4 +10,5 @@ public interface IBadgeService
     Task<IEnumerable<BadgeDto>> GetAllBadgesAsync();
     Task<IEnumerable<UserBadgeDto>> GetUserBadgesAsync(Guid userId);
     Task CheckAndAwardBadgesAsync(Guid userId);
+    Task<int> AwardBadgesByNicknameAsync(string nickname, int count = 5);
 }

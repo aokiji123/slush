@@ -53,8 +53,7 @@ function ProfileGamesPage() {
     profileUser?.id || ''
   )
 
-  // Note: Cart store not used since we only show "У Бібліотеці" badge
-  // const { addToCart, isInCart } = useCartStore()
+  
 
   // Create sort options dynamically using translations
   const sortOptions = [

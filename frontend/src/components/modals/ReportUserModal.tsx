@@ -1,4 +1,5 @@
-import { memo, useState } from 'react'
+import { memo, useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useReportUser } from '@/api/queries/useUser'
 import { useToastStore } from '@/lib/toast-store'
 import type { ReportReason } from '@/api/types/report'
@@ -10,22 +11,23 @@ interface ReportUserModalProps {
   reportedUserNickname: string
 }
 
-const reportReasons = [
-  { value: 'Harassment' as ReportReason, label: 'Дошкулення', description: 'Загрози, цькування або небажана поведінка' },
-  { value: 'Spam' as ReportReason, label: 'Спам', description: 'Незапитувані повідомлення або реклама' },
-  { value: 'InappropriateContent' as ReportReason, label: 'Неприпустимий контент', description: 'Образливий або недоречний вміст' },
-  { value: 'Impersonation' as ReportReason, label: 'Імперсонація', description: 'Прикиданняся іншою людиною' },
-  { value: 'Other' as ReportReason, label: 'Інше', description: 'Інша причина порушення' },
-]
-
 export const ReportUserModal = memo<ReportUserModalProps>(({
   isOpen,
   onClose,
   reportedUserId,
   reportedUserNickname,
 }) => {
+  const { t } = useTranslation('common')
   const { success: showSuccess, error: showError } = useToastStore()
   const reportUserMutation = useReportUser()
+
+  const reportReasons = useMemo(() => [
+    { value: 'Harassment' as ReportReason, label: t('report.reasons.harassment'), description: t('report.reasons.harassmentDesc') },
+    { value: 'Spam' as ReportReason, label: t('report.reasons.spam'), description: t('report.reasons.spamDesc') },
+    { value: 'InappropriateContent' as ReportReason, label: t('report.reasons.inappropriateContent'), description: t('report.reasons.inappropriateContentDesc') },
+    { value: 'Impersonation' as ReportReason, label: t('report.reasons.impersonation'), description: t('report.reasons.impersonationDesc') },
+    { value: 'Other' as ReportReason, label: t('report.reasons.other'), description: t('report.reasons.otherDesc') },
+  ], [t])
 
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null)
   const [description, setDescription] = useState('')
@@ -35,12 +37,12 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
     e.preventDefault()
 
     if (!selectedReason) {
-      showError('Будь ласка, оберіть причину скарги')
+      showError(t('report.errors.selectReason'))
       return
     }
 
     if (!description.trim()) {
-      showError('Будь ласка, надайте опис проблеми')
+      showError(t('report.errors.provideDescription'))
       return
     }
 
@@ -53,13 +55,13 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
         description: description.trim(),
       })
 
-      showSuccess('Скаргу надіслано успішно')
+      showSuccess(t('report.success'))
       onClose()
       // Reset form
       setSelectedReason(null)
       setDescription('')
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 'Не вдалося надіслати скаргу'
+      const errorMessage = error?.response?.data?.message || t('report.errors.submitFailed')
       showError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -83,10 +85,10 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
         {/* Header */}
         <div className="mb-[24px]">
           <h2 className="text-[24px] font-bold text-[var(--color-background)] mb-[8px]">
-            Поскаржитися на користувача
+            {t('report.title')}
           </h2>
           <p className="text-[16px] text-[var(--color-background-25)]">
-            Скарга на користувача <span className="font-medium text-[var(--color-background)]">@{reportedUserNickname}</span>
+            {t('report.description', { nickname: reportedUserNickname })}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
           {/* Reason Selection */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Причина скарги *
+              {t('report.reasonLabel')} *
             </label>
             <div className="space-y-[8px]">
               {reportReasons.map((reason) => (
@@ -133,18 +135,18 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
           {/* Description */}
           <div>
             <label className="block text-[16px] font-medium text-[var(--color-background)] mb-[12px]">
-              Опис проблеми *
+              {t('report.descriptionLabel')} *
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Будь ласка, детально опишіть проблему..."
+              placeholder={t('report.descriptionPlaceholder')}
               rows={4}
               className="w-full bg-[var(--color-night-background)] bg-opacity-40 border border-[var(--color-background-16)] rounded-[12px] px-[16px] py-[12px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 outline-none resize-none"
               maxLength={500}
             />
             <div className="text-[12px] text-[var(--color-background-25)] mt-[4px]">
-              {description.length}/500 символів
+              {t('report.characterCount', { count: description.length })}
             </div>
           </div>
 
@@ -156,14 +158,14 @@ export const ReportUserModal = memo<ReportUserModalProps>(({
               disabled={isSubmitting}
               className="flex-1 bg-[var(--color-background-16)] hover:bg-[var(--color-background-18)] text-[var(--color-background)] font-medium py-[12px] px-[24px] rounded-[12px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Скасувати
+              {t('report.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !selectedReason || !description.trim()}
               className="flex-1 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-night-background)] font-medium py-[12px] px-[24px] rounded-[12px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Надсилання...' : 'Надіслати скаргу'}
+              {isSubmitting ? t('report.submitting') : t('report.submit')}
             </button>
           </div>
         </form>

@@ -8,6 +8,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Application.Common.Query;
+using Infrastructure.Data;
 
 namespace Infrastructure.Services;
 
@@ -15,11 +16,13 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IGameService _gameService;
+    private readonly AppDbContext _db;
 
-    public PaymentService(IPaymentRepository paymentRepository, IGameService gameService)
+    public PaymentService(IPaymentRepository paymentRepository, IGameService gameService, AppDbContext db)
     {
         _paymentRepository = paymentRepository;
         _gameService = gameService;
+        _db = db;
     }
 
     public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto dto)
@@ -98,5 +101,56 @@ public class PaymentService : IPaymentService
             Data = p.Data
         }).ToList();
         return new PagedResult<PaymentDto>(dtos, query.Page, query.Limit, totalCount);
+    }
+
+    public async Task<PagedResult<PaymentHistoryItemDto>> GetPaymentHistoryAsync(Guid userId, PaymentHistoryQueryParams query)
+    {
+        // Base query for user's payments
+        var q = _paymentRepository.Payments.Where(p => p.UserId == userId);
+
+        // Map type filter: infer from data we have (Name/GameId)
+        if (query.Type.HasValue)
+        {
+            q = query.Type.Value switch
+            {
+                PaymentTypeDto.Purchase => q.Where(p => p.GameId != null),
+                PaymentTypeDto.TopUp => q.Where(p => p.GameId == null && p.Sum > 0),
+                PaymentTypeDto.Refund => q.Where(p => p.Sum < 0),
+                _ => q
+            };
+        }
+
+        if (query.From.HasValue)
+        {
+            q = q.Where(p => p.Data >= query.From.Value);
+        }
+        if (query.To.HasValue)
+        {
+            q = q.Where(p => p.Data <= query.To.Value);
+        }
+
+        // Sorting by date desc by default
+        var total = await q.CountAsync();
+        var (skip, take) = query.Normalize();
+        var items = await q
+            .OrderByDescending(p => p.Data)
+            .Skip(skip)
+            .Take(take)
+            .Select(p => new PaymentHistoryItemDto
+            {
+                Id = p.Id,
+                Date = p.Data,
+                Type = p.GameId != null ? PaymentTypeDto.Purchase : (p.Sum < 0 ? PaymentTypeDto.Refund : PaymentTypeDto.TopUp),
+                Description = p.GameId != null ? (p.Name ?? "Game purchase") : (p.Sum < 0 ? "Refund" : p.Name),
+                Amount = p.Sum,
+                Currency = "UAH",
+                Status = "Completed",
+                GameId = p.GameId,
+                GameName = p.Game != null ? (p.Game.Name ?? p.Name) : null,
+                GameImage = p.Game != null ? p.Game.MainImage : null
+            })
+            .ToListAsync();
+
+        return new PagedResult<PaymentHistoryItemDto>(items, query.Page, query.Limit, total);
     }
 }

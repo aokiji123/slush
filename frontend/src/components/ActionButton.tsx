@@ -4,17 +4,11 @@ import { formatCount } from '@/utils/formatters'
 type ActionButtonVariant = 'like' | 'comment' | 'share' | 'buy' | 'view'
 
 interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Icon to display in the button */
   icon: React.ReactNode
-  /** Count to display (will be formatted) */
   count?: number
-  /** Text label to display */
   label?: string
-  /** Button variant for styling */
   variant?: ActionButtonVariant
-  /** Whether the button is in active state */
   isActive?: boolean
-  /** Additional CSS classes */
   className?: string
 }
 
@@ -34,21 +28,6 @@ const activeStyles: Record<ActionButtonVariant, string> = {
   view: 'text-[var(--color-background-10)]',
 }
 
-/**
- * A reusable action button component for like, comment, share, buy, and view actions.
- * Maintains consistent styling across all gallery and post components.
- * 
- * @example
- * ```tsx
- * <ActionButton
- *   icon={<HeartIcon />}
- *   count={1234}
- *   variant="like"
- *   isActive={isLiked}
- *   onClick={handleLike}
- * />
- * ```
- */
 export const ActionButton = forwardRef<HTMLButtonElement, ActionButtonProps>(
   ({ 
     icon, 

@@ -1,17 +1,11 @@
 import type { ReactNode } from 'react'
 
 interface GalleryGridProps<T> {
-  /** Array of items to render */
   items: T[]
-  /** Function to render each item */
   renderItem: (item: T, index: number) => ReactNode
-  /** Number of columns in the grid */
   columns?: 1 | 2 | 3 | 4
-  /** Gap between grid items */
   gap?: 'sm' | 'md' | 'lg'
-  /** Empty state to show when no items */
   emptyState?: ReactNode
-  /** Additional CSS classes */
   className?: string
 }
 
@@ -28,20 +22,6 @@ const gapClasses = {
   lg: 'gap-6',
 }
 
-/**
- * A reusable grid layout component for galleries.
- * Provides consistent grid layouts with customizable columns and gaps.
- * 
- * @example
- * ```tsx
- * <GalleryGrid
- *   items={posts}
- *   renderItem={(post) => <PostCard key={post.id} post={post} />}
- *   columns={3}
- *   gap="md"
- * />
- * ```
- */
 export const GalleryGrid = <T,>({ 
   items, 
   renderItem, 

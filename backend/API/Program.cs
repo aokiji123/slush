@@ -30,13 +30,11 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Application.Interfaces;
 
-// Load environment variables from .env file if it exists
 var currentDir = Directory.GetCurrentDirectory();
 var envPath = Path.Combine(currentDir, ".env");
 
 if (!File.Exists(envPath))
 {
-    // Try parent directory (backend root)
     var parentDir = Directory.GetParent(currentDir)?.FullName ?? "";
     envPath = Path.Combine(parentDir, ".env");
 }
@@ -46,17 +44,14 @@ if (File.Exists(envPath))
     Env.Load(envPath);
 }
 
-// Validate that all required secrets are present
 SecretsConfiguration.ValidateRequiredSecrets();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services using extension methods
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiServices(builder.Configuration);
 
-// JWT
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -76,7 +71,6 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(SecretsConfiguration.GetRequiredSecret("JWT_KEY", "JWT signing key")))
         };
 
-        // Configure JWT for SignalR
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -97,7 +91,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // TODO: Register AWS S3 client for R2 when packages are available
-// SWAGGER
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -140,14 +133,13 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-// CORS SETTING
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5173",  // Vite dev server
-                "http://localhost:3000",  // Alternative dev port
+                "http://localhost:5173",
+                "http://localhost:3000",
                 "https://localhost:5173",
                 "https://localhost:3000"
             )
@@ -187,10 +179,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Map SignalR hubs
 app.MapHub<ChatHub>("/api/hubs/chat");
 
-// CLI seeding support: dotnet run --project backend/API -- --seed --ids 452,999
+// CLI seeding: dotnet run --project backend/API -- --seed --ids 452,999
+// CLI badge seeding: dotnet run --project backend/API -- --seed-badges
 if (args.Contains("--seed"))
 {
     using var scope = app.Services.CreateScope();
@@ -208,6 +200,14 @@ if (args.Contains("--seed"))
     }
 
     await seeder.SeedAsync(ids);
+    return;
+}
+
+if (args.Contains("--seed-badges"))
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<Application.Interfaces.IDatabaseSeeder>();
+    await seeder.SeedBadgesAsync();
     return;
 }
 

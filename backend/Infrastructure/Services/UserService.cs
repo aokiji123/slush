@@ -26,9 +26,10 @@ public class UserService : IUserService
     private readonly ICommunityService _communityService;
     private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
+    private readonly IBadgeRepository _badgeRepository;
 
     public UserService(AppDbContext db, IStorageService storageService, IFriendshipRepository friendshipRepository, 
-        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService, IMapper mapper, UserManager<User> userManager)
+        ILibraryService libraryService, IWishlistService wishlistService, IReviewService reviewService, ICommunityService communityService, IMapper mapper, UserManager<User> userManager, IBadgeRepository badgeRepository)
     {
         _db = db;
         _storageService = storageService;
@@ -39,6 +40,7 @@ public class UserService : IUserService
         _communityService = communityService;
         _mapper = mapper;
         _userManager = userManager;
+        _badgeRepository = badgeRepository;
     }
 
     public async Task<UserDto?> GetUserAsync(Guid id)
@@ -83,6 +85,21 @@ public class UserService : IUserService
 
         user.Balance += amountToAdd;
         await _db.SaveChangesAsync();
+        
+        // Create a payment record for the top-up
+        var payment = new Payment
+        {
+            Id = Guid.NewGuid(),
+            UserId = id,
+            GameId = null,
+            Sum = amountToAdd,
+            Name = "Поповнення рахунку",
+            Data = DateTime.UtcNow
+        };
+        
+        _db.Set<Payment>().Add(payment);
+        await _db.SaveChangesAsync();
+        
         return true;
     }
 
@@ -396,8 +413,9 @@ public class UserService : IUserService
         var guidesCount = await _db.Set<Post>()
             .CountAsync(p => p.AuthorId == userId && p.Type == PostType.Guide);
 
-        // Get badges count (will be calculated separately to avoid circular dependency)
-        var badgesCount = 0;
+        // Get badges count
+        var userBadges = await _badgeRepository.GetUserBadgesAsync(userId);
+        var badgesCount = userBadges.Count();
 
         // Calculate level based on activity
         var level = CalculateUserLevel(gamesCount, reviewsCount, friendsCount, postsCount);

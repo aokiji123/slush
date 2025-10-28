@@ -73,7 +73,7 @@ export const ProfileTabToolbar = ({
       {/* Right Section - Sort */}
       <div className="flex gap-[10px] items-center">
         <p className="text-[16px] font-artifakt text-[rgba(204,248,255,0.65)]">
-          Сортування:
+          {t('sorting.label')}
         </p>
         
         {/* Sort Dropdown */}

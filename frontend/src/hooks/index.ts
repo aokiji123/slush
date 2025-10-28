@@ -1,7 +1,3 @@
-/**
- * Central export for all custom hooks
- */
-
 export * from './useModal'
 export * from './useClickOutside'
 export * from './useKeyboardNavigation'

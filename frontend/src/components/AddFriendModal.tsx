@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchUsers, useAuthenticatedUser } from '@/api/queries/useUser'
 import { useSendFriendRequest, useFriendRequests, useFriends, useBlockedUsers, useUnblockUser } from '@/api/queries/useFriendship'
 import { useToastStore } from '@/lib/toast-store'
@@ -9,6 +10,7 @@ interface AddFriendModalProps {
 }
 
 export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
+  const { t } = useTranslation('common')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
@@ -37,10 +39,10 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const handleSendRequest = async (receiverId: string) => {
     try {
       await sendFriendRequestMutation.mutateAsync(receiverId)
-      showSuccess('Запит на дружбу відправлено')
+      showSuccess(t('friends.addModal.requestSentSuccess'))
     } catch (error: any) {
       console.error('Failed to send friend request:', error)
-      const errorMessage = error?.response?.data?.message || 'Не вдалося відправити запит на дружбу'
+      const errorMessage = error?.response?.data?.message || t('friends.addModal.requestSentError')
       showError(errorMessage)
     }
   }
@@ -48,10 +50,10 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
   const handleUnblock = async (blockedUserId: string) => {
     try {
       await unblockUserMutation.mutateAsync(blockedUserId)
-      showSuccess('Користувача розблоковано')
+      showSuccess(t('friends.addModal.unblockSuccess'))
     } catch (error: any) {
       console.error('Failed to unblock user:', error)
-      const errorMessage = error?.response?.data?.message || 'Не вдалося розблокувати користувача'
+      const errorMessage = error?.response?.data?.message || t('friends.addModal.unblockError')
       showError(errorMessage)
     }
   }
@@ -79,13 +81,13 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
       {/* Modal */}
       <div className="relative bg-[var(--color-background-8)] rounded-[20px] p-[32px] w-[600px] max-w-[90vw] max-h-[80vh] flex flex-col">
         <h2 className="font-manrope font-bold text-[24px] text-[var(--color-background)] leading-[1.1] mb-[24px]">
-          Додати друга
+          {t('friends.addModal.title')}
         </h2>
 
         {/* Search Input */}
         <input
           type="text"
-          placeholder="Введіть нікнейм користувача..."
+          placeholder={t('friends.addModal.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="bg-[var(--color-night-background)] bg-opacity-40 border border-[var(--color-background-16)] rounded-[22px] px-[16px] py-[10px] text-[16px] text-[var(--color-background)] placeholder:text-[var(--color-background-25)] placeholder:opacity-65 leading-[1.25] tracking-[-0.16px] outline-none mb-[24px]"
@@ -97,7 +99,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
           {isSearching ? (
             <div className="flex items-center justify-center py-[40px]">
               <p className="text-[16px] text-[var(--color-background-25)] opacity-65">
-                Пошук...
+                {t('friends.addModal.searching')}
               </p>
             </div>
           ) : searchResults && searchResults.length > 0 ? (
@@ -144,15 +146,15 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
 
                     {status === 'self' ? (
                       <span className="text-[14px] text-[var(--color-background-25)] opacity-65">
-                        Це ви
+                        {t('friends.addModal.status.self')}
                       </span>
                     ) : status === 'friend' ? (
                       <span className="text-[14px] text-[var(--color-background-21)]">
-                        Вже друзі
+                        {t('friends.addModal.status.alreadyFriends')}
                       </span>
                     ) : status === 'pending' ? (
                       <span className="text-[14px] text-[var(--color-background-25)] opacity-65">
-                        Запит відправлено
+                        {t('friends.addModal.status.requestSent')}
                       </span>
                     ) : status === 'blocked' ? (
                       <button
@@ -160,7 +162,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
                         disabled={unblockUserMutation.isPending}
                         className="bg-[var(--color-background-18)] rounded-[12px] px-[20px] py-[8px] text-[14px] text-[var(--color-background)] font-medium hover:bg-[var(--color-background-16)] transition-colors disabled:opacity-50"
                       >
-                        Розблокувати
+                        {t('friends.addModal.unblock')}
                       </button>
                     ) : (
                       <button
@@ -168,7 +170,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
                         disabled={sendFriendRequestMutation.isPending}
                         className="bg-[var(--color-background-21)] rounded-[12px] px-[20px] py-[8px] text-[14px] text-[var(--color-night-background)] font-medium hover:bg-[var(--color-background-23)] transition-colors disabled:opacity-50"
                       >
-                        Надіслати запит
+                        {t('friends.addModal.sendRequest')}
                       </button>
                     )}
                   </div>
@@ -178,13 +180,13 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
           ) : debouncedQuery.length >= 2 ? (
             <div className="flex items-center justify-center py-[40px]">
               <p className="text-[16px] text-[var(--color-background-25)] opacity-65">
-                Користувачів не знайдено
+                {t('friends.addModal.noResults')}
               </p>
             </div>
           ) : (
             <div className="flex items-center justify-center py-[40px]">
               <p className="text-[16px] text-[var(--color-background-25)] opacity-65">
-                Введіть нікнейм для пошуку
+                {t('friends.addModal.enterNickname')}
               </p>
             </div>
           )}
@@ -195,7 +197,7 @@ export const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
           onClick={onClose}
           className="bg-[var(--color-background-18)] rounded-[20px] px-[26px] py-[12px] text-[16px] text-[var(--color-background)] font-medium leading-[1.25] hover:bg-[var(--color-background-16)] transition-colors"
         >
-          Закрити
+          {t('friends.addModal.close')}
         </button>
       </div>
     </div>

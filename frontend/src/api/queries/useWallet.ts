@@ -18,8 +18,9 @@ async function getPaymentHistory(
   pageSize: number = 10
 ): Promise<PagedPayments> {
   const { data } = await axiosInstance.get(
-    `/payment/${userId}/paged?PageNumber=${pageNumber}&PageSize=${pageSize}`
+    `/payment/history/${userId}?page=${pageNumber}&limit=${pageSize}`
   )
+  // ApiResponse wraps the result in a "data" property
   return data.data
 }
 
@@ -39,8 +40,9 @@ export function useAddBalance() {
   return useMutation({
     mutationFn: addBalance,
     onSuccess: () => {
-      // Invalidate and refetch wallet balance
+      // Invalidate and refetch wallet balance and payment history
       queryClient.invalidateQueries({ queryKey: ['walletBalance'] })
+      queryClient.invalidateQueries({ queryKey: ['paymentHistory'] })
     },
   })
 }
