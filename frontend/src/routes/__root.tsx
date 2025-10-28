@@ -4,13 +4,12 @@ import { Footer, Header } from '@/components'
 
 function RootComponent() {
   const location = useLocation()
-  const isChatPage = location.pathname === '/chat'
-  
+
   return (
     <>
       <Header />
       <Outlet />
-      {!isChatPage && <Footer />}
+      {location.pathname !== '/chat' && <Footer />}
       <TanStackRouterDevtools />
     </>
   )

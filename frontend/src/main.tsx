@@ -26,7 +26,7 @@ import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
 // Create a new router instance
- 
+
 const router = createRouter({
   routeTree,
   context: {},
@@ -34,7 +34,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
-}) as any
+})
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
