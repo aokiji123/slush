@@ -15,7 +15,7 @@ import {
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
-import { Search, PurchaseConfirmationModal } from '@/components'
+import { Search, PurchaseConfirmationModal, OptimizedImage } from '@/components'
 import { FavoriteIcon, FavoriteFilledIcon } from '@/icons'
 import { useGameById } from '@/api/queries/useGame'
 import {
@@ -256,11 +256,12 @@ function RouteComponent() {
 
                 <div className="flex flex-col gap-[20px]">
                   {game.data.mainImage && (
-                    <img
+                    <OptimizedImage
                       src={game.data.mainImage}
                       alt={game.data.name}
                       className="w-full h-[145px] rounded-[20px] object-cover"
                       loading="lazy"
+                      placeholder="/game-image.png"
                     />
                   )}
                   <div className="flex items-center gap-[6px] sm:gap-[8px]">

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
-import { Search, SidebarFilter, Pagination } from '@/components'
+import { useState, useMemo, useCallback } from 'react'
+import { Search, SidebarFilter, Pagination, OptimizedImage } from '@/components'
 import { GridIcon, GridRowIcon } from '@/icons'
 import { Product } from '@/components/Product'
 import { ErrorState } from '@/components/ErrorState'
@@ -108,7 +108,7 @@ const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
   const currentPage = filters.page || 1
 
   // Update URL when filters change
-  const updateFilters = (newFilters: CatalogFilters) => {
+  const updateFilters = useCallback((newFilters: CatalogFilters) => {
     const urlParams: Record<string, string> = {}
 
     if (newFilters.search) urlParams.search = newFilters.search
@@ -132,22 +132,22 @@ const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
       to: '/catalog',
       search: urlParams,
     })
-  }
+  }, [navigate])
 
-  const handleSortChange = (sortBy: string) => {
+  const handleSortChange = useCallback((sortBy: string) => {
     updateFilters({
       ...filters,
       sortBy: sortBy || undefined,
       page: 1,
     })
-  }
+  }, [filters, updateFilters])
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     updateFilters({
       ...filters,
       page,
     })
-  }
+  }, [filters, updateFilters])
 
   return (
     <div className="bg-[var(--color-night-background)] relative overflow-hidden">
@@ -257,7 +257,7 @@ const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
       </div>
 
       {glowCoords.map((glow) => (
-        <img
+        <OptimizedImage
           key={glow.id}
           loading="lazy"
           src="/glow.png"
@@ -271,6 +271,7 @@ const Catalog = ({ searchParams }: { searchParams: CatalogSearchParams }) => {
             width: glow.width,
             height: glow.height,
           }}
+          placeholder="/glow.png"
         />
       ))}
     </div>

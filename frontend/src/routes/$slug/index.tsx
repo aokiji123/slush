@@ -18,6 +18,7 @@ import {
   SortDropdown,
   GameComment,
   PurchaseConfirmationModal,
+  OptimizedImage,
 } from '@/components'
 import { ReviewModal } from '@/components/ReviewModal'
 import {
@@ -291,11 +292,12 @@ function RouteComponent() {
         `}
       </style>
       {validSelectedImage && (
-        <img
+        <OptimizedImage
           src={validSelectedImage}
           alt={game.data.name}
           className="w-full object-cover h-[435px] rounded-[20px]"
           loading="lazy"
+          placeholder="/game-image.png"
         />
       )}
       {/* Rating - only visible on screens smaller than lg */}
